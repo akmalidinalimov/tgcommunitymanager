@@ -95,14 +95,23 @@ def test_comments_are_deduplicated_so_a_replay_cannot_double_reply(store):
     assert store._conn.execute("SELECT COUNT(*) FROM comments").fetchone()[0] == 1
 
 
-def test_prior_replies_in_a_thread_are_retrievable_for_anti_repetition(store):
-    store.record_comment(16, 3, author_id=1, author_name="A", text="Zo'r 1",
-                         script="latin", decision="reply", reply_message_id=100)
-    store.record_comment(17, 3, author_id=2, author_name="B", text="Zo'r 2",
-                         script="latin", decision="reply", reply_message_id=101)
+def test_anti_repetition_gets_the_bots_replies_not_the_members_questions(store):
+    """Regression. This returned the `text` column — the MEMBER's message — so
+    anti-repetition was comparing new drafts against the questions rather than
+    against what the bot had already said. Two near-identical replies reached a
+    live thread before it was caught."""
+    store.record_comment(16, 3, author_id=1, author_name="A", text="Qaysi AI ishlatiladi?",
+                         script="latin", decision="reply", reply_message_id=100,
+                         reply_text="Seedance 2.5 va Kling 3.0")
+    store.record_comment(17, 3, author_id=2, author_name="B", text="Omni-chi?",
+                         script="latin", decision="reply", reply_message_id=101,
+                         reply_text="Omni bunday darajada qilib bermaydi")
     store.record_comment(18, 3, author_id=3, author_name="C", text="unanswered",
                          script="latin", decision="skip")
-    assert store.replies_in_thread(3) == ["Zo'r 1", "Zo'r 2"]
+
+    prior = store.replies_in_thread(3)
+    assert prior == ["Seedance 2.5 va Kling 3.0", "Omni bunday darajada qilib bermaydi"]
+    assert not any("Qaysi AI" in p or "Omni-chi" in p for p in prior)
 
 
 def test_artifacts_posted_is_the_north_star_counter(store):

@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import logging
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 
 from app.agents.context import Decision, build_context
@@ -38,6 +38,16 @@ from app.telegram.publisher import find_thread_root
 log = logging.getLogger("runtime")
 
 REACTION = "🔥"
+
+#: On a cold start Telegram hands over every queued update, some hours old.
+#: The first deployment answered a whole stale thread in 30 seconds because of
+#: this. Anything older than the window is read for context and never replied to.
+MAX_REPLY_AGE_S = 15 * 60
+
+#: However large the backlog, do not post more than this many replies into one
+#: thread in a single pass. A cap turns a bad run into two odd replies rather
+#: than eight.
+MAX_REPLIES_PER_THREAD_PER_RUN = 2
 
 #: The weekly grid, by weekday and slot hour. Monday is 0.
 WEEKLY_PLAN: dict[tuple[int, int], str] = {
@@ -62,17 +72,32 @@ class Runtime:
     api: BotAPI
     bot_id: int
     dry_run: bool = False
+    _replied_this_run: dict[int, int] = field(default_factory=dict)
 
     # --- listening ----------------------------------------------------------
 
     def drain_updates(self) -> int:
         offset = self.store.get_runtime("update_offset")
+        if offset is None:
+            # Cold start. Take only the newest update to establish an offset and
+            # discard the queued backlog: those messages are already answered, by
+            # the founders or by each other, and replying now is necroposting.
+            latest = self.api.get_updates(offset=-1, timeout=0)
+            if latest:
+                self.store.set_runtime("update_offset", str(latest[-1]["update_id"] + 1))
+                log.warning("cold start: skipped %s queued update(s)", len(latest))
+            else:
+                self.store.set_runtime("update_offset", "0")
+            return 0
+
         updates = self.api.get_updates(
-            offset=int(offset) if offset else None,
-            timeout=25,
+            offset=int(offset), timeout=25,
             allowed_updates=["message", "channel_post", "callback_query"],
         )
+        self._replied_this_run.clear()
+        batch = [u["message"] for u in updates if "message" in u]
         for update in updates:
+            update["_batch"] = batch
             try:
                 self.handle_update(update)
             except Exception:
@@ -103,9 +128,9 @@ class Runtime:
         if result.kind is not Kind.HUMAN or self.store.seen_comment(message["message_id"]):
             return
 
-        self.handle_comment(message)
+        self.handle_comment(message, update.get("_batch") or [])
 
-    def handle_comment(self, message: dict) -> None:
+    def handle_comment(self, message: dict, batch: list[dict] | None = None) -> None:
         roots = self.store.known_roots()
         thread_id = message.get("message_thread_id")
         if thread_id not in roots:
@@ -114,7 +139,24 @@ class Runtime:
         if thread_id is None:
             return  # group chatter outside any comment thread
 
-        siblings = self._thread_messages(thread_id, message)
+        # Old messages are recorded for context but never answered.
+        age = time.time() - (message.get("date") or time.time())
+        if age > MAX_REPLY_AGE_S:
+            log.info("message %s is %.0fs old; recording without replying",
+                     message["message_id"], age)
+            self._record_only(message, thread_id, "skip_too_old")
+            return
+
+        if self._replied_this_run.get(thread_id, 0) >= MAX_REPLIES_PER_THREAD_PER_RUN:
+            log.info("thread %s hit the per-run reply cap; skipping %s",
+                     thread_id, message["message_id"])
+            self._record_only(message, thread_id, "skip_rate_limited")
+            return
+
+        # Siblings come from this batch as well as from storage. On a fresh
+        # database storage is empty, which is how the already-answered rule was
+        # bypassed on the first live run.
+        siblings = self._thread_messages(thread_id, message, batch or [])
         ctx = build_context(
             message["message_id"], siblings,
             bot_id=self.bot_id, channel_id=self.settings.channel_id,
@@ -163,11 +205,23 @@ class Runtime:
             )
             sent_id = sent["message_id"]
         self.store.record_comment(
-            message["message_id"], decision="reply", reply_message_id=sent_id, **record
+            message["message_id"], decision="reply", reply_message_id=sent_id,
+            reply_text=text, **record
         )
+        self._replied_this_run[thread_id] = self._replied_this_run.get(thread_id, 0) + 1
         log.info("replied to %s in thread %s", message["message_id"], thread_id)
 
-    def _thread_messages(self, thread_id: int, message: dict) -> list[dict]:
+    def _record_only(self, message: dict, thread_id: int, decision: str) -> None:
+        frm = message.get("from") or {}
+        self.store.record_comment(
+            message["message_id"], thread_id, author_id=frm.get("id"),
+            author_name=frm.get("first_name", "?"),
+            text=(message.get("text") or message.get("caption") or ""),
+            script="", decision=decision,
+        )
+
+    def _thread_messages(self, thread_id: int, message: dict,
+                         batch: list[dict] | None = None) -> list[dict]:
         """Reconstruct enough thread context for a reply decision.
 
         Only the current message is guaranteed present; the rest comes from what
@@ -197,7 +251,13 @@ class Runtime:
             "forward_origin": {"type": "channel", "chat": {"id": self.settings.channel_id}},
             "text": "",
         }
-        return [root, *rebuilt, message]
+        from_batch = [
+            m for m in (batch or [])
+            if (m.get("chat") or {}).get("id") == self.settings.discussion_group_id
+            and m.get("message_id") not in {r["message_id"] for r in rows}
+            and m.get("message_id") != message["message_id"]
+        ]
+        return [root, *rebuilt, *from_batch, message]
 
     def _escalate(self, ctx, draft) -> None:
         if self.dry_run or not self.settings.admin_chat_id:

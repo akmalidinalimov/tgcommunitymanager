@@ -20,7 +20,7 @@ from typing import Iterator
 
 from app.spine.states import Content, State
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS content (
@@ -56,7 +56,11 @@ CREATE TABLE IF NOT EXISTS comments (
     script          TEXT,
     decision        TEXT,
     handled_at      TEXT,
-    reply_message_id INTEGER
+    reply_message_id INTEGER,
+    -- The bot's own reply. Distinct from `text`, which is the MEMBER's message.
+    -- Conflating the two fed anti-repetition the questions instead of its own
+    -- answers, and it shipped two near-identical replies into a live thread.
+    reply_text      TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_comments_root ON comments(group_root_id);
 
@@ -89,7 +93,14 @@ class Store:
         self._conn.execute("PRAGMA synchronous=NORMAL")
         self._conn.execute("PRAGMA foreign_keys=ON")
         self._conn.executescript(SCHEMA)
+        self._migrate()
         self._conn.execute(f"PRAGMA user_version={SCHEMA_VERSION}")
+
+    def _migrate(self) -> None:
+        """Additive migrations. SQLite has no IF NOT EXISTS for columns."""
+        existing = {r[1] for r in self._conn.execute("PRAGMA table_info(comments)")}
+        if "reply_text" not in existing:
+            self._conn.execute("ALTER TABLE comments ADD COLUMN reply_text TEXT")
 
     def close(self) -> None:
         self._conn.close()
@@ -209,24 +220,37 @@ class Store:
     def record_comment(
         self, message_id: int, group_root_id: int, *, author_id: int | None,
         author_name: str, text: str, script: str, decision: str,
-        reply_message_id: int | None = None,
+        reply_message_id: int | None = None, reply_text: str | None = None,
     ) -> None:
+        """Record a handled comment.
+
+        ``text`` is the MEMBER's message; ``reply_text`` is what the bot said
+        back. Keeping them distinct matters — conflating them fed anti-repetition
+        the questions instead of its own answers.
+        """
         self._conn.execute(
             """INSERT INTO comments (message_id, group_root_id, author_id, author_name,
-                   text, script, decision, handled_at, reply_message_id)
-               VALUES (?,?,?,?,?,?,?,?,?)
+                   text, script, decision, handled_at, reply_message_id, reply_text)
+               VALUES (?,?,?,?,?,?,?,?,?,?)
                ON CONFLICT(message_id) DO UPDATE SET
                    decision=excluded.decision, handled_at=excluded.handled_at,
-                   reply_message_id=excluded.reply_message_id""",
+                   reply_message_id=excluded.reply_message_id,
+                   reply_text=excluded.reply_text""",
             (message_id, group_root_id, author_id, author_name, text, script,
-             decision, datetime.now().isoformat(timespec="seconds"), reply_message_id),
+             decision, datetime.now().isoformat(timespec="seconds"), reply_message_id,
+             reply_text),
         )
 
     def replies_in_thread(self, group_root_id: int) -> list[str]:
-        """The bot's own replies already in this thread, for anti-repetition."""
+        """The bot's own reply TEXTS in this thread, for anti-repetition.
+
+        Must read reply_text, not text. `text` holds the member's message, and
+        feeding those back as "what you already said" is why two near-identical
+        replies reached a live thread.
+        """
         rows = self._conn.execute(
-            """SELECT text FROM comments
-               WHERE group_root_id=? AND reply_message_id IS NOT NULL
+            """SELECT reply_text AS text FROM comments
+               WHERE group_root_id=? AND reply_text IS NOT NULL AND reply_text != ''
                ORDER BY message_id""",
             (group_root_id,),
         ).fetchall()

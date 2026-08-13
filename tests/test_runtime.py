@@ -230,3 +230,85 @@ def test_the_grid_covers_every_slot_of_the_week():
 
 def test_monday_morning_is_a_technique_post():
     assert kind_for(Slot(datetime(2026, 8, 10, 10, 0, tzinfo=TASHKENT))) == "technique"
+
+
+# --- the first live deployment's failure, encoded ---------------------------
+
+import time as _time  # noqa: E402
+
+from app.runtime import MAX_REPLIES_PER_THREAD_PER_RUN  # noqa: E402
+
+
+class BacklogAPI(FakeAPI):
+    """Telegram handing over a queue of hours-old updates, as on first boot."""
+
+    def __init__(self, updates):
+        super().__init__()
+        self._updates = updates
+        self.get_updates_calls = []
+
+    def get_updates(self, **kw):
+        self.get_updates_calls.append(kw)
+        if kw.get("offset") == -1:
+            return self._updates[-1:]
+        return self._updates
+
+
+def old_comment(mid, uid, text, age_s=6 * 3600):
+    return {"update_id": mid, "message": {
+        "message_id": mid, "date": int(_time.time() - age_s),
+        "chat": {"id": GROUP, "type": "supergroup"},
+        "from": {"id": uid, "is_bot": False, "first_name": f"M{uid}"},
+        "message_thread_id": 3, "text": text,
+    }}
+
+
+def test_cold_start_skips_the_queued_backlog(tmp_path):
+    """The first deployment drained 20 hours-old updates and answered a whole
+    stale thread in 30 seconds. A cold start now establishes an offset and
+    discards the queue."""
+    updates = [old_comment(i, 500 + i, f"savol {i}") for i in range(5, 12)]
+    rt = Runtime(settings=SETTINGS, store=Store(tmp_path / "cold.db"),
+                 api=BacklogAPI(updates), bot_id=BOT)
+    handled = rt.drain_updates()
+    assert handled == 0
+    assert rt.api.sent == []
+    assert rt.store.get_runtime("update_offset") == str(updates[-1]["update_id"] + 1)
+
+
+def test_old_messages_are_recorded_but_never_answered(rt):
+    rt.handle_update(auto_forward())
+    rt.handle_update(old_comment(50, 999, "eski savol?"))
+    assert rt.api.sent == []
+    assert rt.store.seen_comment(50)
+
+
+def test_a_thread_cannot_receive_more_than_the_per_run_cap(rt, monkeypatch):
+    """However large the backlog, a bad run costs two odd replies, not eight."""
+    rt.handle_update(auto_forward())
+    rt._replied_this_run[3] = MAX_REPLIES_PER_THREAD_PER_RUN
+    rt.handle_update({"update_id": 60, "message": {
+        "message_id": 60, "date": int(_time.time()),
+        "chat": {"id": GROUP, "type": "supergroup"},
+        "from": {"id": 777, "is_bot": False, "first_name": "X"},
+        "message_thread_id": 3, "text": "Bu qanday ishlaydi?",
+    }})
+    assert rt.api.sent == []
+
+
+def test_already_answered_is_detected_from_the_batch_on_an_empty_store(rt):
+    """The rule that failed live. Storage was empty, so the founders' answer was
+    invisible and the bot talked over it. Siblings now come from the batch too."""
+    rt.handle_update(auto_forward())
+    question = {"message_id": 5, "date": int(_time.time()),
+                "chat": {"id": GROUP, "type": "supergroup"},
+                "from": {"id": 2399190, "is_bot": False, "first_name": "Kamoliddin"},
+                "message_thread_id": 3, "text": "Qaysi AIdan foydalaniladi?"}
+    founder_answer = {"message_id": 7, "date": int(_time.time()),
+                      "chat": {"id": GROUP, "type": "supergroup"},
+                      "from": {"id": 1087968824, "is_bot": True, "first_name": "Group"},
+                      "sender_chat": {"id": GROUP, "type": "supergroup"},
+                      "message_thread_id": 3, "reply_to_message": {"message_id": 5},
+                      "text": "Seedance 2.5 yoki Kling 3.0"}
+    rt.handle_comment(question, [question, founder_answer])
+    assert rt.api.sent == []
