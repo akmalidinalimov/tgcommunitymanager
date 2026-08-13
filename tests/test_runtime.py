@@ -1,0 +1,232 @@
+"""Runtime routing and the disclosure obligation, with a fake Telegram."""
+
+from __future__ import annotations
+
+from datetime import datetime
+from zoneinfo import ZoneInfo
+
+import pytest
+
+from app.agents.replier import AI_DISCLOSURE, with_disclosure
+from app.config import Settings
+from app.runtime import Runtime, kind_for
+from app.spine.scheduler import Slot
+from app.spine.states import Content, State
+from app.spine.store import Store
+
+TASHKENT = ZoneInfo("Asia/Tashkent")
+CHANNEL, GROUP, BOT, ADMIN = -1002708742288, -1004430366406, 8662504476, 6542876935
+
+SETTINGS = Settings(
+    bot_token="1:x", bot_username="malikamanager_bot", channel_id=CHANNEL,
+    discussion_group_id=GROUP, channel_username="aicreatorsuz",
+    anthropic_api_key="k", admin_chat_id=ADMIN, approver_ids=(ADMIN,),
+)
+
+
+class FakeAPI:
+    """Records calls instead of making them."""
+
+    def __init__(self):
+        self.sent, self.reactions, self.answered, self.edits = [], [], [], []
+        self._next_id = 500
+
+    def send_message(self, chat_id, text, **kw):
+        self._next_id += 1
+        self.sent.append({"chat_id": chat_id, "text": text, **kw})
+        return {"message_id": self._next_id}
+
+    def set_message_reaction(self, chat_id, message_id, emoji, **kw):
+        self.reactions.append((chat_id, message_id, emoji))
+        return True
+
+    def answer_callback_query(self, cid, text=None, **kw):
+        self.answered.append((cid, text))
+        return True
+
+    def edit_message_text(self, chat_id, message_id, text, **kw):
+        self.edits.append((chat_id, message_id, text))
+        return {}
+
+    def get_updates(self, **kw):
+        return []
+
+
+@pytest.fixture
+def rt(tmp_path):
+    return Runtime(settings=SETTINGS, store=Store(tmp_path / "t.db"),
+                   api=FakeAPI(), bot_id=BOT)
+
+
+def auto_forward(group_msg_id=3, channel_msg_id=606):
+    return {"update_id": 1, "message": {
+        "message_id": group_msg_id,
+        "chat": {"id": GROUP, "type": "supergroup"},
+        "from": {"id": 777000, "is_bot": False, "first_name": "Telegram"},
+        "is_automatic_forward": True,
+        "forward_origin": {"type": "channel", "chat": {"id": CHANNEL},
+                           "message_id": channel_msg_id},
+        "text": "post body",
+    }}
+
+
+# --- AI Act disclosure ------------------------------------------------------
+
+
+def test_first_reply_in_a_thread_carries_the_ai_disclosure():
+    """EU AI Act Art. 50, applicable since 2 August 2026, for a Sweden-based
+    operator. A member scrolling straight into a thread must still be told."""
+    out = with_disclosure("Kling 3.0 da sinab koʻring", first_in_thread=True)
+    assert out.endswith(AI_DISCLOSURE)
+
+
+def test_later_replies_do_not_repeat_it():
+    """The obligation is that the member is told, not told repeatedly."""
+    assert with_disclosure("Ha, shunaqa", first_in_thread=False) == "Ha, shunaqa"
+
+
+def test_disclosure_is_not_duplicated_if_already_present():
+    text = f"Javob\n\n{AI_DISCLOSURE}"
+    assert with_disclosure(text, first_in_thread=True).count(AI_DISCLOSURE) == 1
+
+
+def test_empty_draft_gets_no_disclosure():
+    assert with_disclosure("", first_in_thread=True) == ""
+
+
+# --- routing ----------------------------------------------------------------
+
+
+def test_auto_forward_is_persisted_immediately(rt):
+    """Telegram announces this once and drops updates after 24h. Losing it before
+    it is written loses the thread permanently."""
+    rt.handle_update(auto_forward())
+    assert rt.store.root_for_post(606) == 3
+    assert rt.store.known_roots() == {3}
+
+
+def test_the_bot_does_not_reply_to_the_thread_root(rt):
+    rt.handle_update(auto_forward())
+    assert rt.api.sent == []
+
+
+def test_service_messages_are_ignored(rt):
+    rt.handle_update({"update_id": 2, "message": {
+        "message_id": 4, "chat": {"id": GROUP, "type": "supergroup"},
+        "from": {"id": 777000, "is_bot": False},
+        "pinned_message": {"message_id": 3},
+    }})
+    assert rt.api.sent == [] and rt.store.known_roots() == set()
+
+
+def test_messages_from_other_chats_are_ignored(rt):
+    rt.handle_update({"update_id": 3, "message": {
+        "message_id": 9, "chat": {"id": -1009999999, "type": "supergroup"},
+        "from": {"id": 42, "is_bot": False, "first_name": "X"}, "text": "salom",
+    }})
+    assert rt.api.sent == []
+
+
+def test_member_media_gets_a_reaction_not_a_message(rt):
+    rt.handle_update(auto_forward())
+    rt.handle_update({"update_id": 4, "message": {
+        "message_id": 11, "chat": {"id": GROUP, "type": "supergroup"},
+        "from": {"id": 8454060495, "is_bot": False, "first_name": "Euro work"},
+        "message_thread_id": 3, "video": {"file_id": "v"},
+    }})
+    assert rt.api.reactions == [(GROUP, 11, "🔥")]
+    assert rt.api.sent == []
+    assert rt.store.artifacts_posted() == 1
+
+
+def test_a_comment_is_only_handled_once(rt):
+    """A replayed update must not produce a second reply to the same person."""
+    rt.handle_update(auto_forward())
+    comment = {"update_id": 5, "message": {
+        "message_id": 12, "chat": {"id": GROUP, "type": "supergroup"},
+        "from": {"id": 555, "is_bot": False, "first_name": "A"},
+        "message_thread_id": 3, "video": {"file_id": "v"},
+    }}
+    rt.handle_update(comment)
+    rt.handle_update(comment)
+    assert len(rt.api.reactions) == 1
+
+
+# --- approval callbacks -----------------------------------------------------
+
+
+def pending_content(store, slot_key):
+    c = Content(slot_key=slot_key, kind="technique", text="tayyor post")
+    c.submit_for_approval()
+    store.save_content(c)
+    return c
+
+
+def callback(slot_key, user_id=ADMIN, action="ok"):
+    return {"callback_query": {
+        "id": "cb1", "from": {"id": user_id}, "data": f"{action}:{slot_key}",
+        "message": {"message_id": 77, "chat": {"id": ADMIN}},
+    }}
+
+
+def test_approving_schedules_the_content(rt):
+    pending_content(rt.store, "2026-08-14_10:00")
+    rt.handle_update(callback("2026-08-14_10:00"))
+    assert rt.store.get_content("2026-08-14_10:00").state is State.SCHEDULED
+    assert rt.api.answered and rt.api.edits
+
+
+def test_a_stranger_pressing_approve_changes_nothing(rt):
+    pending_content(rt.store, "2026-08-14_10:00")
+    rt.handle_update(callback("2026-08-14_10:00", user_id=999))
+    assert rt.store.get_content("2026-08-14_10:00").state is State.PENDING_APPROVAL
+    assert rt.api.edits == []
+
+
+def test_every_press_is_answered_even_when_refused(rt):
+    """An unanswered callback spins forever on the approver's phone."""
+    rt.handle_update(callback("nonexistent"))
+    assert len(rt.api.answered) == 1
+
+
+# --- publishing -------------------------------------------------------------
+
+
+def test_unapproved_slot_publishes_a_backup_not_the_draft(rt):
+    rt.store.add_backup("evergreen post")
+    c = pending_content(rt.store, "2026-08-14_10:00")
+    rt.publish_slot(Slot(datetime(2026, 8, 14, 10, 0, tzinfo=TASHKENT)))
+    assert rt.api.sent[0]["text"] == "evergreen post"
+    assert rt.store.get_content(c.slot_key).state is State.EXPIRED
+
+
+def test_approved_slot_publishes_the_approved_text(rt):
+    c = pending_content(rt.store, "2026-08-14_10:00")
+    c.approve(ADMIN, (ADMIN,), at=datetime(2026, 8, 13, 20, 0, tzinfo=TASHKENT))
+    c.schedule()
+    rt.store.save_content(c)
+    rt.publish_slot(Slot(datetime(2026, 8, 14, 10, 0, tzinfo=TASHKENT)))
+    assert rt.api.sent[0]["text"] == "tayyor post"
+    assert rt.store.get_content(c.slot_key).state is State.PUBLISHED
+
+
+def test_empty_backup_pool_stays_silent_rather_than_publishing_unapproved(rt):
+    """The pool being empty is an operational failure, but publishing something
+    a human never approved would be a worse one."""
+    pending_content(rt.store, "2026-08-14_10:00")
+    rt.publish_slot(Slot(datetime(2026, 8, 14, 10, 0, tzinfo=TASHKENT)))
+    assert rt.api.sent == []
+
+
+# --- the weekly grid --------------------------------------------------------
+
+
+def test_the_grid_covers_every_slot_of_the_week():
+    for weekday in range(7):
+        for hour in (10, 21):
+            slot = Slot(datetime(2026, 8, 10 + weekday, hour, 0, tzinfo=TASHKENT))
+            assert kind_for(slot)
+
+
+def test_monday_morning_is_a_technique_post():
+    assert kind_for(Slot(datetime(2026, 8, 10, 10, 0, tzinfo=TASHKENT))) == "technique"
