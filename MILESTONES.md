@@ -5,7 +5,9 @@ A milestone is done when every box is checked and you have personally seen the e
 
 Design spec: [`docs/superpowers/specs/2026-08-13-telegram-community-manager-design.md`](docs/superpowers/specs/2026-08-13-telegram-community-manager-design.md)
 
-**Status:** M0 not started — blocked on pre-flight items below.
+**Status:** M0 in progress. The publish → auto-forward → seed-comment flow is **proven on the live channel**
+([post 606](https://t.me/aicreatorsuz/606), auto-forward caught in 2.7s, seed landed in thread root 3).
+Remaining M0 work is deployment.
 
 ---
 
@@ -16,17 +18,19 @@ Design spec: [`docs/superpowers/specs/2026-08-13-telegram-community-manager-desi
 | 1 | Topics/forum mode in the discussion group | ✅ **OFF** — M3 unblocked |
 | 2 | Bot created — `@malikamanager_bot`, token in `.env`, git-ignored | ✅ |
 | 3 | Media generation approach | ✅ Higgsfield MCP on the laptop, weekly batch — no API key needed |
-| 4 | **Disable privacy mode** in BotFather (`getMe` shows `can_read_all_group_messages: false`) — and **remove + re-add** the bot to the group afterwards, or the change won't apply | ⬜ |
-| 5 | Rename bot to `Malika · AI yordamchi` via `/setname`; set description | ⬜ |
-| 6 | Bot promoted to admin in **both** channel (Post/Edit/Delete) and discussion group (Delete/Ban/Pin) | ⬜ |
-| 7 | Channel `@username` and discussion group link | ⬜ |
-| 8 | VPS SSH access + Hostinger subdomain hostname | ⬜ |
-| 9 | Anthropic API key | ⬜ |
+| 4 | Privacy mode disabled — `can_read_all_group_messages: true` | ✅ |
+| 5 | Bot renamed to `Malika · AI yordamchi` | ✅ |
+| 6 | Bot admin in **both** channel and discussion group, all required rights | ✅ |
+| 7 | Channel `@aicreatorsuz` (`-1002708742288`, 3,326) · group `-1004430366406` (3 members) | ✅ |
+| 8 | Anthropic API key in `.env`, verified against the API | ✅ |
+| 9 | **Restart Claude Code** so the `hostinger` MCP server loads from `.mcp.json` | ⬜ |
 | 10 | Shahlo's `telegram_id` (approver) + Akmalidin's, for the Mini App allowlist | ⬜ |
 | 11 | Story Bank — **founders only**: origin story, Sweden conference, own client work, portfolio, boundaries | ⬜ |
+| 12 | Shahlo's review of the Uzbek in `.claude/skills/humanize-uz/SKILL.md` | ⬜ |
 
-Item 4 is the current blocker for M3 — the bot is deaf to comments until it's fixed.
-Item 11 blocks behind-the-scenes content only; how-to and why-content need nothing.
+Item 9 blocks deployment only. Item 11 blocks behind-the-scenes content; how-to and why-content need nothing.
+**Item 12 is the one thing in this build that cannot be verified without a native speaker** — every post
+the system writes inherits those example lines, so an error there compounds rather than staying local.
 
 **No student or testimonial content** (founder decision) — so the conflicting 1500+/1800+/5000+ counts and
 Aisha's $1,500 never enter a post, and the claims-reconciliation task is dropped.
@@ -40,10 +44,10 @@ Aisha's $1,500 never enter a post, and the claims-reconciliation task is dropped
 - [ ] VM 1411263 has headroom for a second project *(check CPU/RAM/disk before deploying alongside freelanceai)*
 - [ ] Compose file stays under Hostinger's 8192-char `content` cap
 - [ ] Health endpoint returns green over HTTPS on the Hostinger subdomain
-- [ ] Bot refuses to boot if the discussion group has Topics enabled *(verify by temporarily enabling it)*
-- [ ] Bot resolves and caches `linked_chat_id` from the channel at startup
-- [ ] Test post published to the channel
-- [ ] **Seed comment lands inside the discussion thread, not the group's main feed** ← the single most
+- [x] Bot refuses to boot if the discussion group has Topics enabled *(verify by temporarily enabling it)*
+- [x] Bot resolves and caches `linked_chat_id` from the channel at startup
+- [x] Test post published to the channel
+- [x] **Seed comment lands inside the discussion thread, not the group's main feed** ← the single most
       important check in M0; the wrong implementation looks identical in code and obvious in the group
 - [ ] Bot can upload a local image file to the channel *(proves the media path without any API key)*
 
