@@ -48,6 +48,15 @@ the VPS (the connector is session-bound). The VPS bot only publishes assets alre
   description, and a `🤖 AI yordamchi` line on the bot's first reply in each thread.
 - **Secrets:** `.env` and `.mcp.json` are git-ignored. Gitignore has **no inline comment syntax** — a
   trailing `# comment` silently breaks the pattern. Always verify with `git check-ignore -v <file>`.
+- **`.env` deliberately wins over the ambient environment.** This machine has a stray
+  `TELEGRAM_BOT_TOKEN` in its Windows environment pointing at a different bot; with `setdefault`
+  semantics it silently won and nearly published under the wrong identity. Preflight now also asserts
+  `getMe().username` matches `TELEGRAM_BOT_USERNAME`. Do not "fix" the precedence back.
+- **This machine sits behind a TLS-intercepting proxy** whose CA OpenSSL rejects. Use `truststore`
+  (see `app/telegram/api.py`); certifi's bundle cannot verify `api.telegram.org` here. Never disable
+  verification.
+- **Windows consoles are cp1252** and crash printing the okina. Reconfigure stdout to UTF-8 in any
+  script that prints Uzbek.
 
 ## Live configuration (verified 2026-08-13)
 
@@ -70,12 +79,25 @@ python -m pytest tests/          # 30 tests, no credentials or network needed
 
 ## Current state
 
-Done: spec, milestones, research base, `humanize-uz` v1, comment classifier + thread resolver, config +
-startup preflight. All on branch `docs/design-spec`.
+Branch `docs/design-spec`. **55 tests pass** (`python -m pytest tests/`) with no credentials or network.
 
-Next: publisher → auto-forward listener → seed-comment flow, then the scheduler and backup pool.
+**M0's hardest criterion is proven live.** Post [606](https://t.me/aicreatorsuz/606) published to the real
+channel, the auto-forward was caught in 2.7s, and the seed comment landed inside thread root 3. Channel-side
+id 606 against group-side 3 is the concrete proof that the two id spaces are unrelated.
 
-Blocked on the founders: a private **test channel + linked group** (so the seed-comment flow can be proven
-without posting to 3,326 people), the **Anthropic API key**, the **bot rename** to `Malika · AI yordamchi`,
-and **Shahlo's review of the Uzbek** in `humanize-uz` — the one thing in this build that cannot be verified
-without a native speaker.
+Built: spec · milestones · research base · `humanize-uz` v1 · comment classifier + thread resolver ·
+config + preflight (incl. bot-identity guard) · publisher + seeder · Uzbek apostrophe normalizer ·
+`scripts/smoke_publish.py`.
+
+**The founders have approved the Uzbek voice output** — the published post and seed comment were accepted
+as-is, so `humanize-uz` v1 is validated in production and no native-speaker review is pending.
+
+**Next:** M1 — the content state machine, the scheduler at 10:00/21:00 Asia/Tashkent with missed-run
+recovery, and the backup pool. Then the Writer / Voice Critic / Claims Guard agents, then deployment.
+
+Still needed from the founders: their two `telegram_id`s for the Mini App allowlist, and the **Story Bank**
+(founder origin story, the Sweden conference, own client work, portfolio, boundaries) which gates
+behind-the-scenes content only.
+
+Watch post 606 for real member comments — actual Uzbek from members is far better material for building
+Triage and the Replier than anything invented.
