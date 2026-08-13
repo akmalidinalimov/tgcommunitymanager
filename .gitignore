@@ -27,7 +27,11 @@ build/
 htmlcov/
 
 # ---- Generated media & runtime data ----
-media/
+# ANCHORED. A bare `media/` matches a directory of that name at ANY depth,
+# which silently swallowed app/media/ — the source module — while its tests
+# were committed. CI then failed on an import that worked locally.
+/data/media/
+/state/
 storage/
 *.db
 *.sqlite3
