@@ -10,9 +10,20 @@ On a Linux VPS the same code path is correct and simply uses the system store.
 
 from __future__ import annotations
 
+import re
 from typing import Any
 
 from app.net import http_client
+
+
+def redact(text: str) -> str:
+    """Strip bot tokens out of anything about to be logged or raised.
+
+    The token sits in the Telegram URL path, so any library or traceback that
+    echoes a URL leaks the credential. Belt and braces alongside silencing
+    httpx's INFO logging.
+    """
+    return re.sub(r"bot\d{6,}:[A-Za-z0-9_-]{20,}", "bot<REDACTED>", text)
 
 
 class TelegramError(RuntimeError):
@@ -54,13 +65,13 @@ class BotAPI:
         try:
             body = response.json()
         except Exception:  # pragma: no cover - malformed response
-            raise TelegramError(method, f"non-JSON response: {response.text[:200]}")
+            raise TelegramError(method, redact(f"non-JSON response: {response.text[:200]}"))
 
         if not body.get("ok"):
             params_block = body.get("parameters") or {}
             raise TelegramError(
                 method,
-                body.get("description", "unknown error"),
+                redact(body.get("description", "unknown error")),
                 error_code=body.get("error_code"),
                 retry_after=params_block.get("retry_after"),
             )
