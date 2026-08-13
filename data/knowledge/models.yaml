@@ -1,0 +1,181 @@
+# AI model knowledge base — the ONLY source the Replier may cite for model facts.
+#
+# The Replier never answers a model question from LLM memory. If a claim is not
+# here, it escalates to the founders instead of guessing. Model facts change
+# monthly and a confidently wrong answer in front of 3,326 people costs more
+# authority than staying silent.
+#
+# Every entry carries `source`, and they are not equal:
+#   founder   — Shahlo/Akmalidin said it. Authoritative. Overrides everything.
+#   catalog   — read from the live Higgsfield model catalog. Verified fact.
+#   web       — third-party benchmark or review. Directional only. NEVER quote
+#               a number from here in a post or reply.
+#
+# Verified against the Higgsfield catalog on 2026-08-13.
+
+meta:
+  verified_on: "2026-08-13"
+  reverify_after_days: 30
+  catalog_source: "Higgsfield models_explore (live account catalog)"
+
+# --- What we recommend. Founder-stated, and what the bot leads with. ---------
+recommendations:
+  video:
+    primary: [seedance_2_5, kling3_0]
+    source: founder
+    note: "Shahlo/Akmalidin's stated defaults for video."
+  image:
+    primary: [gpt_image_2, soul_2]
+    source: founder
+    note: "Stated as 'gpt 2 and Higgsfield Soul'. gpt 2 = GPT Image 2 (OpenAI), confirmed in catalog."
+
+# --- Models we actually have access to. Facts from the live catalog. ---------
+models:
+  seedance_2_5:
+    name: "Seedance 2.5"
+    provider: Bytedance
+    type: video
+    source: catalog
+    duration_s: [4, 30]
+    resolution: ["480p", "720p"]
+    modes: [t2v, omni_reference, video_edit, video_extension]
+    audio: true
+    good_for: "text-to-video, editing or extending an existing video, reference-driven consistency"
+    caveat: >
+      Caps at 720p in our account. Seedance 2.0 reaches 4K. Newer version number
+      does NOT mean higher resolution here — check before promising 1080p+.
+
+  seedance_2_0:
+    name: "Seedance 2.0"
+    provider: Bytedance
+    type: video
+    source: catalog
+    duration_s: [4, 15]
+    resolution: ["480p", "720p", "1080p", "4k"]
+    modes: [std, fast]
+    good_for: "highest-resolution Seedance output, multi-SKU product and e-commerce work"
+    caveat: "4k and 1080p require mode='std'. mode='fast' is 480p/720p only."
+
+  kling3_0:
+    name: "Kling v3.0"
+    provider: Kling
+    type: video
+    source: catalog
+    duration_s: [3, 15]
+    modes: [std, pro, "4k"]
+    good_for: "cinematic, multi-shot, motion transfer, audio sync"
+    cost_tip:
+      text: "sound='off' lowers credit cost; lower resolution is much cheaper"
+      source: founder
+      founder_words: "Kling 720p kachestvada qilsez ancha arzon"
+    caveat: "Subscription is expensive — a member already raised this (Abdumalik, post 606)."
+
+  kling3_0_turbo:
+    name: "Kling 3.0 Turbo"
+    provider: Kling
+    type: video
+    source: catalog
+    resolution: ["720p", "1080p"]
+    good_for: "fast, cheaper Kling output when cinematic depth is not required"
+
+  gpt_image_2:
+    name: "GPT Image 2"
+    provider: OpenAI
+    type: image
+    source: catalog
+    resolution: ["1k", "2k", "4k"]
+    quality: [low, medium, high]
+    good_for: "text rendering, typography, editing, prompt adherence"
+    caveat: "Still never generate Uzbek text inside an image — see rules.never_in_image_text."
+
+  soul_2:
+    name: "Higgsfield Soul 2.0"
+    provider: Higgsfield
+    type: image
+    source: catalog
+    quality: ["1.5k", "2k"]
+    good_for: "realistic UGC, fashion editorial, portraits, consistent characters via soul_id"
+    caveat: >
+      Preset-driven. Piling style adjectives into the prompt fights the preset and
+      the output drifts. Write subject, wardrobe, pose and light; let the preset carry style.
+
+  nano_banana_pro:
+    name: "Nano Banana Pro"
+    provider: Google
+    type: image
+    source: catalog
+    resolution: ["1k", "2k", "4k"]
+    good_for: "photorealism, product consistency, diagrams"
+
+  seedream_v4_5:
+    name: "Seedream 4.5"
+    provider: Bytedance
+    type: image
+    source: catalog
+    good_for: "4K output (6K on high), precise control, transformations"
+
+  flux_2:
+    name: "FLUX.2"
+    provider: Black Forest Labs
+    type: image
+    source: catalog
+    variants: [pro, flex, max]
+    good_for: "precise prompt adherence, high-volume marketing imagery"
+
+  marketing_studio_video:
+    name: "Marketing Studio"
+    provider: Higgsfield
+    type: video
+    source: catalog
+    duration_s: [12, 15]
+    good_for: "one-click product ads, TikTok/Reels-ready commercial output"
+
+# --- Asked about, but NOT in our toolset. Answer honestly. -------------------
+not_in_our_stack:
+  omni_flow:
+    asked_by_member: true
+    founder_verdict:
+      text: "Cannot produce this level of cinematic quality. Recommend Kling 3.0 instead."
+      source: founder
+      founder_words: "Omni bunday darajada qilib bera olmaydi. Kling 3.0 da qilishingizni tavsiya qilaman"
+  veo_3:
+    source: catalog
+    fact: "Not available in our Higgsfield catalog."
+    honest_answer: >
+      We don't use it, so we can't vouch for it. Say that plainly rather than
+      reviewing a tool we have not run.
+  flux_3_bfl_site:
+    note: >
+      A member (Abdumalik, post 606) linked bfl.ai claiming Flux 3 competes with
+      Veo3 and speaks Uzbek. UNVERIFIED by us. Do not confirm or deny — invite
+      them to share their result instead.
+
+# --- Directional only. Never quote these numbers publicly. ------------------
+external_benchmarks:
+  source: web
+  verified: false
+  note: "Context for our own decisions. NEVER cite in a post or reply."
+  claims:
+    - "Seedance 2.0 ranked #1 on Artificial Analysis text-to-video and image-to-video leaderboards (June 2026)"
+    - "Kling 3.0 released 2026-02-05; phoneme-level multi-character lip-sync"
+    - "Veo 3.1 is the only model with native 48kHz synchronized dialogue"
+    - "GPT Image 2 tops the Artificial Analysis generation and editing arenas"
+    - "Nano Banana 2 leads on photorealism and subject consistency for product work"
+
+# --- Hard rules the Replier applies before sending anything -----------------
+rules:
+  never_in_image_text:
+    rule: "Never generate Uzbek text inside an image. Generate a clean plate, overlay type in editing."
+    why: "Generative models garble Latin diacritics and Cyrillic. Teach it as a limitation plus workaround."
+  no_unsupported_claims:
+    rule: "If a model fact is not in this file, do not state it. Escalate to the founders."
+  no_prices_from_memory:
+    rule: >
+      Never quote a subscription price or credit cost that is not in this file.
+      Vendor pricing changes without notice. Direct people to check the vendor.
+  mirror_the_script:
+    rule: "Answer in the script the member wrote in — Latin or Cyrillic."
+  do_not_interrupt_members:
+    rule: >
+      If another member has already answered the question, stay out. Member-to-member
+      help is worth more than a bot reply and the bot must not crowd it out.
