@@ -174,8 +174,28 @@ ending in a helpful offer. That is customer-support voice, not comment voice.
 | Completeness | Fully resolved | Deliberately unresolved |
 | Closing offer | Sometimes | **Never** |
 
-Both live in `.claude/skills/humanize-uz/`, distilled from `docs/research/research-voice-and-engagement.md`
-§1–§5 plus the founders' real posts.
+Both live in `.claude/skills/humanize-uz/`, **derived from an existing corpus-measured voice system** the
+founders already own at `carousel-builder/blogs/ai-uz/` — `voice.md` (statistical fingerprint plus a
+banned-construction table already machine-parsed by `engine/src/copy/lint.ts`), `voice-brand-archived.md`
+(Brand Voice System v4.0, hook formulas, off-voice list, calibration table), and `corpus/reels-scripts.md`
+(raw unedited team writing). Supplemented by `docs/research/research-voice-and-engagement.md` §1–§5.
+
+**Register splits by format, measured from the corpus:**
+
+| | Video / announcements | Written posts |
+|---|---|---|
+| Speaker | `biz` 20 / `men` 2 | **`men` 27 / `biz` 2** |
+| Median sentence | 10 words | **3 words** |
+| Openers | endi, va, lekin, mana, shunchun | ordinals — birinchi, ikkinchi… |
+
+**Never-used words** despite being valid Uzbek — zero occurrences across the corpus, so their appearance is
+a reliable AI tell: `xullas`, `demak`, `yaʼni`, `qarang`, `aytmoqchi`, `biroq`, `shuningdek`.
+
+**Orthography:** normalize to okina `ʻ` (U+02BB) after o/g and tutuq `ʼ` (U+02BC) elsewhere at render time,
+regardless of how the source was typed.
+
+**Emotional arc:** Shubha → Hayrat → Motivatsiya. **The final test:** remove Shahlo's name from a post — is
+it still recognisably this brand?
 
 **Voice DNA** extracted from real channel posts: emoji as structural bullets (📌 ✅ ❗️ 👇 💸), CAPS for
 emphasis, reader-question openers (`- ... - degan savol kelibdi`), callback continuity between posts
