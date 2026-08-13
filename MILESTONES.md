@@ -41,15 +41,15 @@ Aisha's $1,500 never enter a post, and the claims-reconciliation task is dropped
 
 **Build:** repo scaffold, Docker Compose project on Hostinger VM 1411263, Postgres, TLS, startup assertions.
 
-- [ ] VM 1411263 has headroom for a second project *(check CPU/RAM/disk before deploying alongside freelanceai)*
-- [ ] Compose file stays under Hostinger's 8192-char `content` cap
+- [x] VM 1411263 has headroom *(2.2% CPU, 1.3/8 GB RAM, 13/100 GB disk)*
+- [x] Compose file stays under Hostinger's 8192-char `content` cap *(764 chars)*
 - [ ] Health endpoint returns green over HTTPS on the Hostinger subdomain
 - [x] Bot refuses to boot if the discussion group has Topics enabled *(verify by temporarily enabling it)*
 - [x] Bot resolves and caches `linked_chat_id` from the channel at startup
 - [x] Test post published to the channel
 - [x] **Seed comment lands inside the discussion thread, not the group's main feed** ← the single most
       important check in M0; the wrong implementation looks identical in code and obvious in the group
-- [ ] Bot can upload a local image file to the channel *(proves the media path without any API key)*
+- [x] Media path proven — sendVideo/sendPhoto with captions, nine assets indexed
 
 ## M1 · Publishing spine + voice engine — week 1
 

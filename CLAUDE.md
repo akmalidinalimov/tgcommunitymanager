@@ -82,6 +82,17 @@ baseline is zero and bot-seeded first comments are the whole mechanism.
 python -m pytest tests/          # 30 tests, no credentials or network needed
 ```
 
+## Deployment traps that already bit us
+
+- **A volume mounted over a path SHADOWS what the image baked there.** `tgcm-data` was mounted at
+  `/app/data`, hiding the knowledge base and backup pool, so the grounding gate guarded an empty file
+  while the bot looked healthy. Read-only content lives at `/app/data`; mutable state at `/app/state`.
+  Preflight now refuses to boot if the resources are unreadable.
+- **Gitignore matches unanchored directory names at any depth.** A bare `media/` silently excluded
+  `app/media/` — the source module — while its tests were committed, so CI failed on an import that
+  worked locally. Always `git check-ignore -v <file>`, in both directions.
+- **Deploying immediately after a push pulls the previous image.** Wait for the build to go green.
+
 ## Current state
 
 Branch `docs/design-spec`. **55 tests pass** (`python -m pytest tests/`) with no credentials or network.
