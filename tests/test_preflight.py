@@ -105,3 +105,33 @@ def test_matching_token_passes():
 
 def test_username_match_is_case_insensitive():
     assert run(me=dict(GOOD_ME, username="MalikaManager_Bot")).ok
+
+
+# --- resource visibility: the volume-shadowing bug --------------------------
+
+def test_resource_checks_pass_in_the_repo():
+    from app.config import check_resources
+    for name, ok, detail in check_resources():
+        assert ok, f"{name}: {detail}"
+
+
+def test_a_shadowed_knowledge_base_fails(tmp_path):
+    """A volume mounted over /app/data hid the knowledge base and backup pool.
+    Every other check passed, the bot looked healthy, and the grounding gate was
+    guarding an empty file while the Replier answered from model memory."""
+    from app.config import check_resources
+    (tmp_path / ".claude/skills/humanize-uz").mkdir(parents=True)
+    (tmp_path / ".claude/skills/humanize-uz/SKILL.md").write_text("x" * 600, encoding="utf-8")
+    results = dict((name, ok) for name, ok, _ in check_resources(tmp_path))
+    assert results["voice guide readable"]
+    assert not results["knowledge base has models"]
+    assert not results["backup pool has posts"]
+
+
+def test_boot_refuses_when_resources_are_missing(tmp_path):
+    from app.config import check_resources, preflight
+    result = preflight(me=GOOD_ME, channel=GOOD_CHANNEL, group=GOOD_GROUP,
+                       channel_member=GOOD_CH_MEMBER, group_member=GOOD_GR_MEMBER,
+                       settings=SETTINGS)
+    assert any("knowledge base" in name for name, _, _ in result.checks), \
+        "resource checks are not part of preflight"

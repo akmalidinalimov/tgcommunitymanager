@@ -13,9 +13,14 @@ services:
       TELEGRAM_ADMIN_CHAT_ID: ${TELEGRAM_ADMIN_CHAT_ID}
       TELEGRAM_APPROVER_IDS: ${TELEGRAM_APPROVER_IDS}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+    command: ["python", "-m", "app", "--db", "/app/state/bot.db"]
     volumes:
-      # SQLite + generated media. The whole state of the bot is this directory.
-      - tgcm-data:/app/data
+      # Mutable state ONLY. This must never be /app/data: a volume mounted over
+      # a path SHADOWS whatever the image baked there, and /app/data holds the
+      # knowledge base, the backup pool and the voice guide. Mounting over them
+      # left the bot running with an empty knowledge base, answering from model
+      # memory — the exact failure the grounding gate exists to prevent.
+      - tgcm-data:/app/state
     logging:
       driver: json-file
       options: { max-size: "10m", max-file: "3" }

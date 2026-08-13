@@ -103,6 +103,54 @@ class Settings:
         )
 
 
+def check_resources(root: Path | None = None) -> list[tuple[str, bool, str]]:
+    """Assert the read-only content the agents depend on is actually readable.
+
+    These are read at runtime, so a missing or empty file degrades output
+    silently instead of crashing: the Replier answers from model memory rather
+    than the knowledge base, and an unapproved slot publishes nothing.
+
+    This exists because it happened. The compose file mounted a volume over
+    /app/data, which SHADOWED the knowledge base and backup pool baked into the
+    image. Every check passed, the bot looked healthy, and the grounding gate was
+    guarding an empty file.
+    """
+    root = root or Path(__file__).resolve().parent.parent
+    checks: list[tuple[str, bool, str]] = []
+
+    voice = root / ".claude" / "skills" / "humanize-uz" / "SKILL.md"
+    ok = voice.is_file() and voice.stat().st_size > 500
+    checks.append((
+        "voice guide readable", ok,
+        f"{voice.stat().st_size} bytes" if voice.is_file() else f"MISSING at {voice}",
+    ))
+
+    knowledge = root / "data" / "knowledge" / "models.yaml"
+    models = 0
+    if knowledge.is_file():
+        import yaml
+
+        models = len((yaml.safe_load(knowledge.read_text(encoding="utf-8")) or {}).get("models") or {})
+    checks.append((
+        "knowledge base has models", models > 0,
+        f"{models} models" if models else
+        f"EMPTY OR MISSING at {knowledge} — the grounding gate would be guarding nothing",
+    ))
+
+    pool = root / "data" / "backup_pool.yaml"
+    posts = 0
+    if pool.is_file():
+        import yaml
+
+        posts = len((yaml.safe_load(pool.read_text(encoding="utf-8")) or {}).get("posts") or [])
+    checks.append((
+        "backup pool has posts", posts >= 3,
+        f"{posts} posts" if posts >= 3 else
+        f"only {posts} at {pool} — an unapproved slot would publish nothing",
+    ))
+    return checks
+
+
 @dataclass(frozen=True)
 class PreflightResult:
     ok: bool
@@ -124,7 +172,7 @@ def preflight(me: dict, channel: dict, group: dict, channel_member: dict, group_
 
     Callers fetch getMe / getChat / getChatMember and pass the raw results in.
     """
-    checks: list[tuple[str, bool, str]] = []
+    checks: list[tuple[str, bool, str]] = list(check_resources())
 
     # Token identity. A stray TELEGRAM_BOT_TOKEN in the machine environment once
     # loaded a completely different bot here. Publishing to 3,326 people under

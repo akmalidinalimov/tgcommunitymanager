@@ -46,7 +46,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(prog="app")
     parser.add_argument("--preflight", action="store_true", help="check config and exit")
     parser.add_argument("--dry-run", action="store_true", help="run without sending anything")
-    parser.add_argument("--db", default="data/bot.db")
+    parser.add_argument("--db", default="state/bot.db")
     parser.add_argument("--log-level", default="INFO")
     args = parser.parse_args()
 

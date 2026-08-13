@@ -32,10 +32,11 @@ RUN test -f .claude/skills/humanize-uz/SKILL.md \
  && test -f data/knowledge/models.yaml \
  && python -c "import yaml,sys; n=len((yaml.safe_load(open('data/backup_pool.yaml',encoding='utf-8')) or {}).get('posts') or []); print('backup pool:', n, 'posts'); sys.exit(0 if n >= 3 else 1)"
 
-RUN useradd -m -u 10001 bot && mkdir -p /app/data && chown -R bot:bot /app
+# /app/data is read-only content from the image; /app/state is the volume.
+RUN useradd -m -u 10001 bot && mkdir -p /app/state && chown -R bot:bot /app
 USER bot
 
 HEALTHCHECK --interval=60s --timeout=20s --start-period=30s --retries=3 \
-  CMD python -m app --preflight || exit 1
+  CMD python -m app --preflight --db /app/state/bot.db || exit 1
 
-CMD ["python", "-m", "app"]
+CMD ["python", "-m", "app", "--db", "/app/state/bot.db"]
