@@ -12,3 +12,6 @@ addopts = "-q"
 [tool.ruff]
 line-length = 100
 target-version = "py311"
+
+[project.optional-dependencies]
+runtime = ["httpx>=0.28", "truststore>=0.10", "anthropic>=0.105"]
