@@ -1,0 +1,103 @@
+# Assets approved by the founders for reuse on the channel (2026-08-13).
+# ONLY the traditional-Uzbek-room Seedance 2.5 footage was approved; the
+# storybook, father-and-daughter and bank material was not, and must not be
+# added here without a fresh decision.
+#
+# "shows" is what is literally on screen. Matching is by tag, never by guess:
+# a video unrelated to its caption reads as stock filler and undoes the
+# credibility the caption is building.
+#
+# WARNING: these are Higgsfield CDN URLs and they expire. Telegram fetches the
+# URL at send time, so an expired asset means a post goes out as text instead.
+# Mirror anything relied on long-term.
+assets:
+- id: uzbek-room-15s-20260808-1720
+  url: https://d8j0ntlcm91z4.cloudfront.net/user_2zJUonmh6cW6tDKlBEl4CIohbsI/hf_20260808_152055_5a58e8d2-83f6-4a14-ada0-13fdf41af6e4.mp4
+  kind: video
+  model: seedance_2_5
+  duration: 15
+  shows:
+  - traditional Uzbek interior
+  - suzani
+  - tapchan
+  - dastarkhan
+  good_for:
+  - commercial_craft
+  - why_content
+  - mission
+  expires: true
+- id: uzbek-room-20s-20260808-1730
+  url: https://d8j0ntlcm91z4.cloudfront.net/user_2zJUonmh6cW6tDKlBEl4CIohbsI/hf_20260808_153052_118de395-26d0-437f-a8f6-faf522022a8d.mp4
+  kind: video
+  model: seedance_2_5
+  duration: 20
+  shows:
+  - traditional Uzbek interior
+  - suzani
+  - tapchan
+  - dastarkhan
+  good_for:
+  - commercial_craft
+  - why_content
+  - mission
+  expires: true
+- id: uzbek-room-20s-20260808-1744
+  url: https://d8j0ntlcm91z4.cloudfront.net/user_2zJUonmh6cW6tDKlBEl4CIohbsI/hf_20260808_154447_55ea02ba-d8ba-48a9-ab52-4b98a803a50a.mp4
+  kind: video
+  model: seedance_2_5
+  duration: 20
+  shows:
+  - traditional Uzbek interior
+  - suzani
+  - tapchan
+  - dastarkhan
+  good_for:
+  - commercial_craft
+  - why_content
+  - mission
+  expires: true
+- id: uzbek-room-30s-20260808-1115
+  url: https://d8j0ntlcm91z4.cloudfront.net/user_2zJUonmh6cW6tDKlBEl4CIohbsI/hf_20260808_091551_d8e4de2e-e87a-4588-9018-a11e5a1dd9f5.mp4
+  kind: video
+  model: seedance_2_5
+  duration: 30
+  shows:
+  - traditional Uzbek interior
+  - suzani
+  - tapchan
+  - dastarkhan
+  good_for:
+  - commercial_craft
+  - why_content
+  - mission
+  expires: true
+- id: uzbek-room-30s-20260808-1141
+  url: https://d8j0ntlcm91z4.cloudfront.net/user_2zJUonmh6cW6tDKlBEl4CIohbsI/hf_20260808_094129_48fb2259-f896-4e21-a310-1ab696f9df18.mp4
+  kind: video
+  model: seedance_2_5
+  duration: 30
+  shows:
+  - traditional Uzbek interior
+  - suzani
+  - tapchan
+  - dastarkhan
+  good_for:
+  - commercial_craft
+  - why_content
+  - mission
+  expires: true
+- id: uzbek-room-30s-20260808-2204
+  url: https://d8j0ntlcm91z4.cloudfront.net/user_2zJUonmh6cW6tDKlBEl4CIohbsI/hf_20260808_200405_a731cb6c-dc35-45c4-90aa-0d95bbadc112.mp4
+  kind: video
+  model: seedance_2_5
+  duration: 30
+  shows:
+  - traditional Uzbek interior
+  - suzani
+  - tapchan
+  - dastarkhan
+  good_for:
+  - commercial_craft
+  - why_content
+  - mission
+  expires: true

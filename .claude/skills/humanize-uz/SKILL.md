@@ -132,6 +132,12 @@ because `Yo'nalish` is invisible to anyone searching for `Yoʻnalish`.
 **Shape.** Multi-paragraph prose. One or two sentences per paragraph, blank line between every paragraph.
 Sentences run roughly 5–12 words. Not carousel-short, not essay-long.
 
+**Length: about 600 characters, hard ceiling 900.** Every post goes out as a caption under a video or
+image, and Telegram truncates captions at 1024 — a longer post cannot be sent in its intended form.
+The reader is on a phone, deciding in a second whether to read at all, and the visual is what earns
+that second. One idea, said once. When a post will not fit, drop a point; do not compress every point
+into something denser.
+
 **Structural markers.** Emoji sit at the start of a line and act as bullets, not decoration:
 📌 ✅ ❗️ 👇 💸 🤖. CAPS for emphasis on a short phrase. `•` bullets ending in semicolons, lowercase starts.
 

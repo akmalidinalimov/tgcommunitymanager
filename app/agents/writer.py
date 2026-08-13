@@ -224,6 +224,13 @@ Brief: {brief}
   "you can earn X".
 - Lead with the outcome, then the artifact, then the tool. Never open on a tool name.
 - End on what the reader gets.
+- LENGTH: aim for about 600 characters. Hard ceiling 900. Every post ships as a
+  caption under a video or image, and Telegram cuts captions off at 1024 — a
+  longer post cannot be sent in its intended form at all. Beyond that, nobody
+  reads a wall of text on a phone before they have seen what the thing can do.
+  One idea, said once. Cut every sentence that repeats or explains a point
+  already made. If it will not fit, drop a point rather than compressing all of
+  them into something dense.
 - If the brief needs a fact you do not have, set needs_facts and stop. Do not
   invent a plausible one.
 

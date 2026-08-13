@@ -44,6 +44,21 @@ SCAFFOLDING = (
 )
 
 
+#: Telegram caps a photo/video caption at 1024 characters, against 4096 for a
+#: plain text message. Every post ships with media, so a post over the cap cannot
+#: be sent in its intended form at all.
+CAPTION_CAP = 1024
+
+#: The working ceiling, well under the hard cap. Founder direction: posts were
+#: too long to digest. Nobody reads a wall of text on a phone before they have
+#: seen what the thing can do.
+POST_MAX = 900
+
+#: Where a good post lands. Long enough to teach one idea, short enough to read
+#: under a video without scrolling.
+POST_TARGET = 600
+
+
 class Severity(str, Enum):
     BLOCKER = "blocker"
     POLISH = "polish"
@@ -121,6 +136,18 @@ def lint(text: str, *, banned: dict[str, str] | None = None) -> list[Issue]:
                 Severity.BLOCKER, "translated section scaffolding", phrase,
                 "state the thing instead of announcing it",
             ))
+
+    length = len(text)
+    if length > CAPTION_CAP:
+        issues.append(Issue(
+            Severity.BLOCKER, "over Telegram's caption cap", f"{length} chars",
+            f"cut to under {POST_TARGET}; it cannot be sent as a caption at all",
+        ))
+    elif length > POST_MAX:
+        issues.append(Issue(
+            Severity.BLOCKER, "too long to digest", f"{length} chars",
+            f"cut to under {POST_TARGET}",
+        ))
 
     if has_wrong_apostrophes(text):
         issues.append(Issue(

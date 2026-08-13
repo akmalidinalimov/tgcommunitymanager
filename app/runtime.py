@@ -27,6 +27,7 @@ from app.agents.replier import (
 )
 from app.agents.writer import POST_KINDS, write_post
 from app.config import Settings
+from app.media.library import pick as pick_asset
 from app.spine import approval
 from app.spine.scheduler import Slot, due_slots, now_tashkent, slots_needing_approval
 from app.spine.states import Content, State, publishable
@@ -320,11 +321,31 @@ class Runtime:
             log.warning("slot %s unapproved; publishing backup %s", slot.key, picked[0])
             text = picked[1]
 
+        # Founder direction: every post ships with a visual. Text alone does not
+        # earn a read — people want to see what the thing can do first. If no
+        # asset genuinely matches, the post still goes out as text; a mismatched
+        # video is worse than none.
+        used = {row[0] for row in self.store._conn.execute(
+            "SELECT value FROM runtime WHERE key LIKE 'asset_used:%'")}
+        asset = pick_asset(kind_for(slot), used=used)
+
         if self.dry_run:
-            log.info("[dry-run] would publish to slot %s", slot.key)
+            log.info("[dry-run] would publish slot %s with %s", slot.key,
+                     asset.id if asset else "no media")
             return
 
-        posted = self.api.send_message(self.settings.channel_id, text)
+        if asset:
+            try:
+                sender = self.api.send_video if asset.is_video else self.api.send_photo
+                posted = sender(self.settings.channel_id, asset.url, caption=text)
+                self.store.set_runtime(f"asset_used:{asset.id}", asset.id)
+                log.info("published %s with asset %s", slot.key, asset.id)
+            except TelegramError as exc:
+                # An expired CDN URL must not cost the slot. Fall back to text.
+                log.warning("media send failed (%s); publishing text only", exc)
+                posted = self.api.send_message(self.settings.channel_id, text)
+        else:
+            posted = self.api.send_message(self.settings.channel_id, text)
         if content and publishable(content):
             content.publish(posted["message_id"])
             self.store.save_content(content)

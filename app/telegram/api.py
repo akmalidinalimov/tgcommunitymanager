@@ -118,6 +118,33 @@ class BotAPI:
             reply_markup=reply_markup,
         )
 
+    def send_video(
+        self, chat_id: int | str, video: str, *, caption: str | None = None,
+        parse_mode: str | None = None, supports_streaming: bool = True,
+    ) -> dict:
+        """Post a video with its caption.
+
+        ``video`` may be an https URL, which Telegram fetches itself — so a
+        Higgsfield output can be published without ever passing through here.
+
+        Captions cap at 1024 characters against 4096 for a text message; the
+        linter blocks anything longer before it reaches this call.
+        """
+        return self.call(
+            "sendVideo", chat_id=chat_id, video=video, caption=caption,
+            parse_mode=parse_mode, supports_streaming=supports_streaming,
+        )
+
+    def send_photo(
+        self, chat_id: int | str, photo: str, *, caption: str | None = None,
+        parse_mode: str | None = None,
+    ) -> dict:
+        """Post a photo with its caption. Same 1024-character caption cap."""
+        return self.call(
+            "sendPhoto", chat_id=chat_id, photo=photo, caption=caption,
+            parse_mode=parse_mode,
+        )
+
     def answer_callback_query(
         self, callback_query_id: str, text: str | None = None, *, show_alert: bool = False
     ) -> bool:

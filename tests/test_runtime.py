@@ -312,3 +312,47 @@ def test_already_answered_is_detected_from_the_batch_on_an_empty_store(rt):
                       "text": "Seedance 2.5 yoki Kling 3.0"}
     rt.handle_comment(question, [question, founder_answer])
     assert rt.api.sent == []
+
+
+# --- media attachment -------------------------------------------------------
+
+class MediaAPI(FakeAPI):
+    def __init__(self, fail_media=False):
+        super().__init__()
+        self.videos = []
+        self._fail = fail_media
+
+    def send_video(self, chat_id, video, *, caption=None, **kw):
+        if self._fail:
+            from app.telegram.api import TelegramError
+            raise TelegramError("sendVideo", "wrong file identifier")
+        self._next_id += 1
+        self.videos.append({"url": video, "caption": caption})
+        return {"message_id": self._next_id}
+
+
+def approved(store, slot_key, text="post matni"):
+    c = Content(slot_key=slot_key, kind="commercial_craft", text=text)
+    c.submit_for_approval()
+    c.approve(ADMIN, (ADMIN,), at=datetime(2026, 8, 13, 20, 0, tzinfo=TASHKENT))
+    c.schedule()
+    store.save_content(c)
+    return c
+
+
+def test_an_expired_media_url_does_not_cost_the_slot(tmp_path):
+    """Higgsfield CDN URLs expire. A dead link must degrade to a text post, not
+    to a missed slot."""
+    rt = Runtime(settings=SETTINGS, store=Store(tmp_path / "m.db"),
+                 api=MediaAPI(fail_media=True), bot_id=BOT)
+    rt.store.add_backup("evergreen")
+    approved(rt.store, "2026-08-10_21:00")
+    rt.publish_slot(Slot(datetime(2026, 8, 10, 21, 0, tzinfo=TASHKENT)))
+    assert rt.api.sent, "slot was lost when media failed"
+    assert rt.api.sent[0]["text"] == "post matni"
+
+
+def test_a_post_with_no_matching_asset_still_publishes(rt):
+    approved(rt.store, "2026-08-10_10:00")
+    rt.publish_slot(Slot(datetime(2026, 8, 10, 10, 0, tzinfo=TASHKENT)))
+    assert rt.api.sent[0]["text"] == "post matni"

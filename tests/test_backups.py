@@ -84,3 +84,15 @@ def test_seeded_posts_rotate_least_recently_used(store, tmp_path):
     first = store.take_backup()[1]
     second = store.take_backup()[1]
     assert first != second
+
+
+def test_the_shipped_pool_seeds_cleanly(store):
+    """The real data/backup_pool.yaml, not a fixture. These publish unattended
+    with nobody reading them first, so a rule change that silently invalidates
+    them must fail here rather than on the VPS at 10:00."""
+    from app.spine.backups import DEFAULT_PATH, load_file
+
+    entries = load_file()
+    assert len(entries) >= 3, "pool too small to be a safety net"
+    seeded = seed(store, DEFAULT_PATH, strict=True)
+    assert seeded == len(entries), "some shipped posts failed lint"

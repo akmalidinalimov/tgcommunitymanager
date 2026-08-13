@@ -1,194 +1,139 @@
 # Evergreen posts published unattended when a slot goes unapproved.
-# No dates, no callbacks, nothing that stops being true. Linted on seed.
-# Approved by the founders 2026-08-13.
+# No dates, no callbacks, nothing that stops being true.
+# Every one must fit Telegram's 1024-char caption cap: these ship as captions
+# under a video, and a post over the cap cannot be sent in that form at all.
 posts:
 - id: plate-and-overlay
   kind: technique
-  text: 'Bannerdagi yozuv toʻgʻri chiqsin desangiz, uni AI ga umuman yozdirmang.
+  text: 'Rasm zoʻr chiqadi, lekin ustidagi yozuv «Chgirmaa» boʻlib turadi.
 
 
-    Koʻp odam shu joyda toʻxtab qoladi. Rasm zoʻr chiqadi, lekin ustidagi "Chegirma" degan soʻz "Chegrima"
-    boʻlib turadi. Yoki oʻrniga tanib boʻlmaydigan harflar chiqadi.
+    Bu promptingiz aybi emas. Model harfni harf deb emas, shakl deb koʻradi. Shunchun oʻzbekcha yozuvda
+    apostrof, ʻoʻ va ʻgʻ birinchi boʻlib buziladi.
 
 
-    Bu sizning promptingiz xato boʻlgani uchun emas.
+    Yechimi oddiy:
 
 
-    Model harflarni harf deb emas, shakl deb koʻradi. Ingliz tilidagi soʻzlarni koʻp koʻrgan, shunchun
-    ularni chidasa boʻladigan darajada chizadi. Oʻzbekcha yozuv esa unga deyarli tanish emas — ustiga
-    oʻ, gʻ, ʼ kabi belgilar qoʻshiladi. Kirillcha ham xuddi shunday.
+    📌 promptda yozuv soʻramang — «clean background, empty space at the top for text» deb yozing;
 
 
-    ✅ Ishlaydigan yoʻl oddiy: rasmni BOʻSH holda chiqaring.
+    ✅ rasmni boʻsh joyi bilan chiqarib oling;
 
 
-    Promptda kompozitsiyani soʻrang — mahsulot chapda tursin, oʻng tomoni tekis va toza qolsin, yozuv
-    uchun joy boʻlsin. Fon, yorugʻlik, ranglar — hammasi modeldan.
+    ✍️ yozuvni Canvaʼda yoki montaj dasturida oʻzingiz yozing.
 
 
-    📌 Yozuvni esa oʻzingiz qoʻyasiz. Canva, Figma, Photoshop — qaysi biri qoʻlingizga qulay boʻlsa.
+    Shrift ham, joylashuvi ham sizda qoladi — brendingizga mos tushadi.
 
 
-    Shunda shrift ham oʻzingizniki boʻladi, brend rangi ham joyida turadi, harf esa aynan siz yozgandek
-    chiqadi.
-
-
-    Va tahrir qilish osonlashadi: matnni almashtirish uchun rasmni qaytadan generatsiya qilib oʻtirmaysiz,
-    faqat yozuvni almashtirasiz.
-
-
-    Endi "AI oʻzbekcha yozolmaydi" emas, balki yozuvni oʻzim qoʻyaman — rasm esa AI dan.
+    Endi buzuq harflarni tuzatmaysiz — tayyor rasmni ochib, yozuvni oʻzingiz yozib qoʻyasiz.
 
     '
 - id: what-business-buys
   kind: why_content
-  text: 'Biznes sizdan rasm sotib olmaydi. U oʻzining muammosini yechib berishingizni sotib oladi.
+  text: 'Biznes sizdan chiroyli rasm sotib olmaydi.
 
 
-    Shunchun "menga chiroyli rasm kerak" degan gap ortida doim boshqa gap turadi: mahsulot koʻrinmayapti,
-    odam bosmayapti, sotuv toʻxtab qolgan.
+    Kafe egasiga rangi zoʻr kadr kerak emas — kechqurun stollari boʻsh qolmasligi kerak. Doʻkonchiga rasm
+    emas, tovar tez sotilishi kerak.
 
 
-    Mana shu farqni tushunsangiz, suhbat ham oʻzgaradi.
+    Shunchun prompt yozishdan oldin 3 ta savolni yozib olaman:
 
 
-    📌 Oldin: "Sizga qanaqa rasm chiqarib beray?"
+    • kim koʻradi;
+
+    • qayerda koʻradi;
+
+    • koʻrgandan keyin nima qilishi kerak.
 
 
-    ✅ Endi: "Bu rasm nimani hal qilishi kerak?"
+    Uchtasiga javob boʻlmasa, rasm chizmayman. Chiroyli chiqadi, lekin kerak boʻlmaydi.
 
 
-    Ikkinchi savolni bergan odam boshqacha ishlaydi. U avval nima ishlamayotganini soʻraydi, keyin nima
-    chiqarishini hal qiladi.
+    Javob bor boʻlsa, ish oʻzgaradi. Instagram uchun kadr bilan vitrina uchun kadr bir xil boʻlmaydi.
+    Referens ham, format ham oʻsha javobdan chiqadi.
 
 
-    Va natija ham boshqacha oʻlchanadi. Chiroyli chiqdimi emas — kutilgan ish boʻldimi.
-
-
-    ❗️Bitta rasm bir oʻzi hech narsani qutqarmaydi. Lekin toʻgʻri savoldan keyin chiqqan rasm — bu allaqachon
-    yechim.
-
-
-    Shunchun tool tanlashdan oldin muammoni yozib oling. Aynan bir gap bilan.
-
-
-    Biznes ana shu bir gapga pul toʻlaydi. Rasmga emas.
+    Endi «menga qanaqa rasm kerak» emas, balki «sizga nima kerak» deb soʻraysiz. Mijoz shu savolga pul
+    toʻlaydi.
 
     '
-- id: intent-not-quality
+- id: intent-and-the-set
   kind: commercial_craft
-  text: 'Chiroyli rasm bilan pul toʻlanadigan rasm orasida katta farq bor. Farq sifatida emas — niyatda.
+  text: 'Chiroyli rasm bilan pul toʻlanadigan rasm orasida bitta farq bor: birinchisida niyat yoʻq.
 
 
-    📌 Birinchi savol doim bitta: bu rasm nima qilishi kerak? Odamni toʻxtatishimi, mahsulotni tushuntirishimi,
-    yoki bosishga undashimi.
+    📌 Niyat — bu «kim koʻradi va nima qiladi» degan savolga javob. Menyudagi kofe rasmi odamni ichkariga
+    kirgizishi kerak. Shu bitta vazifa promptdan oldin yoziladi.
 
 
-    Javob boʻlmasa, prompt yozishning ham maʼnosi yoʻq. Chiroyli chiqadi, lekin hech qanday ish bajarmaydi.
+    ✅ Shunchun men rasmdan oldin qisqa brief yozaman: mahsulot, kimga, qayerda chiqadi, qanday hissiyot.
+    4 qator, koʻp emas. Rasm shundan keyin chiqadi.
 
 
-    ✅ Keyin brief keladi. Kim koʻradi, qayerda koʻradi, qanday holatda koʻradi — mana shu uchtasi kadr
-    ichidagi hamma narsani hal qiladi.
+    ❗️Va eng muhimi — bittasi emas, seti. Bir xil yorugʻlik, bir xil rang, bir xil kadr mantigʻi. Biznes
+    bitta kadrni emas, shu setni sotib oladi, chunki uni bir oy davomida ishlatadi.
 
 
-    Stories uchun chiqarilgan rasm bannerda ishlamaydi. Bir xil model, bir xil prompt, lekin joyi boshqa.
-
-
-    ❗️Va eng koʻp sotiladigani — bir xillik. Bitta rasm emas, seriya.
-
-
-    Biznesga bitta zoʻr kadr kerak emas. Unga bir oy davomida bir xil koʻrinadigan 10 ta kadr kerak.
-
-
-    Buni ushlab turishning yoʻli oddiy: bitta qahramonni bir marta chizib olasiz, keyin har bir yangi
-    kadrda shu bitta referens bilan birga tashlaysiz.
-
-
-    Fon, yorugʻlik va qahramonni promptda har safar bir xil soʻzlar bilan yozing — oʻzgartirish faqat
-    rakursda boʻlsin.
-
-
-    Shunda siz bitta rasm emas, tayyor komplekt topshirasiz. Va aynan shuning uchun pul toʻlanadi.
+    Yagona goʻzal kadr — portfolio uchun. Brief va set — buyurtma uchun.
 
     '
 - id: four-things-that-move-an-image
   kind: technique
-  text: 'Bitta rasm boshqalardan ajralib turadi. Farqi promptning uzunligida emas.
+  text: 'Bitta prompt ichida 20 ta sifat yozasiz, rasm esa oʻsha-oʻsha chiqadi.
 
 
-    Koʻpchilik natija yoqmasa, promptga yana sifat qoʻshadi: "chiroyli", "professional", "yuqori sifatli",
-    "eng zoʻr". Rasm esa oʻsha-oʻsha.
+    Chunki natijani sifatlar emas, 4 ta narsa buradi:
 
 
-    Sababi oddiy — bu soʻzlar modelga hech narsa aytmaydi. Model ularni oʻzicha tushunadi va oʻrtacha
-    natija beradi.
+    📌 subyekt — kim yoki nima kadrda turibdi, nima kiygan, nima qilyapti;
 
 
-    📌 Rasmni haqiqatan oʻzgartiradigan 4 ta narsa bor:
+    📌 yorugʻlik — deraza yonidagi yumshoq yorugʻmi yoki tepadan tushgan qattiq nurmi;
 
 
-    • subyekt — kim yoki nima, nima kiygan, qanday turibdi;
-
-    • yorugʻlik — deraza yorugʻimi, studiya yorugʻimi, quyosh botishimi;
-
-    • kamera burchagi — pastdanmi, koʻz balandligidanmi, tepadanmi;
-
-    • linza — yaqindan portretmi, keng kadrmi.
+    📌 kamera burchagi — pastdanmi, koʻz balandidanmi, tepadanmi;
 
 
-    Shu 4 tasini yozsangiz, model taxmin qilishni toʻxtatadi. Chunki har biri kadrda koʻrinadigan qaror.
+    📌 linza — 35mm keng plan yoki 85mm yaqin portret.
 
 
-    ❗️Sifatlar esa kadrda koʻrinmaydi. "Professional" degan soʻzning rasmda oʻrni yoʻq — u yorugʻlik va
-    burchak orqali chiqadi.
+    Mana shu 4 tasini aniq yozsangiz, uslub oʻzi keladi.
 
 
-    Yana bitta joyi bor. Soul 2.0 kabi preset ustiga qurilgan modellarda stil sifatlarini toʻplab tashlasangiz,
-    ular presetga qarshi ishlaydi va natija chetga ogʻib ketadi. Subyekt, kiyim, poza va yorugʻlikni yozing
-    — stilni preset oʻzi olib chiqadi.
+    «Chiroyli, professional, zoʻr, kinematografik» degan soʻzlar esa modelga hech narsa aytmaydi — ular
+    hamma rasmga birdek toʻgʻri keladi.
 
 
-    Shunchun keyingi safar prompt ishlamasa, uzaytirmang. Oʻsha 4 tadan qaysi biri yozilmaganini toping.
+    ✅ Preset ishlatsangiz, uslubni preset olib yuradi — ustiga sifat yogʻdirsangiz, natija chetga ogʻib
+    ketadi. Shunchun preset bilan ishlaganda faqat shu 4 tasini yozing.
 
 
-    Endi "yana qanaqa soʻz qoʻshsam ekan" emas, balki "qaysi burchakdan olay" — savol shunga oʻzgaradi.
-    Bu esa sizga takrorlanadigan natija beradi.
+    Endi qayta-qayta generatsiya qilib oʻtirmaysiz — boshidan oʻzingiz oʻylagan kadr chiqadi.
 
     '
 - id: starting-from-home
   kind: mission
-  text: 'Uyda oʻtirib, faqat telefon bilan, noldan boshlash mumkin. Bu haqiqat.
+  text: 'Uyda oʻtirib, qoʻlida faqat telefon bilan boshlagan odam ham AI bilan ishlay oladi.
 
 
-    Lekin oson emas. Shuni ochiq aytay.
+    Boshida hech narsa bilmasangiz ham boʻladi. Kompyuter ham, diplom ham, ingliz tili ham shart emas.
 
 
-    Koʻpchilik AI ni sehrli tugma deb oʻylaydi. Bosasiz — natija chiqadi. Aslida bunday emas.
+    ❗️Lekin bir narsani ochiq aytay: bu tugmani bosib pul chiqadigan joy emas.
 
 
-    📌 Siz promptni yozasiz, natijani koʻrasiz, nima notoʻgʻri ketganini oʻylab, qaytadan yozasiz. Va yana.
+    Birinchi rasmlaringiz xunuk chiqadi. Prompt qayta-qayta yozasiz. Bitta kadr uchun oʻn marta urinasiz.
+    Shu bosqichdan hamma oʻtadi.
 
 
-    Birinchi kuni chiqqan rasm sizga yoqmaydi. Uchinchi kuni ham. Keyin bir joyda nimadir toʻgʻri kelib
-    qoladi, va siz nega toʻgʻri kelganini tushunasiz.
+    ✅ Oʻtib boʻlgach esa qoʻlingizda mahsulot qoladi: kafega menyu kadri, doʻkonga reels, brendga bir
+    haftalik kontent. Biznes shunisiga pul toʻlaydi — chiroyli rasmga emas.
 
 
-    Mana shu tushunish sotiladi. Rasm emas.
-
-
-    🤖 Tool muhim emas. Bittasini olasiz — masalan rasm uchun Midjourney, video uchun Kling — va bir hafta
-    faqat shunda ishlaysiz. Ikkinchisiga oʻtish keyin.
-
-
-    Bir haftadan keyin qoʻlingizda tayyor ish boʻladi. Kimgadir koʻrsatsa boʻladigan ish.
-
-
-    Biznes sizdan chiroyli soʻz emas, tayyor natija soʻraydi. Shunchun birinchi kundan natija yigʻing.
-
-
-    ✅ Bugun bitta tool oching, bitta prompt yozing, chiqqanini saqlang. Ertaga shuni yaxshilaysiz.
-
-
-    Endi «AI ni oʻrganmoqchiman» emas, balki «mana, men qilgan ish».
+    Men shu kanalda oʻsha yoʻlni bosqichma-bosqich koʻrsataman. Telefon, sabr va bitta ish — boshlash
+    uchun shuncha kifoya.
 
     '
