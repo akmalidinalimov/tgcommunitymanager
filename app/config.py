@@ -24,16 +24,32 @@ class ConfigError(RuntimeError):
     """Raised when the environment cannot support a safe run."""
 
 
-def _load_dotenv(path: Path) -> None:
-    """Minimal .env loader. Existing environment variables win."""
+def _load_dotenv(path: Path) -> list[str]:
+    """Load .env, which **wins over the ambient environment**.
+
+    Deliberately not ``setdefault``. A stray ``TELEGRAM_BOT_TOKEN`` left in the
+    machine's environment by another project silently beat this project's .env
+    and pointed at a different bot entirely. On a developer machine the ambient
+    environment is untrusted leftovers; the file checked into the project
+    directory is the declared intent.
+
+    Returns the names of variables whose ambient value was overridden, so the
+    caller can say so out loud rather than swapping credentials silently.
+    """
+    overridden: list[str] = []
     if not path.is_file():
-        return
+        return overridden
     for raw in path.read_text(encoding="utf-8").splitlines():
-        line = raw.strip()
+        line = raw.strip().lstrip("﻿")
         if not line or line.startswith("#") or "=" not in line:
             continue
         key, _, value = line.partition("=")
-        os.environ.setdefault(key.strip(), value.strip())
+        key = key.strip()
+        value = value.strip().strip("\"'")
+        if key in os.environ and os.environ[key] != value:
+            overridden.append(key)
+        os.environ[key] = value
+    return overridden
 
 
 def _required(name: str) -> str:
@@ -55,11 +71,20 @@ class Settings:
     channel_username: str
     anthropic_api_key: str | None
 
+    #: Names whose ambient environment value was overridden by .env.
+    overridden_env: tuple[str, ...] = ()
+
     @classmethod
     def load(cls, root: Path | None = None) -> "Settings":
         root = root or Path(__file__).resolve().parent.parent
-        _load_dotenv(root / ".env")
+        overridden = tuple(_load_dotenv(root / ".env"))
+        if overridden:
+            print(
+                f"note: .env overrode ambient environment for {', '.join(overridden)}",
+                flush=True,
+            )
         return cls(
+            overridden_env=overridden,
             bot_token=_required("TELEGRAM_BOT_TOKEN"),
             bot_username=os.environ.get("TELEGRAM_BOT_USERNAME", "").lstrip("@"),
             channel_id=int(_required("TELEGRAM_CHANNEL_ID")),
@@ -91,6 +116,20 @@ def preflight(me: dict, channel: dict, group: dict, channel_member: dict, group_
     Callers fetch getMe / getChat / getChatMember and pass the raw results in.
     """
     checks: list[tuple[str, bool, str]] = []
+
+    # Token identity. A stray TELEGRAM_BOT_TOKEN in the machine environment once
+    # loaded a completely different bot here. Publishing to 3,326 people under
+    # the wrong identity is unrecoverable, so the token must prove it belongs to
+    # the bot this project declares.
+    if settings.bot_username:
+        actual = (me.get("username") or "").lstrip("@")
+        expected = settings.bot_username.lstrip("@")
+        same = actual.lower() == expected.lower()
+        checks.append((
+            "token belongs to the configured bot", same,
+            f"@{actual}" if same
+            else f"token is for @{actual} but TELEGRAM_BOT_USERNAME says @{expected}",
+        ))
 
     # Privacy mode. Without this the bot receives only messages mentioning it,
     # so the comment section is invisible and nothing appears broken.

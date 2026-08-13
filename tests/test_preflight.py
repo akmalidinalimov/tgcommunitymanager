@@ -21,7 +21,11 @@ SETTINGS = Settings(
 )
 
 # The live values verified on 2026-08-13.
-GOOD_ME = {"id": 8662504476, "can_read_all_group_messages": True}
+GOOD_ME = {
+    "id": 8662504476,
+    "username": "malikamanager_bot",
+    "can_read_all_group_messages": True,
+}
 GOOD_CHANNEL = {"id": CHANNEL_ID, "linked_chat_id": GROUP_ID, "title": "AI CREATORS"}
 GOOD_GROUP = {"id": GROUP_ID, "title": "AI CREATORS Chat"}  # is_forum absent = off
 GOOD_CH_MEMBER = {"status": "administrator", "can_post_messages": True}
@@ -82,3 +86,22 @@ def test_report_names_every_check():
     report = run().report()
     for fragment in ("privacy mode", "forum", "linked group", "channel admin", "discussion-group admin"):
         assert fragment in report
+
+
+# --- token identity: the stray-ambient-token class of bug --------------------
+
+def test_token_for_a_different_bot_blocks_boot():
+    """A stray TELEGRAM_BOT_TOKEN in the machine environment once loaded bot
+    8282699405 instead of the configured 8662504476. Publishing under the wrong
+    identity to 3,326 people is unrecoverable, so this must never pass."""
+    result = run(me=dict(GOOD_ME, username="some_other_bot"))
+    assert not result.ok
+    assert any("token belongs" in name for name, _, _ in result.failures())
+
+
+def test_matching_token_passes():
+    assert run(me=GOOD_ME).ok
+
+
+def test_username_match_is_case_insensitive():
+    assert run(me=dict(GOOD_ME, username="MalikaManager_Bot")).ok
