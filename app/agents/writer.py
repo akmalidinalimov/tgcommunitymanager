@@ -93,10 +93,20 @@ CRITIC_TOOL: dict[str, Any] = {
                 "items": {
                     "type": "object",
                     "properties": {
+                        "severity": {
+                            "type": "string",
+                            "enum": ["blocker", "polish"],
+                            "description": (
+                                "blocker = must not publish: translationese above 30, a dead "
+                                "opening, an untrue or unusable claim, a paragraph with nothing "
+                                "to act on. polish = genuinely better if changed, fine to ship "
+                                "as is. Most issues are polish. Reserve blocker for real damage."
+                            ),
+                        },
                         "what": {"type": "string"},
                         "fix": {"type": "string", "description": "The replacement text, in Uzbek, ready to drop in."},
                     },
-                    "required": ["what", "fix"],
+                    "required": ["severity", "what", "fix"],
                 },
             },
             "summary": {"type": "string"},
@@ -245,6 +255,18 @@ Every issue needs `fix` as the actual replacement text in Uzbek, ready to drop
 in — not "make this punchier". An issue without a usable fix is an opinion, and
 opinions do not improve a draft.
 
+=== SEVERITY, AND THE BAR FOR PASSING ===
+Mark each issue `blocker` or `polish`.
+
+- `blocker` — must not publish. Translationese above 30, a dead opening, a claim
+  that is untrue or unusable, a paragraph with nothing to act on.
+- `polish` — genuinely better if changed, fine to ship if not.
+
+**Most issues are polish.** Reserve `blocker` for real damage. Set `passed` true
+when there are zero blockers — do not withhold it because the draft could be
+better, since every draft could be better. A post held back forever helps nobody,
+and the alternative to shipping this is a channel that publishes nothing at all.
+
 Call judge."""
 
 
@@ -293,16 +315,36 @@ def write_post(
             continue
 
         verdict = _call(client, CRITIC_TOOL, critic_prompt(post.text, kind), model)
-        post.translationese = verdict.get("translationese")
+
+        # The model does not always fill this field even though the schema
+        # requires it. Treating a missing score as 0 would be fail-open on the
+        # single most important quality signal — a post with no score would look
+        # like a perfect one. Absent means unknown, and unknown is not evidence.
+        raw = verdict.get("translationese")
+        try:
+            post.translationese = int(raw) if raw is not None else None
+        except (TypeError, ValueError):
+            post.translationese = None
+
         issues = verdict.get("issues") or []
-        if verdict.get("passed") and (post.translationese or 0) <= 30:
-            post.critic_passed = True
+        hard = [i for i in issues if i.get("severity") == "blocker"]
+        too_translated = post.translationese is not None and post.translationese > 30
+
+        # The verdict is computed from the issues rather than taken from the
+        # model's own boolean. An adversarial critic told to assume problems will
+        # keep finding them, and a first version of this trusted `passed` and so
+        # rejected six perfectly good posts in a row — every draft can be better,
+        # which is not the same as every draft being unpublishable.
+        post.critic_passed = not hard and not too_translated
+        post.critic_notes = [
+            f"[{i.get('severity', 'polish')}] {i.get('what')} → {i.get('fix')}" for i in issues
+        ]
+        if post.critic_passed:
             return post
 
-        post.critic_notes = [f"{i.get('what')} → {i.get('fix')}" for i in issues]
         feedback = (
             f"translationese score {post.translationese}. {verdict.get('summary', '')}\n"
-            + "\n".join(post.critic_notes)
+            + "\n".join(f"{i.get('what')} → {i.get('fix')}" for i in hard)
         )
 
     # Rounds exhausted. Returning it as publishable would defeat the point of
