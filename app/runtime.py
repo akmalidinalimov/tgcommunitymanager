@@ -50,6 +50,11 @@ MAX_REPLY_AGE_S = 15 * 60
 #: than eight.
 MAX_REPLIES_PER_THREAD_PER_RUN = 2
 
+#: How many times a slot may be redrafted after rejection before it is left
+#: to the backup pool. Bounded so a genuinely impossible brief cannot burn
+#: tokens every fifteen minutes forever.
+MAX_REDRAFTS = 3
+
 #: The weekly grid, by weekday and slot hour. Monday is 0.
 WEEKLY_PLAN: dict[tuple[int, int], str] = {
     (0, 10): "technique",      (0, 21): "commercial_craft",
@@ -356,9 +361,26 @@ class Runtime:
 
     def prepare_upcoming(self) -> None:
         """Draft and send for approval anything inside the horizon."""
-        for slot in slots_needing_approval():
-            if self.store.get_content(slot.key):
+        upcoming = slots_needing_approval()
+        log.info("preparing: %s slot(s) inside the horizon", len(upcoming))
+        for slot in upcoming:
+            existing = self.store.get_content(slot.key)
+            if existing and existing.state is not State.REJECTED:
+                log.debug("%s already %s", slot.key, existing.state.value)
                 continue
+            if existing:
+                # A rejected draft used to block its slot forever: the check was
+                # "does content exist" rather than "is it still viable". One bad
+                # draft — produced while the knowledge base was missing — meant
+                # that slot silently never produced an approval card again.
+                attempts = int(self.store.get_runtime(f"redraft:{slot.key}") or 0)
+                if attempts >= MAX_REDRAFTS:
+                    log.warning("%s rejected %s times; leaving it to the backup pool",
+                                slot.key, attempts)
+                    continue
+                self.store.set_runtime(f"redraft:{slot.key}", str(attempts + 1))
+                log.info("%s was rejected; redrafting (attempt %s)", slot.key, attempts + 1)
+
             kind = kind_for(slot)
             log.info("drafting %s for %s", kind, slot.key)
             post = write_post(
@@ -380,6 +402,7 @@ class Runtime:
             content.submit_for_approval()
             self.store.save_content(content)
             self._send_for_approval(content, slot)
+            log.info("approval card sent for %s (%s)", slot.key, kind)
 
     def _send_for_approval(self, content: Content, slot: Slot) -> None:
         if self.dry_run or not self.settings.admin_chat_id:

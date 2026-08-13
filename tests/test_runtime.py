@@ -381,3 +381,58 @@ def test_a_post_with_a_matching_asset_ships_as_a_caption(tmp_path):
         runtime_mod.pick_asset = original
     assert api.videos and api.videos[0]["caption"] == "post matni"
     assert api.sent == [], "text was sent separately instead of as a caption"
+
+
+# --- rejected drafts must not poison their slot ----------------------------
+
+def test_a_rejected_draft_does_not_block_its_slot_forever(rt):
+    """The check was "does content exist" rather than "is it still viable", so
+    one bad draft — produced while the knowledge base was missing — meant that
+    slot silently never produced an approval card again. No card, no error, no
+    log line."""
+    from app.runtime import MAX_REDRAFTS
+    from app.spine.scheduler import slots_needing_approval
+
+    slot = slots_needing_approval()[0]
+    dead = Content(slot_key=slot.key, kind="technique", text="bad")
+    dead.reject("critic never passed it")
+    rt.store.save_content(dead)
+
+    drafted = []
+    import app.runtime as mod
+    original = mod.write_post
+    mod.write_post = lambda kind, **kw: drafted.append(kind) or _ok_post(kind)
+    try:
+        rt.prepare_upcoming()
+    finally:
+        mod.write_post = original
+    assert drafted, "a rejected slot was skipped instead of redrafted"
+
+
+def test_redrafting_is_bounded(rt):
+    """A genuinely impossible brief must not burn tokens every fifteen minutes."""
+    from app.runtime import MAX_REDRAFTS
+    from app.spine.scheduler import slots_needing_approval
+
+    slot = slots_needing_approval()[0]
+    dead = Content(slot_key=slot.key, kind="technique", text="bad")
+    dead.reject("nope")
+    rt.store.save_content(dead)
+    rt.store.set_runtime(f"redraft:{slot.key}", str(MAX_REDRAFTS))
+
+    drafted = []
+    import app.runtime as mod
+    original = mod.write_post
+    mod.write_post = lambda kind, **kw: drafted.append(kind) or _ok_post(kind)
+    try:
+        rt.prepare_upcoming()
+    finally:
+        mod.write_post = original
+    assert slot.key not in [c for c in drafted], "exhausted slot was redrafted again"
+
+
+def _ok_post(kind):
+    from app.agents.writer import Post
+    p = Post(text="yangi post", seed_comment="savol?", kind=kind)
+    p.critic_passed = True
+    return p
