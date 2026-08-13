@@ -10,11 +10,9 @@ On a Linux VPS the same code path is correct and simply uses the system store.
 
 from __future__ import annotations
 
-import ssl
 from typing import Any
 
-import httpx
-import truststore
+from app.net import http_client
 
 
 class TelegramError(RuntimeError):
@@ -29,10 +27,6 @@ class TelegramError(RuntimeError):
         super().__init__(f"{method}: {description} (error_code={error_code})")
 
 
-def _ssl_context() -> ssl.SSLContext:
-    return truststore.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
-
-
 class BotAPI:
     """Synchronous Bot API client, scoped to setup and smoke tests.
 
@@ -42,7 +36,7 @@ class BotAPI:
 
     def __init__(self, token: str, *, timeout: float = 30.0):
         self._base = f"https://api.telegram.org/bot{token}/"
-        self._client = httpx.Client(verify=_ssl_context(), timeout=timeout)
+        self._client = http_client(timeout=timeout)
 
     def __enter__(self) -> "BotAPI":
         return self
@@ -109,6 +103,23 @@ class BotAPI:
             parse_mode=parse_mode,
             reply_parameters=reply_parameters,
             disable_notification=disable_notification,
+        )
+
+    def set_message_reaction(
+        self, chat_id: int | str, message_id: int, emoji: str, *, is_big: bool = False
+    ) -> bool:
+        """React to a message instead of replying to it.
+
+        Acknowledging a member's posted result with a reaction is what a human
+        community manager does. Three text replies under three videos reads as a
+        machine no matter how the sentences are varied.
+        """
+        return self.call(
+            "setMessageReaction",
+            chat_id=chat_id,
+            message_id=message_id,
+            reaction=[{"type": "emoji", "emoji": emoji}],
+            is_big=is_big,
         )
 
     def delete_message(self, chat_id: int | str, message_id: int) -> bool:
