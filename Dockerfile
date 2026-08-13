@@ -21,10 +21,16 @@ COPY data/knowledge ./data/knowledge
 COPY data/backup_pool.yaml ./data/backup_pool.yaml
 COPY .claude/skills/humanize-uz ./.claude/skills/humanize-uz
 
-# The voice guide and knowledge base are read at runtime, so a missing copy
-# would degrade output silently rather than crashing. Fail the build instead.
+# The voice guide, knowledge base and backup pool are read at runtime, so a
+# missing or empty copy degrades output silently instead of crashing. Fail the
+# build instead.
+#
+# The pool is COUNTED rather than checked for bytes: "posts: []" is a perfectly
+# non-empty file and sails past `test -s`, which would ship a bot whose only
+# safety net against an unapproved slot is nothing at all.
 RUN test -f .claude/skills/humanize-uz/SKILL.md \
- && test -f data/knowledge/models.yaml \n && test -s data/backup_pool.yaml
+ && test -f data/knowledge/models.yaml \
+ && python -c "import yaml,sys; n=len((yaml.safe_load(open('data/backup_pool.yaml',encoding='utf-8')) or {}).get('posts') or []); print('backup pool:', n, 'posts'); sys.exit(0 if n >= 3 else 1)"
 
 RUN useradd -m -u 10001 bot && mkdir -p /app/data && chown -R bot:bot /app
 USER bot
