@@ -104,7 +104,7 @@ topic → theme-approved → written → critic-passed → claims-cleared → me
 | | 10:00 | 21:00 |
 |---|---|---|
 | Mon | Practical technique | Commercial craft — *what businesses pay for* |
-| Tue | AI news + opportunity angle | Member transformation story |
+| Tue | AI news + opportunity angle | **Why-content** — why a business pays for this |
 | Wed | Practical technique | Poll / quiz |
 | Thu | Commercial craft | Behind the scenes |
 | Fri | AI news + opportunity angle | Challenge launch |
@@ -114,9 +114,15 @@ topic → theme-approved → written → critic-passed → claims-cleared → me
 *Commercial craft* is the bridge pillar — technique and income in one post, which holds the 50/50 balance
 without every second post being about money.
 
-**Dependency:** the Tue 21:00 transformation slot and the Thu 21:00 behind-the-scenes slot both require
-Story Bank entries. Until those exist, the Planner substitutes commercial-craft posts and flags the gap in
-the weekly report rather than inventing a story.
+**No student or testimonial content.** Founder decision: the channel does not publish member success
+stories, testimonials, or third-party outcome claims. Authority comes from demonstrated craft and from
+*why-content* — explaining what makes commercial work sell — not from social proof. This also removes the
+system's largest legal exposure, since outcome claims about other people are the primary regulatory risk in
+this market.
+
+**Dependency:** the Thu 21:00 behind-the-scenes slot requires Story Bank entries about the founders
+themselves. Until those exist, the Planner substitutes commercial-craft posts and flags the gap in the
+weekly report rather than inventing anything.
 
 ### The commitment ladder
 
@@ -210,8 +216,34 @@ English phrasing.
 
 ## 8. Media pipeline
 
-Higgsfield via HTTP API (the MCP connector is session-bound and unusable from a server). Async submit →
-poll or webhook → **download immediately**, since outputs expire in roughly 7 days.
+**Media is generated on the laptop via the Higgsfield MCP connector, never on the VPS.** Founder decision:
+use the existing Creator-plan credits (2,173 available) rather than paying for HTTP API access.
+
+This works because approval is already weekly and batched. The laptop does not need to be on continuously —
+only during the weekly generation-and-review window:
+
+```
+weekly session (laptop on, Claude Code open)
+  Planner + Writer + Critic produce the week's copy
+  Shot Director builds prompt objects
+  Higgsfield MCP generates 3-4 variants per slot
+  results downloaded and uploaded into the bot's media store
+  Shahlo reviews the week and approves
+        │
+        ▼
+VPS bot (24/7, no media generation)
+  publishes pre-generated media on schedule · seeds · replies · analyzes
+```
+
+Consequences, stated plainly:
+- **The VPS bot never calls Higgsfield.** It publishes assets already sitting in its store. Media generation
+  is a human-in-the-loop weekly ritual, not autonomous — the MCP connector requires an interactive session.
+- **If a week is not prepped, there is no new media.** The backup pool covers the slots; the channel stays
+  alive but repeats.
+- Regenerating an image during review requires the laptop, which it will be, since review happens there.
+- Ad-hoc mid-week media needs a laptop session. Founder-shot clips via Quick Post need none.
+- **Download every output immediately** — Higgsfield URLs expire in roughly 7 days.
+- This removes the HTTP client, API key, and media job queue from scope entirely. M4 shrinks accordingly.
 
 The Shot Director holds a **structured prompt object** — subject, action, environment, lighting, camera,
 lens, aspect, negative space, brand hex, recipe id, seed — rendered into each model's dialect at call time.
@@ -280,7 +312,8 @@ media problems.
 | Bot offline when a post publishes | Thread root never learned; Telegram drops updates >24h and never replays. **Uptime monitoring is core.** |
 | Discussion group has Topics enabled | Comments arrive with no thread data and no error. **Startup assertion refuses to boot.** |
 | Week not approved by deadline | Backup pool publishes. Never auto-approve. |
-| Higgsfield job fails or times out | Post publishes text-only rather than missing its slot |
+| A slot has no generated media | Post publishes text-only rather than missing its slot |
+| Week never prepped on the laptop | Backup pool publishes; the weekly report says plainly that the channel is repeating |
 | Voice Critic can't pass a draft in 3 rounds | Escalates to the admin group as a flagged exception |
 | LLM proposes a number with no ledger row | Claims Guard strips it before a human ever sees the draft |
 

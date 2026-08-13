@@ -13,17 +13,23 @@ Design spec: [`docs/superpowers/specs/2026-08-13-telegram-community-manager-desi
 
 | # | Item | Status |
 |---|---|---|
-| 1 | **Is Topics/forum mode ON or OFF** in the discussion group? | ⬜ |
-| 2 | Channel `@username` and discussion group link | ⬜ |
-| 3 | VPS SSH access + Hostinger subdomain hostname | ⬜ |
-| 4 | Bot token in `.env`; bot admin in **both** chats; privacy mode disabled **before** joining the group | ⬜ |
-| 5 | Higgsfield HTTP API key — **and** confirmation the Creator plan grants server-side access | ⬜ |
-| 6 | Anthropic API key | ⬜ |
-| 7 | Shahlo's `telegram_id` (approver) + Akmalidin's, for the Mini App allowlist | ⬜ |
-| 8 | Story Bank — origin story, Sweden conference, member results with permission, portfolio, boundaries | ⬜ |
+| 1 | Topics/forum mode in the discussion group | ✅ **OFF** — M3 unblocked |
+| 2 | Bot created — `@malikamanager_bot`, token in `.env`, git-ignored | ✅ |
+| 3 | Media generation approach | ✅ Higgsfield MCP on the laptop, weekly batch — no API key needed |
+| 4 | **Disable privacy mode** in BotFather (`getMe` shows `can_read_all_group_messages: false`) — and **remove + re-add** the bot to the group afterwards, or the change won't apply | ⬜ |
+| 5 | Rename bot to `Malika · AI yordamchi` via `/setname`; set description | ⬜ |
+| 6 | Bot promoted to admin in **both** channel (Post/Edit/Delete) and discussion group (Delete/Ban/Pin) | ⬜ |
+| 7 | Channel `@username` and discussion group link | ⬜ |
+| 8 | VPS SSH access + Hostinger subdomain hostname | ⬜ |
+| 9 | Anthropic API key | ⬜ |
+| 10 | Shahlo's `telegram_id` (approver) + Akmalidin's, for the Mini App allowlist | ⬜ |
+| 11 | Story Bank — **founders only**: origin story, Sweden conference, own client work, portfolio, boundaries | ⬜ |
 
-Items 1 and 5 each gate an entire milestone (M3 and M4 respectively) — worth resolving first.
-Item 8 blocks authority and proof content only; how-to and why-content can be produced without it.
+Item 4 is the current blocker for M3 — the bot is deaf to comments until it's fixed.
+Item 11 blocks behind-the-scenes content only; how-to and why-content need nothing.
+
+**No student or testimonial content** (founder decision) — so the conflicting 1500+/1800+/5000+ counts and
+Aisha's $1,500 never enter a post, and the claims-reconciliation task is dropped.
 
 ---
 
@@ -37,7 +43,7 @@ Item 8 blocks authority and proof content only; how-to and why-content can be pr
 - [ ] Test post published to the channel
 - [ ] **Seed comment lands inside the discussion thread, not the group's main feed** ← the single most
       important check in M0; the wrong implementation looks identical in code and obvious in the group
-- [ ] One authenticated Higgsfield HTTP API call returns an image
+- [ ] Bot can upload a local image file to the channel *(proves the media path without any API key)*
 
 ## M1 · Publishing spine + voice engine — week 1
 
@@ -76,14 +82,17 @@ Claims Guard, approval via bot-native inline cards, AI disclosure.
 
 ## M4 · Media pipeline — week 3–4
 
-**Build:** Higgsfield client, structured prompt object, banned-term transform, pairing validator, variants.
+**Build:** structured prompt object, banned-term transform, pairing validator, laptop-side generation
+script driving the Higgsfield MCP, and the upload path into the bot's media store.
+*No HTTP client, no API key, no job queue — media is generated in the weekly laptop session.*
 
-- [ ] A full week's media generated inside budget
-- [ ] **Zero published images contain generated Uzbek text**
+- [ ] A full week's media generated in one laptop session and uploaded to the media store
+- [ ] **Zero published images contain generated Uzbek text** (plate + overlay, never in-image type)
 - [ ] Every published asset stores `{recipe_id, model, seed, prompt, refs, aspect}`
 - [ ] Banned-term transform logs both raw and cleaned prompt *(this diff becomes a post)*
 - [ ] Pairing validator rejects a deliberately incompatible prompt (24mm lens + extreme close-up)
-- [ ] Generated outputs downloaded locally within minutes — never relied on at the vendor URL
+- [ ] Outputs downloaded immediately — never relied on at the Higgsfield URL, which expires in ~7 days
+- [ ] Credit burn per week measured against the 2,173 balance, so the runway is known
 
 ## M5 · Analyst + content spine — week 4
 
