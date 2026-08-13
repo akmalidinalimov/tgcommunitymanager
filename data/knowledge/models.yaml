@@ -25,9 +25,39 @@ recommendations:
     source: founder
     note: "Shahlo/Akmalidin's stated defaults for video."
   image:
-    primary: [gpt_image_2, soul_2]
+    primary: [gpt_image_2, soul_2, midjourney]
     source: founder
-    note: "Stated as 'gpt 2 and Higgsfield Soul'. gpt 2 = GPT Image 2 (OpenAI), confirmed in catalog."
+    note: >
+      Stated as 'gpt 2 and Higgsfield Soul'. gpt 2 = GPT Image 2 (OpenAI), confirmed in
+      catalog. Midjourney added 2026-08-13: the founders use it regularly and had simply
+      not listed it. Not available through Higgsfield — used directly.
+
+# --- What may be said about tools ------------------------------------------
+# Founder ruling, 2026-08-13: the test is TRUTH, not a whitelist. The initial
+# list was only what they use most often, and treating it as exhaustive made the
+# bot refuse to name real tools its audience already uses.
+#
+# So: naming any real AI tool is fine, and reporting a genuine, well-established
+# capability is fine.
+#
+# What still requires a knowledge-base row:
+#   - prices, subscription costs, credit costs
+#   - specific capability claims ("X does Y at Z resolution/quality")
+#   - comparative verdicts ("X is better than Y for Z")
+#   - anything about OUR OWN work, results, or settings
+#
+# For a tool the founders have not tested, say so plainly and invite the member's
+# result — the honest answer, and it produces exactly the member-generated
+# artifacts the channel exists to create.
+tool_mentions:
+  naming_allowed: true
+  source: founder
+  requires_grounding:
+    - price
+    - credit_cost
+    - specific_capability_claim
+    - comparison_verdict
+    - our_own_results_or_settings
 
 # --- Models we actually have access to. Facts from the live catalog. ---------
 models:

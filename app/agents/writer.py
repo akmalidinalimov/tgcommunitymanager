@@ -215,6 +215,11 @@ Brief: {brief}
   base, and you must list them in numbers_used. If you want a number you cannot
   source, write the sentence without it.
 - NO student names, testimonials, or claims about what anyone earned.
+- Naming any real AI tool is fine — the test is whether it is TRUE, not whether
+  it appears in the knowledge base. But a PRICE, a credit cost, a specific
+  capability claim, a comparative verdict, or anything about our own work,
+  results or settings must come from the knowledge base. For a tool we have not
+  tested, say so plainly rather than reviewing it.
 - Income framing is always "businesses pay X for deliverable Y", never
   "you can earn X".
 - Lead with the outcome, then the artifact, then the tool. Never open on a tool name.
