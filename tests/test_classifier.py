@@ -252,3 +252,20 @@ def test_reply_to_a_known_root_resolves():
 
 def test_bare_group_message_has_no_thread():
     assert thread_key({"message_id": 5104}, known_roots=KNOWN_ROOTS) is None
+
+
+# --- credential hygiene -----------------------------------------------------
+
+def test_bot_tokens_are_redacted_from_anything_logged():
+    """The token lives in the Telegram URL path, so any library or traceback
+    echoing a URL leaks it. This happened once via httpx INFO logging."""
+    from app.telegram.api import redact
+    leaked = "POST https://api.telegram.org/bot1234567890:FAKEfakeFAKEfakeFAKEfakeFAKEfake123/getMe"
+    cleaned = redact(leaked)
+    assert "AAGuo71H" not in cleaned
+    assert "bot<REDACTED>" in cleaned
+
+
+def test_redaction_leaves_ordinary_text_alone():
+    from app.telegram.api import redact
+    assert redact("chat not found") == "chat not found"
