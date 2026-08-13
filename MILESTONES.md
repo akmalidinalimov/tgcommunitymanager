@@ -35,8 +35,10 @@ Aisha's $1,500 never enter a post, and the claims-reconciliation task is dropped
 
 ## M0 · Foundations — day 1–2
 
-**Build:** repo scaffold, VPS, Postgres, Caddy TLS, systemd unit, startup assertions.
+**Build:** repo scaffold, Docker Compose project on Hostinger VM 1411263, Postgres, TLS, startup assertions.
 
+- [ ] VM 1411263 has headroom for a second project *(check CPU/RAM/disk before deploying alongside freelanceai)*
+- [ ] Compose file stays under Hostinger's 8192-char `content` cap
 - [ ] Health endpoint returns green over HTTPS on the Hostinger subdomain
 - [ ] Bot refuses to boot if the discussion group has Topics enabled *(verify by temporarily enabling it)*
 - [ ] Bot resolves and caches `linked_chat_id` from the channel at startup

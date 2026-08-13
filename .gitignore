@@ -2,6 +2,10 @@
 .env
 .env.*
 !.env.example
+# .mcp.json carries HOSTINGER_API_TOKEN — comments must be on their own line,
+# gitignore has no inline comment syntax and would treat it as part of the pattern.
+.mcp.json
+!.mcp.json.example
 *.pem
 *.key
 secrets/

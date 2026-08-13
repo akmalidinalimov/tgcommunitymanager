@@ -71,8 +71,23 @@ the spine decides, times and publishes. This is the property that makes autonomy
               └────────────────────────────────────────────┘
 ```
 
-One FastAPI process serves both the aiogram webhook and the Mini App, under one systemd unit, behind Caddy
-for automatic TLS.
+One FastAPI process serves both the aiogram webhook and the Mini App.
+
+**Deployment follows the founders' existing, proven pattern** rather than introducing a second one: a Docker
+Compose project pushed through the **Hostinger API** (`POST /api/vps/v1/virtual-machines/1411263/docker`),
+not systemd over SSH. There is no Hostinger SSH key; the API is how these founders already ship
+`freelanceai`, with deploy, restore-drill and smoke-test scripts in `freelanceai/deploy/` to adapt.
+
+Deployed as a **separate Compose project on the same VM (1411263)** that runs `freelanceai`. The API is
+project-scoped, so the two coexist. Two constraints inherited from that repo's hard-won experience:
+
+- **The compose `content` field is capped at 8192 characters** (hit at 8312 on 2026-07-26). Keep the file
+  lean; move configuration into env rather than inline YAML.
+- A known "created-not-started" flake requires an explicit project-start call after deploy. The existing
+  script already recovers from it.
+
+Because the VM is shared, M0 must check its CPU, RAM and disk headroom before adding a second Postgres and
+a media directory to it.
 
 ### Agents
 
