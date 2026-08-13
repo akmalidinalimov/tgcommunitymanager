@@ -11,40 +11,43 @@
 # URL at send time, so an expired asset means a post goes out as text instead.
 # Mirror anything relied on long-term.
 assets:
-- id: cafe-coffee-lowangle-a
+- id: cafe-coffee-169-a
   kind: photo
-  url: https://d8j0ntlcm91z4.cloudfront.net/user_2zJUonmh6cW6tDKlBEl4CIohbsI/hf_20260813_214010_0b23ce57-8be1-4925-a09e-1f78f71734e9.png
+  aspect: '16:9'
+  url: https://d8j0ntlcm91z4.cloudfront.net/user_2zJUonmh6cW6tDKlBEl4CIohbsI/hf_20260813_223650_9c4dcec9-9c05-4bf6-afd6-6dbf57e8d447.png
   model: gpt_image_2
   duration: null
   shows:
   - cafe coffee cup
   - low angle close-up
-  - morning window light
-  - blurred napkin and menu card foreground
+  - counter running right
   - upturned chairs at opening time
-  - clear upper-left space for text
+  - napkin and card foreground
+  - clear left third for text
   good_for:
   - why_content
   - commercial_craft
   expires: true
-- id: cafe-coffee-lowangle-b
+- id: cafe-coffee-169-b
   kind: photo
-  url: https://d8j0ntlcm91z4.cloudfront.net/user_2zJUonmh6cW6tDKlBEl4CIohbsI/hf_20260813_214010_e16ab17b-0f37-4c7f-9067-d39c9def2bcd.png
+  aspect: '16:9'
+  url: https://d8j0ntlcm91z4.cloudfront.net/user_2zJUonmh6cW6tDKlBEl4CIohbsI/hf_20260813_223650_544e258d-9b99-4591-8cc3-3ab63aea861f.png
   model: gpt_image_2
   duration: null
   shows:
   - cafe coffee cup
   - low angle close-up
-  - brass grinder and stacked saucers
-  - blurred napkin and card foreground
-  - clear upper-left space for text
+  - brass grinder and saucers
+  - napkin and card foreground
+  - clear left third for text
   good_for:
   - why_content
   - commercial_craft
   expires: true
-- id: cafe-pushin-5s
+- id: cafe-pushin-169-5s
   kind: video
-  url: https://d8j0ntlcm91z4.cloudfront.net/user_2zJUonmh6cW6tDKlBEl4CIohbsI/hf_20260813_214131_8ced4466-9539-4258-92a2-f631eaf73627.mp4
+  aspect: '16:9'
+  url: https://d8j0ntlcm91z4.cloudfront.net/user_2zJUonmh6cW6tDKlBEl4CIohbsI/hf_20260813_223701_115a8929-83f7-4c5c-9845-d0d6531aa9ce.mp4
   model: seedance_2_5
   duration: 5
   shows:
@@ -52,7 +55,7 @@ assets:
   - steam rising
   - forearm through foreground
   - low angle
-  - morning window light
+  - counter running right
   good_for:
   - why_content
   - commercial_craft
@@ -73,6 +76,7 @@ assets:
   - why_content
   - mission
   expires: true
+  aspect: '9:16'
 - id: uzbek-room-20s-20260808-1730
   url: https://d8j0ntlcm91z4.cloudfront.net/user_2zJUonmh6cW6tDKlBEl4CIohbsI/hf_20260808_153052_118de395-26d0-437f-a8f6-faf522022a8d.mp4
   kind: video
@@ -88,6 +92,7 @@ assets:
   - why_content
   - mission
   expires: true
+  aspect: '9:16'
 - id: uzbek-room-20s-20260808-1744
   url: https://d8j0ntlcm91z4.cloudfront.net/user_2zJUonmh6cW6tDKlBEl4CIohbsI/hf_20260808_154447_55ea02ba-d8ba-48a9-ab52-4b98a803a50a.mp4
   kind: video
@@ -103,6 +108,7 @@ assets:
   - why_content
   - mission
   expires: true
+  aspect: '9:16'
 - id: uzbek-room-30s-20260808-1115
   url: https://d8j0ntlcm91z4.cloudfront.net/user_2zJUonmh6cW6tDKlBEl4CIohbsI/hf_20260808_091551_d8e4de2e-e87a-4588-9018-a11e5a1dd9f5.mp4
   kind: video
@@ -118,6 +124,7 @@ assets:
   - why_content
   - mission
   expires: true
+  aspect: '9:16'
 - id: uzbek-room-30s-20260808-1141
   url: https://d8j0ntlcm91z4.cloudfront.net/user_2zJUonmh6cW6tDKlBEl4CIohbsI/hf_20260808_094129_48fb2259-f896-4e21-a310-1ab696f9df18.mp4
   kind: video
@@ -133,6 +140,7 @@ assets:
   - why_content
   - mission
   expires: true
+  aspect: '9:16'
 - id: uzbek-room-30s-20260808-2204
   url: https://d8j0ntlcm91z4.cloudfront.net/user_2zJUonmh6cW6tDKlBEl4CIohbsI/hf_20260808_200405_a731cb6c-dc35-45c4-90aa-0d95bbadc112.mp4
   kind: video
@@ -148,3 +156,4 @@ assets:
   - why_content
   - mission
   expires: true
+  aspect: '9:16'
