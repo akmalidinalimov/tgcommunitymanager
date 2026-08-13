@@ -139,21 +139,47 @@ def passes(text: str, *, banned: dict[str, str] | None = None) -> bool:
     return not blockers(lint(text, banned=banned))
 
 
-NUMBER = re.compile(r"(?<![\w])[\d]+(?:[.,]\d+)?\s*(?:%|ming|mln|million|so'm|soʻm|\$|usd)?", re.IGNORECASE)
+#: A *claim* is a number asserting a result, a price, or how many people did
+#: something. Those are the ones that carry legal and credibility risk and must
+#: trace to a ledger row.
+#:
+#: A technical number is not a claim. "10 soniyalik video", "720p", "Kling 3.0"
+#: describe the work rather than assert an outcome, and treating them as claims
+#: blocks perfectly good posts forever — which is worse than useless, because a
+#: guardrail that fires on everything gets switched off.
+CLAIM_NUMBER = re.compile(
+    r"""(?<![\w.])
+        (\d[\d\s.,]*)                       # the figure
+        \s*
+        (?:ta|nafar|kishilik)?              # Uzbek counter: "5000 ta o'quvchi"
+        \s*
+        (%|\$|usd|eur|so['ʼʻ]?m|ming|mln|million|milliard
+         |odam|kishi|o['ʼʻ]?quvchi|mijoz|obunachi|talaba|bitiruvchi
+         |barobar|baravar|foiz|marta\s+ko['ʼʻ]?p)
+        """,
+    re.IGNORECASE | re.VERBOSE,
+)
+
+#: Money or scale stated before the unit — "$1500", "1500 dollar".
+CURRENCY_FIRST = re.compile(r"[$€]\s?\d[\d\s.,]*", re.IGNORECASE)
 
 
 def unsupported_numbers(text: str, ledger: set[str]) -> list[str]:
-    """Numbers in ``text`` that do not appear in the claims ledger.
+    """Claim-shaped numbers with no backing row.
 
-    The strongest guardrail in the system precisely because it is a schema check
-    and not a model's opinion: if the ledger has no row, the number does not ship.
-    Years and small counts inside a sentence are still flagged — the writer must
-    justify every figure rather than the linter guessing which ones matter.
+    A schema check rather than a model's opinion, which is what makes it the most
+    reliable guardrail in the system. Deliberately scoped to claims — earnings,
+    prices, headcounts, multiples — and not to every digit in the text.
     """
-    found = {m.group(0).strip() for m in NUMBER.finditer(text) if m.group(0).strip()}
-    normalized_ledger = {c.strip().lower() for c in ledger}
+    found = {m.group(0).strip() for m in CLAIM_NUMBER.finditer(text)}
+    found |= {m.group(0).strip() for m in CURRENCY_FIRST.finditer(text)}
+
+    def digits(value: str) -> str:
+        return re.sub(r"[^\d]", "", value)
+
+    ledger_digits = {digits(c) for c in ledger if digits(c)}
+    ledger_lower = {c.strip().lower() for c in ledger}
     return sorted(
         n for n in found
-        if n.lower() not in normalized_ledger
-        and re.sub(r"[^\d]", "", n) not in {re.sub(r"[^\d]", "", c) for c in normalized_ledger}
+        if n.lower() not in ledger_lower and digits(n) not in ledger_digits
     )

@@ -156,3 +156,36 @@ def test_blockers_filters_out_polish():
     issues = lint("bo'ladi va amalga oshirish", banned=BANNED)
     assert len(blockers(issues)) == 1
     assert len(issues) == 2
+
+
+# --- claim-shaped numbers vs technical numbers ------------------------------
+
+
+@pytest.mark.parametrize("text", [
+    "5000 ta o'quvchi bor",
+    "oyiga 1500$ ishlashadi",
+    "$1500 topdi",
+    "daromad 3 barobar oshdi",
+    "1 200 000 so'm",
+    "konversiya 40% oshdi",
+])
+def test_claim_shaped_numbers_are_flagged(text):
+    assert unsupported_numbers(text, ledger=set()), text
+
+
+@pytest.mark.parametrize("text", [
+    "10 soniyalik video chiqaring",
+    "Kling 3.0 da sinab ko'ring",
+    "720p sifatida ancha arzon",
+    "3 ta rasm tayyorlang",
+    "2026-yil",
+])
+def test_technical_numbers_are_not_claims(text):
+    """A duration, a resolution or a version describes the work rather than
+    asserting an outcome. Flagging these blocks good posts forever, and a
+    guardrail that fires on everything gets switched off."""
+    assert unsupported_numbers(text, ledger=set()) == [], text
+
+
+def test_a_claim_backed_by_the_ledger_passes():
+    assert unsupported_numbers("5000 ta o'quvchi", ledger={"5000"}) == []
