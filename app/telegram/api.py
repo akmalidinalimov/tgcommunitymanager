@@ -85,6 +85,7 @@ class BotAPI:
         reply_to_message_id: int | None = None,
         parse_mode: str | None = None,
         disable_notification: bool | None = None,
+        reply_markup: dict | None = None,
     ) -> dict:
         """Send a message.
 
@@ -103,6 +104,34 @@ class BotAPI:
             parse_mode=parse_mode,
             reply_parameters=reply_parameters,
             disable_notification=disable_notification,
+            reply_markup=reply_markup,
+        )
+
+    def answer_callback_query(
+        self, callback_query_id: str, text: str | None = None, *, show_alert: bool = False
+    ) -> bool:
+        """Always call this, even on rejection — an unanswered press spins
+        forever on the approver's phone."""
+        return self.call(
+            "answerCallbackQuery",
+            callback_query_id=callback_query_id,
+            text=text,
+            show_alert=show_alert,
+        )
+
+    def edit_message_text(
+        self, chat_id: int | str, message_id: int, text: str,
+        *, parse_mode: str | None = None, reply_markup: dict | None = None,
+    ) -> dict:
+        """Mutate the card in place rather than sending a new message, so a week
+        of approvals does not bury the admin chat."""
+        return self.call(
+            "editMessageText",
+            chat_id=chat_id,
+            message_id=message_id,
+            text=text,
+            parse_mode=parse_mode,
+            reply_markup=reply_markup,
         )
 
     def set_message_reaction(
