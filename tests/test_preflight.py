@@ -1,0 +1,84 @@
+"""Preflight refuses to boot on exactly the misconfigurations that fail silently.
+
+Every case here was observed or narrowly avoided during setup, so these are
+regression tests rather than hypotheticals.
+"""
+
+from __future__ import annotations
+
+from app.config import Settings, preflight
+
+CHANNEL_ID = -1002708742288
+GROUP_ID = -1004430366406
+
+SETTINGS = Settings(
+    bot_token="x",
+    bot_username="malikamanager_bot",
+    channel_id=CHANNEL_ID,
+    discussion_group_id=GROUP_ID,
+    channel_username="aicreatorsuz",
+    anthropic_api_key=None,
+)
+
+# The live values verified on 2026-08-13.
+GOOD_ME = {"id": 8662504476, "can_read_all_group_messages": True}
+GOOD_CHANNEL = {"id": CHANNEL_ID, "linked_chat_id": GROUP_ID, "title": "AI CREATORS"}
+GOOD_GROUP = {"id": GROUP_ID, "title": "AI CREATORS Chat"}  # is_forum absent = off
+GOOD_CH_MEMBER = {"status": "administrator", "can_post_messages": True}
+GOOD_GR_MEMBER = {"status": "administrator", "can_delete_messages": True}
+
+
+def run(**overrides):
+    args = {
+        "me": GOOD_ME,
+        "channel": GOOD_CHANNEL,
+        "group": GOOD_GROUP,
+        "channel_member": GOOD_CH_MEMBER,
+        "group_member": GOOD_GR_MEMBER,
+    }
+    args.update(overrides)
+    return preflight(settings=SETTINGS, **args)
+
+
+def test_the_real_verified_configuration_passes():
+    result = run()
+    assert result.ok, result.report()
+
+
+def test_privacy_mode_enabled_blocks_boot():
+    """The state the bot was actually in at creation: admin everywhere, looks
+    healthy, and silently receives no comments."""
+    result = run(me={"id": 1, "can_read_all_group_messages": False})
+    assert not result.ok
+    assert any("privacy" in name for name, _, _ in result.failures())
+
+
+def test_forum_mode_blocks_boot():
+    """Topics on means comments carry no thread data AND no error signal."""
+    result = run(group={"id": GROUP_ID, "is_forum": True})
+    assert not result.ok
+    assert any("forum" in name for name, _, _ in result.failures())
+
+
+def test_linked_group_mismatch_blocks_boot():
+    """Guards against seeding comments into an unrelated chat after someone
+    relinks the channel to a different group."""
+    result = run(channel={"id": CHANNEL_ID, "linked_chat_id": -1009999999999})
+    assert not result.ok
+    assert any("linked" in name for name, _, _ in result.failures())
+
+
+def test_admin_without_post_rights_blocks_boot():
+    result = run(channel_member={"status": "administrator", "can_post_messages": False})
+    assert not result.ok
+
+
+def test_demoted_in_discussion_group_blocks_boot():
+    result = run(group_member={"status": "member"})
+    assert not result.ok
+
+
+def test_report_names_every_check():
+    report = run().report()
+    for fragment in ("privacy mode", "forum", "linked group", "channel admin", "discussion-group admin"):
+        assert fragment in report
