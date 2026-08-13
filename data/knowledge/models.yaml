@@ -130,6 +130,22 @@ models:
     duration_s: [12, 15]
     good_for: "one-click product ads, TikTok/Reels-ready commercial output"
 
+# --- Our own published work. Answers "how did you make that?" ---------------
+our_posts:
+  "606":
+    url: "https://t.me/aicreatorsuz/606"
+    date: "2026-08-13"
+    topic: "recreate yesterday's video from the shared prompt"
+    referenced_video:
+      made_with: seedance_2_5
+      source: founder
+      note: >
+        Answers the question Фотима asked in the thread — "Қандай қилганизнм хам
+        кўрсатиб беринг". The model is now answerable; the exact settings are
+        still unknown, so the Replier may name the model and must not invent
+        resolution, mode or reference-image details.
+      still_unknown: [resolution, mode, duration, whether_reference_images_used]
+
 # --- Asked about, but NOT in our toolset. Answer honestly. -------------------
 not_in_our_stack:
   omni_flow:
