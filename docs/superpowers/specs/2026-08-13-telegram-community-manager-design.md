@@ -225,6 +225,12 @@ Uzbek suffixes (`ChatGPT'dan`, `Custom Instructions'ga`).
 
 **Language:** clean standard Uzbek Latin, polite-casual, `siz`. **Voice:** Shahlo's first person.
 
+**Replies mirror the commenter's script.** Measured on the first live post: of 16 text comments, **11 were
+Uzbek Latin and 5 were Uzbek Cyrillic** — one member wrote exclusively in Cyrillic (`Қандай қилганизнм хам
+кўрсатиб беринг`, `линкини ташлаб бера оласизми`, `Рахмат`). Answering a Cyrillic writer in Latin reads as
+not listening. The Replier detects the script of the message it is answering and matches it; channel posts
+stay Latin. Orthography normalization applies to Latin output only.
+
 **News must not be translated.** Rewriting foreign coverage into Uzbek produces translationese — the
 News Curator extracts the bare fact and the Writer composes a native reaction from scratch, never seeing the
 English phrasing.

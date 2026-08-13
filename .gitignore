@@ -48,3 +48,6 @@ tmp/
 
 # ---- Tooling artifacts ----
 .gstack/
+
+# Raw Telegram updates contain member names and user ids
+data/corpus/*raw*
