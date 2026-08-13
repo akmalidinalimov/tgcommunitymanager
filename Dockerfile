@@ -18,12 +18,13 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY app ./app
 COPY data/knowledge ./data/knowledge
+COPY data/backup_pool.yaml ./data/backup_pool.yaml
 COPY .claude/skills/humanize-uz ./.claude/skills/humanize-uz
 
 # The voice guide and knowledge base are read at runtime, so a missing copy
 # would degrade output silently rather than crashing. Fail the build instead.
 RUN test -f .claude/skills/humanize-uz/SKILL.md \
- && test -f data/knowledge/models.yaml
+ && test -f data/knowledge/models.yaml \n && test -s data/backup_pool.yaml
 
 RUN useradd -m -u 10001 bot && mkdir -p /app/data && chown -R bot:bot /app
 USER bot

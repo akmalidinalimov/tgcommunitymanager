@@ -25,6 +25,7 @@ for stream in (sys.stdout, sys.stderr):
 
 from app.config import ConfigError, Settings, preflight  # noqa: E402
 from app.runtime import build  # noqa: E402
+from app.spine.backups import seed  # noqa: E402
 
 
 def run_preflight(runtime) -> bool:
@@ -74,6 +75,9 @@ def main() -> int:
     if args.preflight:
         return 0
 
+    # The pool ships with the image, so a fresh volume is never left without a
+    # safety net. Idempotent — restarting does not duplicate anything.
+    seed(runtime.store)
     if runtime.store.backup_count() == 0:
         # Not fatal, but the operator should know the safety net is missing: an
         # unapproved slot will go silent rather than falling back.
