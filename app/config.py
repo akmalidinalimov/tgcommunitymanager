@@ -70,6 +70,10 @@ class Settings:
     discussion_group_id: int
     channel_username: str
     anthropic_api_key: str | None
+    #: Where drafts, escalations and approvals are delivered.
+    admin_chat_id: int | None = None
+    #: Telegram user ids permitted to approve. Anyone else is ignored.
+    approver_ids: tuple[int, ...] = ()
 
     #: Names whose ambient environment value was overridden by .env.
     overridden_env: tuple[str, ...] = ()
@@ -91,6 +95,11 @@ class Settings:
             discussion_group_id=int(_required("TELEGRAM_DISCUSSION_GROUP_ID")),
             channel_username=os.environ.get("TELEGRAM_CHANNEL_USERNAME", "").lstrip("@"),
             anthropic_api_key=os.environ.get("ANTHROPIC_API_KEY") or None,
+            admin_chat_id=int(os.environ["TELEGRAM_ADMIN_CHAT_ID"])
+            if os.environ.get("TELEGRAM_ADMIN_CHAT_ID") else None,
+            approver_ids=tuple(
+                int(x) for x in os.environ.get("TELEGRAM_APPROVER_IDS", "").split(",") if x.strip()
+            ),
         )
 
 

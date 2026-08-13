@@ -21,6 +21,13 @@ from app.text.script import Script, reply_script
 
 class Decision(str, Enum):
     REPLY = "reply"
+    REACT = "react"
+    """Acknowledge with an emoji reaction instead of text.
+
+    Three text replies under three member videos read as a machine however the
+    sentences are varied — the repetition is structural, not a prompting problem.
+    A reaction is what a person actually does, costs nothing, and still tells the
+    member they were seen."""
     SKIP_ALREADY_ANSWERED = "skip_already_answered"
     SKIP_NOT_A_QUESTION = "skip_not_a_question"
     SKIP_NOT_HUMAN = "skip_not_human"
@@ -51,6 +58,10 @@ class ReplyContext:
     @property
     def should_reply(self) -> bool:
         return self.decision is Decision.REPLY
+
+    @property
+    def should_react(self) -> bool:
+        return self.decision is Decision.REACT
 
 
 MEDIA_FIELDS = ("photo", "video", "animation", "document", "video_note", "voice", "sticker")
@@ -135,9 +146,9 @@ def build_context(
         return ctx
 
     if not target.text and target.has_media:
-        # A member posting their own generated result is the north-star event.
-        # Worth acknowledging, and never worth ignoring.
-        ctx.decision = Decision.REPLY
+        # A member posting their own generated result is the north-star event —
+        # never ignore one. But acknowledge it with a reaction, not a sentence.
+        ctx.decision = Decision.REACT
         ctx.decision_reason = "member posted their own generated media"
         return ctx
 

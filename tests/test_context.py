@@ -95,12 +95,14 @@ def test_cyrillic_member_is_answered_in_cyrillic():
     assert c.script is Script.CYRILLIC
 
 
-def test_member_posting_their_own_video_is_worth_acknowledging():
-    """Member-generated artifacts are the north-star metric. An unanswered one
-    should never be ignored."""
+def test_member_posting_their_own_video_gets_a_reaction_not_a_sentence():
+    """Member-generated artifacts are the north-star metric and must never be
+    ignored — but three text replies under three videos read as a machine however
+    the wording is varied. A reaction is what a person actually does."""
     thread = [ROOT_MSG, msg(50, 8454060495, "Euro work", reply_to=ROOT, media=True)]
     c = ctx_for(50, thread)
-    assert c.should_reply
+    assert c.should_react
+    assert not c.should_reply
     assert "generated media" in c.decision_reason
 
 
