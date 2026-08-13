@@ -197,6 +197,26 @@ def draft_reply(
     )
 
 
+#: Required by EU AI Act Art. 50, applicable since 2 August 2026, for a
+#: Sweden-based operator. One of three disclosure layers — the other two are the
+#: bot's display name and its profile description. This is the one a member sees
+#: if they scroll straight into a thread without ever viewing the bot's profile.
+AI_DISCLOSURE = "🤖 AI yordamchi"
+
+
+def with_disclosure(text: str, *, first_in_thread: bool) -> str:
+    """Append the AI marker to the bot's first reply in a thread.
+
+    Only the first: repeating it under every reply would be noise, and the
+    obligation is that the member is told, not that they are told repeatedly.
+    """
+    if not first_in_thread or not text.strip():
+        return text
+    if AI_DISCLOSURE in text:
+        return text
+    return f"{text}\n\n{AI_DISCLOSURE}"
+
+
 def to_admin_card(ctx: ReplyContext, draft: Draft) -> str:
     """Render the shadow-mode card the founders see before anyone else does."""
     header = "🟡 <b>Javob tayyor</b>" if draft.is_reply else "🔴 <b>Sizning javobingiz kerak</b>"
