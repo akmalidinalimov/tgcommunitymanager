@@ -39,6 +39,11 @@ the VPS (the connector is session-bound). The VPS bot only publishes assets alre
 
 ## Hard rules
 
+- **Never touch `smmuzbot` on VM 1411263.** It is the founders' live SMM bot and is explicitly off limits —
+  do not stop, restart, redeploy, inspect its config, or modify it. Same for `freelanceai`. Deploys must
+  always name the `tgcommunitymanager` project explicitly, because the Hostinger docker endpoint replaces
+  the project it is given.
+
 - **No LLM decides whether to publish.** The spine is deterministic; agents only write, judge and analyze.
 - **No invented numbers.** Every figure must resolve to a claims-ledger row, enforced by schema check.
 - **No student or testimonial content** — founder decision, and it removes the main legal exposure.
