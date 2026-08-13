@@ -260,9 +260,11 @@ def test_bot_tokens_are_redacted_from_anything_logged():
     """The token lives in the Telegram URL path, so any library or traceback
     echoing a URL leaks it. This happened once via httpx INFO logging."""
     from app.telegram.api import redact
+    # Synthetic, never a real token — a credential in a fixture is a credential
+    # in git history forever.
     leaked = "POST https://api.telegram.org/bot1234567890:FAKEfakeFAKEfakeFAKEfakeFAKEfake123/getMe"
     cleaned = redact(leaked)
-    assert "AAGuo71H" not in cleaned
+    assert "FAKEfake" not in cleaned
     assert "bot<REDACTED>" in cleaned
 
 
