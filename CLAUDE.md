@@ -95,25 +95,28 @@ python -m pytest tests/          # 30 tests, no credentials or network needed
 
 ## Current state
 
-Branch `docs/design-spec`. **55 tests pass** (`python -m pytest tests/`) with no credentials or network.
+**Live on Hostinger VM 1411263** as the `tgcommunitymanager` Compose project, alongside `freelanceai` and
+the untouchable `smmuzbot`. All ten preflight checks green. Deploy with `python deploy/deploy.py` — and
+**wait for the CI build to go green first**, or it pulls the previous image.
 
-**M0's hardest criterion is proven live.** Post [606](https://t.me/aicreatorsuz/606) published to the real
-channel, the auto-forward was caught in 2.7s, and the seed comment landed inside thread root 3. Channel-side
-id 606 against group-side 3 is the concrete proof that the two id spaces are unrelated.
+Working: publisher + seeder (proven on post [606](https://t.me/aicreatorsuz/606)) · comment classifier and
+thread resolver · Replier with grounding gate, script mirroring and react-instead-of-reply · scheduler with
+missed-run recovery · content state machine · SQLite store · day-ahead approval cards · Writer + Voice
+Critic + mechanical lint + claims ledger · media library with 9 tagged assets · runtime loop · deployment.
 
-Built: spec · milestones · research base · `humanize-uz` v1 · comment classifier + thread resolver ·
-config + preflight (incl. bot-identity guard) · publisher + seeder · Uzbek apostrophe normalizer ·
-`scripts/smoke_publish.py`.
+**~240 tests**, no credentials or network needed.
 
-**The founders have approved the Uzbek voice output** — the published post and seed comment were accepted
-as-is, so `humanize-uz` v1 is validated in production and no native-speaker review is pending.
+Content standard: posts target 600 chars, hard cap 900 (Telegram truncates captions at 1024). Media is
+16:9, stills 2K, video 720p. Every post ships with a visual when one genuinely matches; a mismatch is worse
+than none, so it falls back to text.
 
-**Next:** M1 — the content state machine, the scheduler at 10:00/21:00 Asia/Tashkent with missed-run
-recovery, and the backup pool. Then the Writer / Voice Critic / Claims Guard agents, then deployment.
+Not started: M2 Mini App batch review · most of M4 (batch generation, variant contact sheet) · M5 analyst
+and the ~87-post shot-vocabulary content spine.
 
-Still needed from the founders: their two `telegram_id`s for the Mini App allowlist, and the **Story Bank**
-(founder origin story, the Sweden conference, own client work, portfolio, boundaries) which gates
-behind-the-scenes content only.
+Still needed from the founders: the **Story Bank** (origin story, the Sweden conference, own client work,
+portfolio, boundaries), which gates behind-the-scenes content only — the Planner substitutes and flags the
+gap rather than inventing anything.
 
-Watch post 606 for real member comments — actual Uzbek from members is far better material for building
-Triage and the Replier than anything invented.
+Next visual worth shooting: a **before/after pair** for technique posts — a garbled Uzbek word beside a
+clean plate with type overlaid. The café assets are evidence for why-content and commercial-craft, but only
+thematic for technique.
