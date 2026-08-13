@@ -1,0 +1,34 @@
+# The image copies data/ wholesale rather than cherry-picking files: naming each
+# one individually is how data/media_library.yaml came to be missing, so the bot
+# had no assets and every post silently went out as text. Exclusions live here.
+
+# Secrets — never in a layer, even a discarded one.
+.env
+.env.*
+.mcp.json
+*.pem
+*.key
+
+# Mutable state. The volume provides /app/state at runtime.
+state/
+data/bot.db*
+data/*.log
+
+# Generated media and raw corpora: megabytes, and the corpus carries member
+# names and user ids.
+data/media/
+data/corpus/
+
+# Not needed at runtime.
+.git/
+.github/
+.gstack/
+tests/
+scripts/
+deploy/
+docs/
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/

@@ -137,6 +137,18 @@ def check_resources(root: Path | None = None) -> list[tuple[str, bool, str]]:
         f"EMPTY OR MISSING at {knowledge} — the grounding gate would be guarding nothing",
     ))
 
+    library = root / "data" / "media_library.yaml"
+    assets = 0
+    if library.is_file():
+        import yaml
+
+        assets = len((yaml.safe_load(library.read_text(encoding="utf-8")) or {}).get("assets") or [])
+    checks.append((
+        "media library has assets", assets > 0,
+        f"{assets} assets" if assets else
+        f"EMPTY OR MISSING at {library} — every post would go out as text",
+    ))
+
     pool = root / "data" / "backup_pool.yaml"
     posts = 0
     if pool.is_file():
