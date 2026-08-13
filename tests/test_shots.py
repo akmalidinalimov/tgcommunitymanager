@@ -86,3 +86,24 @@ def test_every_banned_term_has_a_word_boundary_match():
     """Guards against a substring rule silently mangling legitimate words."""
     assert clean("a 4k monitor on the desk") != "a 4k monitor on the desk"
     assert "darkroom" in clean("a darkroom with red light")
+
+
+# --- output format, fixed by founder direction 2026-08-14 -------------------
+
+def test_frames_default_to_16_9():
+    """Consistent across the channel rather than per-request."""
+    from app.media.shots import DEFAULT_ASPECT
+    assert DEFAULT_ASPECT == "16:9"
+    assert "16:9" in cafe().image_prompt()
+
+
+def test_negative_space_defaults_to_a_side_third():
+    """A 16:9 frame has horizontal room and almost no vertical headroom, so
+    reserving the top third would leave type nowhere usable to sit."""
+    assert "left third" in cafe().image_prompt()
+
+
+def test_resolutions_are_pinned():
+    from app.media.shots import IMAGE_RESOLUTION, VIDEO_RESOLUTION
+    assert IMAGE_RESOLUTION == "2k"
+    assert VIDEO_RESOLUTION == "720p"

@@ -60,6 +60,16 @@ LENS_FOR_SHOT = {
     "extreme wide shot": ("16mm", "24mm"),
 }
 
+#: Founder direction, 2026-08-14. Fixed so output is consistent across the
+#: channel rather than depending on who asked for what.
+DEFAULT_ASPECT = "16:9"
+IMAGE_RESOLUTION = "2k"
+VIDEO_RESOLUTION = "720p"
+
+#: In a 16:9 frame the usable clear area for type is a side third, not the top:
+#: a wide frame has horizontal room and very little vertical headroom.
+DEFAULT_NEGATIVE_SPACE = "left third"
+
 #: Small physical wrongnesses are what separate a photograph from a render.
 IMPERFECTIONS = (
     "slight motion blur on the moving hand",
@@ -92,8 +102,8 @@ class Shot:
     light: str = "soft window light from camera-left"
     film: str = "Kodak Portra 400"
     imperfection: str = ""
-    negative_space: str = ""
-    aspect: str = "4:5"
+    negative_space: str = DEFAULT_NEGATIVE_SPACE
+    aspect: str = DEFAULT_ASPECT
     camera_move: str = ""
     """Video only. One move, not three."""
     beats: tuple[str, ...] = field(default=())
