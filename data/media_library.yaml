@@ -11,6 +11,53 @@
 # URL at send time, so an expired asset means a post goes out as text instead.
 # Mirror anything relied on long-term.
 assets:
+- id: cafe-coffee-lowangle-a
+  kind: photo
+  url: https://d8j0ntlcm91z4.cloudfront.net/user_2zJUonmh6cW6tDKlBEl4CIohbsI/hf_20260813_214010_0b23ce57-8be1-4925-a09e-1f78f71734e9.png
+  model: gpt_image_2
+  duration: null
+  shows:
+  - cafe coffee cup
+  - low angle close-up
+  - morning window light
+  - blurred napkin and menu card foreground
+  - upturned chairs at opening time
+  - clear upper-left space for text
+  good_for:
+  - why_content
+  - commercial_craft
+  expires: true
+- id: cafe-coffee-lowangle-b
+  kind: photo
+  url: https://d8j0ntlcm91z4.cloudfront.net/user_2zJUonmh6cW6tDKlBEl4CIohbsI/hf_20260813_214010_e16ab17b-0f37-4c7f-9067-d39c9def2bcd.png
+  model: gpt_image_2
+  duration: null
+  shows:
+  - cafe coffee cup
+  - low angle close-up
+  - brass grinder and stacked saucers
+  - blurred napkin and card foreground
+  - clear upper-left space for text
+  good_for:
+  - why_content
+  - commercial_craft
+  expires: true
+- id: cafe-pushin-5s
+  kind: video
+  url: https://d8j0ntlcm91z4.cloudfront.net/user_2zJUonmh6cW6tDKlBEl4CIohbsI/hf_20260813_214131_8ced4466-9539-4258-92a2-f631eaf73627.mp4
+  model: seedance_2_5
+  duration: 5
+  shows:
+  - slow push-in on a cafe coffee cup
+  - steam rising
+  - forearm through foreground
+  - low angle
+  - morning window light
+  good_for:
+  - why_content
+  - commercial_craft
+  - technique
+  expires: true
 - id: uzbek-room-15s-20260808-1720
   url: https://d8j0ntlcm91z4.cloudfront.net/user_2zJUonmh6cW6tDKlBEl4CIohbsI/hf_20260808_152055_5a58e8d2-83f6-4a14-ada0-13fdf41af6e4.mp4
   kind: video

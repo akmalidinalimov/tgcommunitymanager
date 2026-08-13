@@ -352,7 +352,32 @@ def test_an_expired_media_url_does_not_cost_the_slot(tmp_path):
     assert rt.api.sent[0]["text"] == "post matni"
 
 
-def test_a_post_with_no_matching_asset_still_publishes(rt):
-    approved(rt.store, "2026-08-10_10:00")
-    rt.publish_slot(Slot(datetime(2026, 8, 10, 10, 0, tzinfo=TASHKENT)))
+def test_a_post_with_no_matching_asset_still_publishes(rt, monkeypatch):
+    """A slot is never lost for want of a visual. Pinned to an empty library so
+    the assertion does not silently invert when a matching asset is added — an
+    earlier version broke exactly that way."""
+    monkeypatch.setattr("app.runtime.pick_asset", lambda kind, used=None: None)
+    approved(rt.store, "2026-08-16_21:00")
+    rt.publish_slot(Slot(datetime(2026, 8, 16, 21, 0, tzinfo=TASHKENT)))
     assert rt.api.sent[0]["text"] == "post matni"
+
+
+def test_a_post_with_a_matching_asset_ships_as_a_caption(tmp_path):
+    """Founder direction: every post carries a visual. The text becomes the
+    caption rather than a separate message."""
+    from app.media.library import Asset
+
+    api = MediaAPI()
+    rt = Runtime(settings=SETTINGS, store=Store(tmp_path / "v.db"), api=api, bot_id=BOT)
+    asset = Asset(id="clip", url="https://cdn/x.mp4", kind="video",
+                  good_for=("commercial_craft",), duration=5)
+    import app.runtime as runtime_mod
+    original = runtime_mod.pick_asset
+    runtime_mod.pick_asset = lambda kind, used=None: asset
+    try:
+        approved(rt.store, "2026-08-10_21:00")
+        rt.publish_slot(Slot(datetime(2026, 8, 10, 21, 0, tzinfo=TASHKENT)))
+    finally:
+        runtime_mod.pick_asset = original
+    assert api.videos and api.videos[0]["caption"] == "post matni"
+    assert api.sent == [], "text was sent separately instead of as a caption"
