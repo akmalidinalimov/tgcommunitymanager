@@ -82,6 +82,31 @@ baseline is zero and bot-seeded first comments are the whole mechanism.
 python -m pytest tests/          # 30 tests, no credentials or network needed
 ```
 
+## Spine traps that already bit us — all one bug, four times
+
+Every one of these was **state committed before the side effect that gives it meaning**, guarded by a
+check written as a negation. A slot then sits in a state nothing moves it out of, and the backup pool
+covers silently, so the failure is invisible.
+
+- **The approval card was sent after `save_content`.** A send that failed left the slot in
+  `PENDING_APPROVAL` forever, because `prepare_upcoming` skipped anything "not REJECTED". Delivery is
+  now recorded only on success, and any pending slot with no recorded delivery is resent.
+- **`card()` interpolated model-written text into a `parse_mode="HTML"` message.** One `<` or `&`
+  and Telegram rejects the card permanently, for that slot. Escape anything the Writer produced.
+- **`request_revision` lands content in `DRAFTING`, which is not `REJECTED`.** Pressing
+  ✏️ Qayta yozish therefore deleted the slot instead of revising it. Guards over `State` must be
+  written **positively** (`NEEDS_DRAFTING = {...}`), never as `is not X` — a state added later falls
+  through a negation silently.
+- **Seeding the backup pool was additive only.** A post pulled from `backup_pool.yaml` for being
+  factually wrong stayed in the live database and, at `times_used=0`, was the *next* post LRU would
+  publish unattended. The file is only the source of truth because seeding now retires missing rows.
+
+**Diagnostics.** `report_state()` dumps `last_seen`, per-slot content states and `backup_pool.times_used`
+at every boot — the last of those is the only thing that distinguishes "fell back to the pool" from
+"never reached `publish_slot`". Container logs do not survive a redeploy, so anything not printed at
+boot is unrecoverable. In the admin chat: **`/pending`** resends every waiting card, **`/holat`** reports
+next slot, queue depth and pool depth.
+
 ## Deployment traps that already bit us
 
 - **A volume mounted over a path SHADOWS what the image baked there.** `tgcm-data` was mounted at
