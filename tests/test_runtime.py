@@ -192,7 +192,10 @@ def test_every_press_is_answered_even_when_refused(rt):
 # --- publishing -------------------------------------------------------------
 
 
-def test_unapproved_slot_publishes_a_backup_not_the_draft(rt):
+def test_unapproved_slot_publishes_a_backup_not_the_draft(rt, monkeypatch):
+    # Pinned to no asset: this asserts publish behaviour, not media selection,
+    # and it silently inverted once when a matching asset was added.
+    monkeypatch.setattr("app.runtime.pick_asset", lambda kind, used=None: None)
     rt.store.add_backup("evergreen post")
     c = pending_content(rt.store, "2026-08-14_10:00")
     rt.publish_slot(Slot(datetime(2026, 8, 14, 10, 0, tzinfo=TASHKENT)))
@@ -200,7 +203,8 @@ def test_unapproved_slot_publishes_a_backup_not_the_draft(rt):
     assert rt.store.get_content(c.slot_key).state is State.EXPIRED
 
 
-def test_approved_slot_publishes_the_approved_text(rt):
+def test_approved_slot_publishes_the_approved_text(rt, monkeypatch):
+    monkeypatch.setattr("app.runtime.pick_asset", lambda kind, used=None: None)
     c = pending_content(rt.store, "2026-08-14_10:00")
     c.approve(ADMIN, (ADMIN,), at=datetime(2026, 8, 13, 20, 0, tzinfo=TASHKENT))
     c.schedule()

@@ -11,6 +11,50 @@
 # URL at send time, so an expired asset means a post goes out as text instead.
 # Mirror anything relied on long-term.
 assets:
+- id: ai-news-banner
+  kind: photo
+  aspect: '16:9'
+  url: https://d8j0ntlcm91z4.cloudfront.net/user_2zJUonmh6cW6tDKlBEl4CIohbsI/hf_20260814_062958_a4093db5-a19e-4c05-aeea-e204e236189d.png
+  model: gpt_image_2
+  duration: null
+  reusable: true
+  shows:
+  - charcoal and amber banner
+  - the words AI NEWS
+  - thin amber rule
+  good_for:
+  - news
+  - poll
+  - recap
+  expires: true
+- id: honey-compare-gpt
+  kind: photo
+  aspect: '16:9'
+  url: https://d8j0ntlcm91z4.cloudfront.net/user_2zJUonmh6cW6tDKlBEl4CIohbsI/hf_20260814_062937_df45a81b-7416-476f-a946-f679bb3bd554.png
+  model: gpt_image_2
+  duration: null
+  shows:
+  - honey jar at a Tashkent bazaar
+  - backlit haze
+  - textile foreground
+  - blurred figures
+  good_for:
+  - comparison
+  expires: true
+- id: honey-compare-nano
+  kind: photo
+  aspect: '16:9'
+  url: https://d8j0ntlcm91z4.cloudfront.net/user_2zJUonmh6cW6tDKlBEl4CIohbsI/hf_20260814_062946_2fca8bad-6982-4877-9c30-fb3daec09897.png
+  model: nano_banana_pro
+  duration: null
+  shows:
+  - honey jar at a Tashkent bazaar
+  - shopper shoulder foreground
+  - honey running off the dipper
+  - comb crumb
+  good_for:
+  - comparison
+  expires: true
 - id: cafe-coffee-169-a
   kind: photo
   aspect: '16:9'

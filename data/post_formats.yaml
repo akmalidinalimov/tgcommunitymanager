@@ -1,0 +1,128 @@
+# What each post kind must LOOK like, and what it must ASK.
+#
+# Founder direction, 2026-08-14: every post carries a visual, and the visual
+# should carry the value rather than decorate the text. A generated image plus
+# the exact prompt that made it is itself worth commenting on. Two models run on
+# one prompt is an argument people take sides in. A wall of text is neither.
+#
+# `cta` is not decoration either. The research is blunt about it: questions that
+# can be answered in one word get answered, questions that require effort get
+# scrolled past, and one small prior commitment raises later compliance sharply
+# (76% vs 17%, Freedman & Fraser 1966). So every CTA here asks for something
+# cheap — a word, a side, a number — not an essay.
+
+formats:
+  news:
+    visual: template
+    template_id: ai-news-banner
+    why: >
+      A recurring branded banner makes the news slot recognisable at a glance in
+      a feed. The reader knows what kind of post this is before reading a word.
+    cta_style: pick_a_side
+    cta_examples:
+      - "Sizningcha, bu bizda qachon ishlaydi — hozirmi yoki bir yildan keyinmi?"
+      - "Qaysi biznesga birinchi kerak boʻladi? 👇"
+
+  technique:
+    visual: generated_with_prompt
+    why: >
+      Show the result AND publish the exact prompt that produced it. The prompt
+      is the value — it is copyable, testable tonight, and it proves the claim
+      instead of asserting it. This is the format that produces member artifacts.
+    cta_style: do_it_tonight
+    cta_examples:
+      - "Shu promptni bugun sinab koʻring — natijangizni kommentga tashlang 👇"
+      - "Qaysi qismi ishlamadi? Yozing, birga koʻramiz"
+
+  comparison:
+    visual: side_by_side
+    why: >
+      One prompt, two models, both outputs shown. The reader can see the
+      difference before reading the explanation, and disagreeing is easy — which
+      is exactly what fills a comment section.
+    cta_style: vote
+    cta_examples:
+      - "Qaysi biri yaxshi chiqdi — 1 yoki 2? Bitta raqam yozing 👇"
+      - "Sizningcha qaysinisi mijozga topshirsa boʻladi?"
+
+  commercial_craft:
+    visual: artifact_plus_brief
+    why: >
+      Show the deliverable and the brief behind it. The brief is the part
+      businesses pay for, and it is the part nobody else publishes.
+    cta_style: pick_a_side
+    cta_examples:
+      - "Shu kadr qaysi biznesga toʻgʻri keladi deb oʻylaysiz? 👇"
+
+  why_content:
+    visual: artifact_plus_brief
+    cta_style: pick_a_side
+    cta_examples:
+      - "Sizga qaysi biri kerak — chiroyli rasm yoki sotadigan rasm? 👇"
+
+  poll:
+    visual: template
+    template_id: ai-news-banner
+    cta_style: vote
+    cta_examples:
+      - "Ovoz bering 👇"
+
+  challenge:
+    visual: generated_with_prompt
+    why: "The example they are being asked to beat, plus the prompt to start from."
+    cta_style: do_it_tonight
+    cta_examples:
+      - "Bugun bittasini qiling va kommentga tashlang. Ertaga eng zoʻrini koʻrsataman"
+
+  recognition:
+    visual: member_artifact
+    why: "A member's own work, with their permission. Nothing is more motivating."
+    cta_style: do_it_tonight
+
+  mission:
+    visual: atmosphere
+    why: >
+      The one kind where a visual may carry mood rather than information. Still
+      never stock-feeling — it must look like the work being described.
+    cta_style: one_word
+    cta_examples:
+      - "Boshlaganingizda eng qiyini nima boʻlgan? Bitta soʻz bilan yozing 👇"
+
+  behind_scenes:
+    visual: founder_footage
+    why: "Real footage from the founders. Requires the Story Bank."
+    cta_style: one_word
+
+  recap:
+    visual: template
+    template_id: ai-news-banner
+    cta_style: pick_a_side
+
+# --- CTA styles, and what makes each one work ------------------------------
+cta_styles:
+  one_word:
+    ask: "Something answerable in a single word."
+    why: "The lowest possible bar. In a comment section with no history, the first comment is the hardest one to get."
+  vote:
+    ask: "A number or a choice between two named options."
+    why: "Choosing is easier than composing, and a vote is a public commitment that makes the next comment likelier."
+  pick_a_side:
+    ask: "An opinion where disagreement is reasonable."
+    why: "People comment to disagree far more readily than to agree."
+  do_it_tonight:
+    ask: "Make the thing and post the result."
+    why: >
+      The north-star metric is member-generated artifacts in the discussion
+      group. This is the only CTA that produces them directly, and mastery
+      experience is the strongest driver of self-belief there is.
+
+# --- Hard rules ------------------------------------------------------------
+rules:
+  - Every post ships with a visual. No exceptions, no text-only posts.
+  - Every post ends with exactly ONE call to action. Two asks means neither happens.
+  - The CTA must be answerable without leaving Telegram and without doing research.
+  - Never ask people to "share with friends" or "subscribe" — it asks them to give
+    rather than to participate, and it converts far worse than a real question.
+  - When a technique post publishes, the prompt goes in the caption or the first
+    comment. Withholding it to drive engagement is the bait pattern this channel
+    does not use.

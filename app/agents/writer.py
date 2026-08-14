@@ -24,6 +24,7 @@ from app.text.orthography import normalize_apostrophes
 MODEL = "claude-opus-5"
 ROOT = Path(__file__).resolve().parent.parent.parent
 KNOWLEDGE_PATH = ROOT / "data" / "knowledge" / "models.yaml"
+FORMATS_PATH = ROOT / "data" / "post_formats.yaml"
 VOICE_PATH = ROOT / ".claude" / "skills" / "humanize-uz" / "SKILL.md"
 
 #: The weekly grid. Each kind carries the brief that makes it that kind of post.
@@ -201,6 +202,9 @@ founder Shahlo's first-person voice.
 === KNOWLEDGE BASE — the only source for model facts ===
 {_read(KNOWLEDGE_PATH)}
 
+=== POST FORMATS — what this kind must look like and what it must ask ===
+{_read(FORMATS_PATH)}
+
 === THIS POST ===
 Kind: {kind}
 Brief: {brief}
@@ -224,6 +228,13 @@ Brief: {brief}
   "you can earn X".
 - Lead with the outcome, then the artifact, then the tool. Never open on a tool name.
 - End on what the reader gets.
+- EXACTLY ONE call to action, as the last line, in the style this kind requires.
+  It must be answerable in one word, one number or one opinion, without leaving
+  Telegram and without research. Never "share with friends" or "subscribe" —
+  those ask people to give rather than to participate.
+- Assume a visual sits above your text. Do not describe the image; write what the
+  image cannot say. If the post teaches a prompt, say the prompt is in the first
+  comment rather than withholding it for engagement.
 - LENGTH: aim for about 600 characters. Hard ceiling 900. Every post ships as a
   caption under a video or image, and Telegram cuts captions off at 1024 — a
   longer post cannot be sent in its intended form at all. Beyond that, nobody
