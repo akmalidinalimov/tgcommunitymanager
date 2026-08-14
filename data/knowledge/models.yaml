@@ -116,7 +116,10 @@ models:
     resolution: ["1k", "2k", "4k"]
     quality: [low, medium, high]
     good_for: "text rendering, typography, editing, prompt adherence"
-    caveat: "Still never generate Uzbek text inside an image — see rules.never_in_image_text."
+    note: >
+      Renders short Uzbek display text correctly, okina included — tested
+      2026-08-14. See rules.in_image_uzbek_text before repeating the old claim
+      that AI cannot write Uzbek.
 
   soul_2:
     name: "Higgsfield Soul 2.0"
@@ -210,9 +213,28 @@ external_benchmarks:
 
 # --- Hard rules the Replier applies before sending anything -----------------
 rules:
-  never_in_image_text:
-    rule: "Never generate Uzbek text inside an image. Generate a clean plate, overlay type in editing."
-    why: "Generative models garble Latin diacritics and Cyrillic. Teach it as a limitation plus workaround."
+  in_image_uzbek_text:
+    rule: >
+      Do NOT claim that AI cannot write Uzbek. Tested 2026-08-14 on GPT Image 2:
+      short bold display text rendered correctly, INCLUDING the okina —
+      "QOʻSHIMCHA CHEGIRMA", "TOʻYGA TAYYORGARLIK", "AI YANGILIKLARI",
+      "CHEGIRMA BOSHLANDI" all came out clean.
+    source: tested
+    tested_on: gpt_image_2
+    still_unknown:
+      - long paragraphs rather than short display lines
+      - small type
+      - Cyrillic
+      - other models (Soul, Nano Banana, Seedance, Kling)
+    practice: >
+      Overlaying type is still the safer default for client work — it keeps the
+      brand font, allows edits without regenerating, and is not exposed to any of
+      the untested cases. But it is a workflow preference now, not a limitation,
+      and the channel must not teach it as one.
+    history: >
+      The original rule said models garble Uzbek diacritics. It came from research
+      predating this model and was never verified. It was baked into the voice
+      guide, the shot grammar and an approved backup post before anyone tested it.
   no_unsupported_claims:
     rule: "If a model fact is not in this file, do not state it. Escalate to the founders."
   no_prices_from_memory:

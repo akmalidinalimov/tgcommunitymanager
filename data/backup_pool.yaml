@@ -3,33 +3,6 @@
 # Every one must fit Telegram's 1024-char caption cap: these ship as captions
 # under a video, and a post over the cap cannot be sent in that form at all.
 posts:
-- id: plate-and-overlay
-  kind: technique
-  text: 'Rasm zoʻr chiqadi, lekin ustidagi yozuv «Chgirmaa» boʻlib turadi.
-
-
-    Bu promptingiz aybi emas. Model harfni harf deb emas, shakl deb koʻradi. Shunchun oʻzbekcha yozuvda
-    apostrof, ʻoʻ va ʻgʻ birinchi boʻlib buziladi.
-
-
-    Yechimi oddiy:
-
-
-    📌 promptda yozuv soʻramang — «clean background, empty space at the top for text» deb yozing;
-
-
-    ✅ rasmni boʻsh joyi bilan chiqarib oling;
-
-
-    ✍️ yozuvni Canvaʼda yoki montaj dasturida oʻzingiz yozing.
-
-
-    Shrift ham, joylashuvi ham sizda qoladi — brendingizga mos tushadi.
-
-
-    Endi buzuq harflarni tuzatmaysiz — tayyor rasmni ochib, yozuvni oʻzingiz yozib qoʻyasiz.
-
-    '
 - id: what-business-buys
   kind: why_content
   text: 'Biznes sizdan chiroyli rasm sotib olmaydi.
