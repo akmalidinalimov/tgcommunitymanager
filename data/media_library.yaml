@@ -43,6 +43,40 @@ assets:
   - poll
   - recap
   expires: true
+- id: potter-portrait-nano
+  kind: photo
+  aspect: '16:9'
+  url: https://d8j0ntlcm91z4.cloudfront.net/user_2zJUonmh6cW6tDKlBEl4CIohbsI/hf_20260814_095226_2073ba79-cc66-43e8-b4db-0e7c62ef167d.png
+  model: nano_banana_pro
+  duration: null
+  shows:
+  - Rishtan ceramic painter
+  - documentary brightness
+  - deep wrinkles and aged hands
+  - blue glaze on the finger
+  - full workshop rendered
+  good_for:
+  - comparison
+  - mission
+  - commercial_craft
+  expires: true
+- id: potter-portrait-gpt
+  kind: photo
+  aspect: '16:9'
+  url: https://d8j0ntlcm91z4.cloudfront.net/user_2zJUonmh6cW6tDKlBEl4CIohbsI/hf_20260814_095213_e2a0cc9b-0770-4129-871e-e767a3750dfd.png
+  model: gpt_image_2
+  duration: null
+  shows:
+  - Rishtan ceramic painter
+  - deep shadow, subject out of black
+  - ikat robe
+  - softer skin rendering
+  - clear dark left third
+  good_for:
+  - comparison
+  - mission
+  - commercial_craft
+  expires: true
 - id: tandyr-baker
   kind: photo
   aspect: '16:9'
