@@ -3,6 +3,33 @@
 # Every one must fit Telegram's 1024-char caption cap: these ship as captions
 # under a video, and a post over the cap cannot be sent in that form at all.
 posts:
+- id: overlay-your-own-type
+  kind: technique
+  text: 'Rasmdagi yozuvni modelga yozdirmang. Oʻzingiz qoʻying.
+
+
+    Sabab «model oʻzbekchani buzadi» emas — GPT Image 2 oʻ va gʻ ni toʻgʻri chiqaradi.
+
+
+    Sabab amaliy:
+
+
+    📌 Shrift sizniki boʻlib qoladi. Brend harfi har bir kadrda bir xil turadi.
+
+
+    ✅ Mijoz «narxni oʻzgartiring» desa — yozuvni tahrirlaysiz, tamom. Rasm ichida boʻlsa, hammasini qaytadan
+    chiqarasiz.
+
+
+    ❗️Bitta kampaniyada 10 ta kadr boʻlsa, bu farq bir kunga teng.
+
+
+    Shuning uchun rasmni boʻsh joyi bilan chiqaring: «empty space on the left for text».
+
+
+    Yozuvni qaysi dasturda qoʻyasiz — Canva, Figma yoki telefonda? 👇
+
+    '
 - id: what-business-buys
   kind: why_content
   text: 'Biznes sizdan chiroyli rasm sotib olmaydi.
