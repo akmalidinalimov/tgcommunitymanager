@@ -10,7 +10,7 @@ WORKDIR /app
 # CA certificates matter here: the bot talks to api.telegram.org and
 # api.anthropic.com, and truststore reads the system store.
 RUN apt-get update \
- && apt-get install -y --no-install-recommends ca-certificates tzdata \
+ && apt-get install -y --no-install-recommends ca-certificates tzdata fonts-dejavu-core \
  && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .

@@ -160,6 +160,15 @@ def check_resources(root: Path | None = None) -> list[tuple[str, bool, str]]:
         f"{posts} posts" if posts >= 3 else
         f"only {posts} at {pool} — an unapproved slot would publish nothing",
     ))
+
+    # Proven, not assumed. Uzbek oʻ/gʻ use U+02BB, and a font without that glyph
+    # draws a blank or a box — invisible until it is in a headline in front of
+    # 3,326 people. Arial Narrow lacks it; Arial Nova has it. The container gets
+    # DejaVu from apt, and this asserts the container actually got it.
+    from app.media.cards import check_font
+
+    font_ok, font_detail = check_font()
+    checks.append(("card font renders Uzbek", font_ok, font_detail))
     return checks
 
 

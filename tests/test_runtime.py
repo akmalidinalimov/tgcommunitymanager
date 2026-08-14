@@ -40,6 +40,13 @@ class FakeAPI:
         self.sent.append({"chat_id": chat_id, "text": text, **kw})
         return {"message_id": self._next_id}
 
+    def upload_photo(self, chat_id, image, **kw):
+        self._next_id += 1
+        self.sent.append({"chat_id": chat_id, "media": "<rendered card>",
+                          "media_kind": "card", "card_bytes": len(image),
+                          "text": kw.get("caption") or "", **kw})
+        return {"message_id": self._next_id}
+
     def send_photo(self, chat_id, photo, **kw):
         return self._media(chat_id, photo, "photo", **kw)
 

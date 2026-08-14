@@ -10,6 +10,7 @@ On a Linux VPS the same code path is correct and simply uses the system store.
 
 from __future__ import annotations
 
+import json
 import re
 from typing import Any
 
@@ -61,7 +62,9 @@ class BotAPI:
     def call(self, method: str, **params: Any) -> Any:
         """Invoke a Bot API method, raising TelegramError on a non-ok response."""
         payload = {k: v for k, v in params.items() if v is not None}
-        response = self._client.post(self._base + method, json=payload)
+        return self._result(method, self._client.post(self._base + method, json=payload))
+
+    def _result(self, method: str, response: Any) -> Any:
         try:
             body = response.json()
         except Exception:  # pragma: no cover - malformed response
@@ -76,6 +79,32 @@ class BotAPI:
                 retry_after=params_block.get("retry_after"),
             )
         return body.get("result")
+
+    def upload_photo(
+        self, chat_id: int | str, image: bytes, *, filename: str = "card.png",
+        caption: str | None = None, parse_mode: str | None = None,
+        reply_markup: dict | None = None,
+    ) -> dict:
+        """Send image bytes as multipart, for visuals rendered here rather than
+        fetched from a URL.
+
+        Every other send hands Telegram a link and lets it fetch. A card drawn on
+        this machine has no URL, so it goes as a file upload — which means form
+        fields, not JSON, and ``reply_markup`` serialised by hand.
+        """
+        fields: dict[str, str] = {"chat_id": str(chat_id)}
+        if caption:
+            fields["caption"] = caption
+        if parse_mode:
+            fields["parse_mode"] = parse_mode
+        if reply_markup:
+            fields["reply_markup"] = json.dumps(reply_markup)
+        response = self._client.post(
+            self._base + "sendPhoto",
+            data=fields,
+            files={"photo": (filename, image, "image/png")},
+        )
+        return self._result("sendPhoto", response)
 
     # --- the handful of methods this project actually uses -------------------
 
