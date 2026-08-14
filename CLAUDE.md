@@ -121,15 +121,22 @@ next slot, queue depth and pool depth.
 ## Current state
 
 **Live on Hostinger VM 1411263** as the `tgcommunitymanager` Compose project, alongside `freelanceai` and
-the untouchable `smmuzbot`. All ten preflight checks green. Deploy with `python deploy/deploy.py` — and
+the untouchable `smmuzbot`. All eleven preflight checks green. Deploy with `python deploy/deploy.py` — and
 **wait for the CI build to go green first**, or it pulls the previous image.
 
 Working: publisher + seeder (proven on post [606](https://t.me/aicreatorsuz/606)) · comment classifier and
 thread resolver · Replier with grounding gate, script mirroring and react-instead-of-reply · scheduler with
 missed-run recovery · content state machine · SQLite store · day-ahead approval cards · Writer + Voice
-Critic + mechanical lint + claims ledger · media library with 9 tagged assets · runtime loop · deployment.
+Critic + mechanical lint + claims ledger · media library with 15 tagged assets · runtime loop · deployment.
 
-**~240 tests**, no credentials or network needed.
+**~320 tests**, no credentials or network needed.
+
+Visuals: a library asset when one genuinely matches, otherwise a **card rendered on the VPS**
+(`app/media/cards.py`, Pillow). Cards exist because `challenge`, `recognition` and `behind_scenes`
+have no photograph that fits and were publishing bare text. The font is asserted at boot — Uzbek
+`oʻ`/`gʻ` are U+02BB and plenty of fonts have no glyph for it (Arial Narrow does not, DejaVu does),
+so a missing glyph is an invisible blank in a headline. The visual is bound at DRAFT time and the
+approval card is sent as that visual with the post as its caption, so what is approved is what ships.
 
 Content standard: posts target 600 chars, hard cap 900 (Telegram truncates captions at 1024). Media is
 16:9, stills 2K, video 720p. Every post ships with a visual when one genuinely matches; a mismatch is worse
