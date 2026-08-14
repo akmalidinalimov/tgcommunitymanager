@@ -96,3 +96,40 @@ def test_the_shipped_pool_seeds_cleanly(store):
     assert len(entries) >= 3, "pool too small to be a safety net"
     seeded = seed(store, DEFAULT_PATH, strict=True)
     assert seeded == len(entries), "some shipped posts failed lint"
+
+
+def test_a_post_pulled_from_the_file_is_retired_from_the_pool(tmp_path):
+    """Seeding used to be additive only. A backup post pulled for teaching a
+    claim we had disproved stayed in the live pool and kept its turn to publish
+    unattended, because deleting it from the file did nothing to the database."""
+    store = Store(tmp_path / "b.db")
+    pool = tmp_path / "pool.yaml"
+
+    pool.write_text(
+        "posts:\n"
+        "  - id: keep\n    text: |\n      Birinchi post shu yerda qoladi.\n"
+        "  - id: wrong\n    text: |\n      Bu post notoʻgʻri maʼlumot beradi.\n",
+        encoding="utf-8")
+    assert seed(store, pool) == 2
+    assert store.backup_count() == 2
+
+    # The post is pulled from version control.
+    pool.write_text(
+        "posts:\n  - id: keep\n    text: |\n      Birinchi post shu yerda qoladi.\n",
+        encoding="utf-8")
+    seed(store, pool)
+
+    assert store.backup_count() == 1
+    remaining = store.take_backup()
+    assert remaining and "notoʻgʻri" not in remaining[1]
+
+
+def test_retiring_is_idempotent_and_leaves_a_matching_pool_alone(tmp_path):
+    store = Store(tmp_path / "b.db")
+    pool = tmp_path / "pool.yaml"
+    pool.write_text("posts:\n  - id: a\n    text: |\n      Yagona post.\n", encoding="utf-8")
+
+    seed(store, pool)
+    seed(store, pool)
+    seed(store, pool)
+    assert store.backup_count() == 1

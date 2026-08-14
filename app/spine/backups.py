@@ -63,6 +63,23 @@ def seed(store: Store, path: Path | None = None, *, strict: bool = False) -> int
         existing.add(text)
         added += 1
 
-    if added:
-        log.info("seeded %s backup post(s); pool now holds %s", added, store.backup_count())
+    # Retire anything the file no longer contains. Without this the file is only
+    # additive: a post pulled for being wrong stays in the pool and keeps its
+    # turn to publish unattended. That happened — a post teaching a claim we had
+    # since disproved was deleted from the file and went on sitting in the live
+    # pool, because seeding had no way to take anything out.
+    wanted = {
+        normalize_apostrophes((e.get("text") or "").strip()) for e in load_file(path)
+    }
+    retired = 0
+    for row in store._conn.execute("SELECT id, text FROM backup_pool"):
+        if row["text"] not in wanted:
+            store._conn.execute("DELETE FROM backup_pool WHERE id=?", (row["id"],))
+            log.warning("retired backup #%s — no longer in the pool file: %.50s",
+                        row["id"], row["text"])
+            retired += 1
+
+    if added or retired:
+        log.info("seeded %s, retired %s; pool now holds %s",
+                 added, retired, store.backup_count())
     return added
