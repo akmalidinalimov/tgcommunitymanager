@@ -107,3 +107,12 @@ def test_resolutions_are_pinned():
     from app.media.shots import IMAGE_RESOLUTION, VIDEO_RESOLUTION
     assert IMAGE_RESOLUTION == "2k"
     assert VIDEO_RESOLUTION == "720p"
+
+
+def test_the_cinematic_rules_are_documented():
+    """These were learned by shipping a forgettable image first. Keeping them in
+    code rather than in a chat log is the point."""
+    from app.media.shots import CINEMATIC
+    for key in ("one_source", "someone_working", "skin_as_surface",
+                "locally_legible", "depth_in_three_layers"):
+        assert key in CINEMATIC and len(CINEMATIC[key]) > 40

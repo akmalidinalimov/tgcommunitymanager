@@ -70,6 +70,38 @@ VIDEO_RESOLUTION = "720p"
 #: a wide frame has horizontal room and very little vertical headroom.
 DEFAULT_NEGATIVE_SPACE = "left third"
 
+#: What separates a picture from a competent arrangement.
+#:
+#: Learned the expensive way: a honey jar on a market counter, correctly lit with
+#: soft window light and a bounce fill, came out technically clean and completely
+#: forgettable. A tandyr baker lit only by the fire in the oven stopped people.
+#: The difference was not more adjectives.
+CINEMATIC = {
+    "one_source": (
+        "ONE hard key and let everything else fall to black. Soft light plus fill "
+        "is how a product catalogue is lit, not how a film frame is. Firelight, a "
+        "single window, one shaft — and no second source rescuing the shadows."
+    ),
+    "someone_working": (
+        "A person mid-action beats an object placed. Reaching into the oven, "
+        "pressing the stamp into dough. An arrangement has nothing at stake."
+    ),
+    "skin_as_surface": (
+        "Name skin the way you would name any material: pores, sweat sheen, grey "
+        "stubble, a cracked thumb, flour packed into the knuckle creases. Texture "
+        "is what separates a face from a render."
+    ),
+    "locally_legible": (
+        "A subject the reader recognises without being told — a tandyr before "
+        "dawn, a chekich in dough, sesame and nigella on the board. Recognition "
+        "does work that no amount of polish can."
+    ),
+    "depth_in_three_layers": (
+        "Something out of focus in front, the subject sharp, something falling "
+        "away behind. A frame with only a middle ground reads as a render."
+    ),
+}
+
 #: Small physical wrongnesses are what separate a photograph from a render.
 IMPERFECTIONS = (
     "slight motion blur on the moving hand",
