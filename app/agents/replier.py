@@ -83,7 +83,8 @@ def _read(path: Path) -> str:
     return path.read_text(encoding="utf-8") if path.is_file() else ""
 
 
-def build_prompt(ctx: ReplyContext, previous_drafts: list[str] | None = None) -> str:
+def build_prompt(ctx: ReplyContext, previous_drafts: list[str] | None = None,
+                 extra_facts: list[str] | None = None) -> str:
     script_name = "Uzbek Cyrillic" if ctx.script is Script.CYRILLIC else "Uzbek Latin"
     history = "\n".join(
         f"  [{m.message_id}] {m.author}: {m.text or '(posted a video)'}"
@@ -108,6 +109,24 @@ buys that credibility back."""
     else:
         variety = ""
 
+    # Facts a live web search established just now, each with its source. These
+    # rank with the knowledge base rather than above it: they are grounded the
+    # same way — a fetched page instead of a founder statement — and they exist
+    # so a member asking a price gets an answer instead of a deflection.
+    if extra_facts:
+        checked = "\n".join(f"  - {f}" for f in extra_facts)
+        research = f"""
+=== VERIFIED JUST NOW BY WEB SEARCH (grounded, quotable) ===
+{checked}
+
+You MAY state these, and you MUST include the source and the as-of date if you
+do — a price without a date is a price that will be wrong later. Cite them in
+grounded_on as 'research.<subject>'. Anything beyond what is written above is
+still ungrounded: do not extrapolate a yearly price from a monthly one, do not
+convert currencies, and do not describe a plan that is not listed."""
+    else:
+        research = ""
+
     return f"""You write comment replies for an Uzbek AI-education Telegram channel, as its
 openly-AI assistant "Malika · AI yordamchi".
 
@@ -116,6 +135,7 @@ openly-AI assistant "Malika · AI yordamchi".
 
 === KNOWLEDGE BASE — the ONLY source you may cite for model facts ===
 {_read(KNOWLEDGE_PATH)}
+{research}
 
 === THE CHANNEL POST BEING DISCUSSED ===
 {ctx.post_text}
@@ -157,11 +177,18 @@ def draft_reply(
     api_key: str,
     model: str = MODEL,
     previous_drafts: list[str] | None = None,
+    extra_facts: list[str] | None = None,
 ) -> Draft:
     """Produce a draft, or an escalation. Never sends anything.
 
     ``previous_drafts`` are the bot's own replies already placed in this thread;
     passing them is what stops three near-identical sentences appearing together.
+    They were accepted here but never reached build_prompt, so the anti-repetition
+    guard added after two near-identical replies shipped live was inert.
+
+    ``extra_facts`` are lines a web search just verified, each carrying its source.
+    They let a price question be answered instead of deflected, without ever
+    letting a price come from model memory.
     """
     import anthropic
 
@@ -175,7 +202,8 @@ def draft_reply(
         max_tokens=1200,
         tools=[DRAFT_TOOL],
         tool_choice={"type": "tool", "name": "submit_reply"},
-        messages=[{"role": "user", "content": build_prompt(ctx)}],
+        messages=[{"role": "user", "content": build_prompt(
+            ctx, previous_drafts=previous_drafts, extra_facts=extra_facts)}],
     )
 
     payload: dict[str, Any] = {}

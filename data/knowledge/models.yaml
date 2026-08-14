@@ -239,8 +239,26 @@ rules:
     rule: "If a model fact is not in this file, do not state it. Escalate to the founders."
   no_prices_from_memory:
     rule: >
-      Never quote a subscription price or credit cost that is not in this file.
-      Vendor pricing changes without notice. Direct people to check the vendor.
+      Never quote a subscription price or credit cost from memory. A price is
+      quotable only when it is in this file, or when a live web search just
+      returned it from the VENDOR'S OWN page — with the source and the date.
+    source: founder
+    founder_direction_2026_08_15: >
+      When a member asks something the open web can answer, go and find it
+      instead of deflecting. Raise it to the founders only when it is unclear.
+    how_research_is_gated: >
+      app/agents/research.py searches, then refuses to publish unless the price
+      is specific, from the vendor's own domain, free of conflicting sources and
+      high-confidence. Anything less goes to the admin chat WITH the evidence.
+    why_the_gate_is_strict: >
+      The first probe asked what Kling costs. Third-party trackers disagreed
+      materially ($6.99 vs $10-15 for the same plan), no official page appeared
+      in the results, and Kling shows THREE prices on one card — list $10,
+      first-month promo $6.99, renewal $8.80. A bot that answers "$6.99" has
+      told 3,326 people a number that is wrong from month two.
+    always_say: >
+      Quote the RENEWAL price, not the promotional one, and name the date. A
+      price without a date is a price that will be wrong later.
   mirror_the_script:
     rule: "Answer in the script the member wrote in — Latin or Cyrillic."
   do_not_interrupt_members:

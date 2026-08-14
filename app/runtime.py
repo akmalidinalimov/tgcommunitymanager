@@ -14,12 +14,15 @@ slot's approval that arrived seconds ago is seen before the slot fires.
 
 from __future__ import annotations
 
+import hashlib
+import json
 import logging
 import time
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 from datetime import datetime
 
 from app.agents.context import Decision, build_context
+from app.agents.research import Finding, is_price_question, lookup_price
 from app.agents.replier import (
     draft_reply,
     to_admin_card,
@@ -27,6 +30,7 @@ from app.agents.replier import (
 )
 from app.agents.writer import POST_KINDS, write_post
 from app.config import Settings
+from html import escape
 from app.media import cards
 from app.media.library import get as asset_by_id
 from app.media.library import pick as pick_asset
@@ -49,6 +53,10 @@ REACTION = "🔥"
 #: Recorded on content whose visual is a card drawn here rather than a library
 #: asset. Not a path: the render is deterministic and is redrawn at send time.
 CARD = "card"
+
+#: Marks every message that needs a founder to decide something, so an
+#: attention-needed message is never mistaken for routine bot chatter.
+NEEDS_YOU = "🔴 <b>SIZDAN JAVOB KERAK</b>"
 
 #: On a cold start Telegram hands over every queued update, some hours old.
 #: The first deployment answered a whole stale thread in 30 seconds because of
@@ -81,6 +89,11 @@ WEEKLY_PLAN: dict[tuple[int, int], str] = {
     (5, 10): "mission",        (5, 21): "technique",
     (6, 10): "recognition",    (6, 21): "recap",
 }
+
+
+def _cache_key(question: str) -> str:
+    """Stable key for a researched question, so the same one is not paid for twice."""
+    return hashlib.sha256(question.strip().lower().encode()).hexdigest()[:16]
 
 
 def kind_for(slot: Slot) -> str:
@@ -242,8 +255,15 @@ class Runtime:
             ctx, api_key=self.settings.anthropic_api_key or "", previous_drafts=prior
         )
 
+        finding = None
         if not draft.is_reply:
-            self._escalate(ctx, draft)
+            # The grounding gate refused. If the missing fact is a price, go and
+            # look it up rather than making the member wait on a founder for
+            # something the vendor publishes openly.
+            draft, finding = self._research_then_redraft(ctx, draft, prior)
+
+        if not draft.is_reply:
+            self._escalate(ctx, draft, finding)
             self.store.record_comment(message["message_id"], decision="escalate", **record)
             return
 
@@ -261,6 +281,42 @@ class Runtime:
         )
         self._replied_this_run[thread_id] = self._replied_this_run.get(thread_id, 0) + 1
         log.info("replied to %s in thread %s", message["message_id"], thread_id)
+
+    def _research_then_redraft(self, ctx, draft, prior: list[str]):
+        """Try to answer an escalated price question from the open web.
+
+        Returns (draft, finding). The draft is upgraded to a reply only when the
+        finding clears every gate in `research`: a specific price, from the
+        vendor's own page, with no conflicting sources and high confidence.
+        Anything less goes to the founders WITH the evidence, so raising it is
+        useful rather than a shrug.
+        """
+        question = draft.needs_from_founders or ctx.target.text
+        if not is_price_question(ctx.target.text):
+            return draft, None
+
+        cached = self.store.get_runtime(f"price:{_cache_key(question)}")
+        if cached:
+            log.info("price question already researched; not searching again")
+            return draft, Finding(**json.loads(cached))
+
+        log.info("price question escalated; researching: %.80s", question)
+        finding = lookup_price(question, api_key=self.settings.anthropic_api_key or "")
+        if finding.searched:
+            self.store.set_runtime(f"price:{_cache_key(question)}",
+                                   json.dumps(asdict(finding), ensure_ascii=False))
+
+        if not finding.quotable:
+            log.info("finding is not quotable (%s); leaving it to the founders",
+                     ", ".join(finding.blockers))
+            return draft, finding
+
+        upgraded = draft_reply(
+            ctx, api_key=self.settings.anthropic_api_key or "",
+            previous_drafts=prior, extra_facts=[finding.as_fact()],
+        )
+        log.info("redrafted with researched price -> %s", upgraded.action)
+        return upgraded, finding
 
     def _record_only(self, message: dict, thread_id: int, decision: str) -> None:
         frm = message.get("from") or {}
@@ -310,13 +366,25 @@ class Runtime:
         ]
         return [root, *rebuilt, *from_batch, message]
 
-    def _escalate(self, ctx, draft) -> None:
+    def _escalate(self, ctx, draft, finding=None) -> None:
         if self.dry_run or not self.settings.admin_chat_id:
             log.info("escalation (not sent): %s", draft.needs_from_founders)
             return
-        self.api.send_message(
-            self.settings.admin_chat_id, to_admin_card(ctx, draft), parse_mode="HTML"
-        )
+
+        card = f"{NEEDS_YOU}\n\n{to_admin_card(ctx, draft)}"
+        if finding is not None and finding.searched:
+            # Raising a question with the legwork already done is the difference
+            # between "someone asked about pricing" and "here is what the web
+            # says, here is why I would not publish it, here is the decision".
+            why = ", ".join(finding.blockers) or "—"
+            card += (
+                f"\n\n🔎 <b>Men qidirib koʻrdim</b>\n"
+                f"<i>Nega eʼlon qilmadim: {escape(why)}</i>\n\n"
+                f"{escape(finding.summary_for_founders)}"
+            )
+            if finding.source_url:
+                card += f"\n\n{escape(finding.source_url)}"
+        self.api.send_message(self.settings.admin_chat_id, card, parse_mode="HTML")
 
     def handle_callback(self, query: dict) -> None:
         action, slot_key = approval.parse_callback(query.get("data", ""))
