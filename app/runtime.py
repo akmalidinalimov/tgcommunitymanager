@@ -30,7 +30,8 @@ from app.config import Settings
 from app.media.library import pick as pick_asset
 from app.spine import approval
 from app.spine.scheduler import (
-    Slot, due_slots, next_slot, now_tashkent, slots_needing_approval,
+    Slot, due_slots, next_slot, now_tashkent, slot_from_key,
+    slots_needing_approval,
 )
 from app.spine.states import Content, State, publishable
 from app.spine.store import Store
@@ -121,7 +122,15 @@ class Runtime:
             return
 
         message = update.get("message")
-        if not message or (message.get("chat") or {}).get("id") != self.settings.discussion_group_id:
+        if not message:
+            return
+
+        chat_id = (message.get("chat") or {}).get("id")
+        if chat_id == self.settings.admin_chat_id:
+            self.handle_admin_command(message)
+            return
+
+        if chat_id != self.settings.discussion_group_id:
             return
 
         result = classify(message, bot_id=self.bot_id, channel_id=self.settings.channel_id)
@@ -137,6 +146,27 @@ class Runtime:
             return
 
         self.handle_comment(message, update.get("_batch") or [])
+
+    #: What the founders can ask the bot in the admin chat. Deliberately tiny:
+    #: the batch review belongs in the Mini App, and this is the safety valve for
+    #: when a card did not arrive.
+    COMMANDS = ("/pending", "/kutilmoqda", "/holat", "/status")
+
+    def handle_admin_command(self, message: dict) -> None:
+        text = (message.get("text") or "").strip().lower().split("@")[0]
+        user_id = (message.get("from") or {}).get("id")
+        if self.settings.approver_ids and user_id not in self.settings.approver_ids:
+            return
+        if text in ("/pending", "/kutilmoqda"):
+            log.info("admin asked for the approval queue")
+            self.send_pending_digest()
+        elif text in ("/holat", "/status"):
+            waiting = len(self.pending_approvals())
+            self._alert(
+                f"🗓 Keyingi slot: <b>{next_slot().key}</b>\n"
+                f"⏳ Tasdiqlashni kutmoqda: <b>{waiting}</b>\n"
+                f"🛟 Zaxira postlar: <b>{self.store.backup_count()}</b>"
+            )
 
     def handle_comment(self, message: dict, batch: list[dict] | None = None) -> None:
         roots = self.store.known_roots()
@@ -411,6 +441,11 @@ class Runtime:
             existing = self.store.get_content(slot.key)
             if existing and existing.state is not State.REJECTED:
                 log.debug("%s already %s", slot.key, existing.state.value)
+                if (existing.state is State.PENDING_APPROVAL
+                        and not self.store.get_runtime(f"card_sent:{slot.key}")):
+                    log.warning("%s is pending approval but its card was never "
+                                "delivered; resending", slot.key)
+                    self._send_for_approval(existing, slot)
                 continue
             if existing:
                 # A rejected draft used to block its slot forever: the check was
@@ -448,16 +483,52 @@ class Runtime:
             self._send_for_approval(content, slot)
             log.info("approval card sent for %s (%s)", slot.key, kind)
 
-    def _send_for_approval(self, content: Content, slot: Slot) -> None:
+    def _send_for_approval(self, content: Content, slot: Slot) -> bool:
+        """Deliver the card, and record delivery only once it has happened.
+
+        The state used to be committed before the send. If the send then failed,
+        the slot sat in PENDING_APPROVAL forever — the guard in prepare_upcoming
+        skips anything not REJECTED, so the card was never retried and the
+        founders simply never saw that slot again.
+        """
         if self.dry_run or not self.settings.admin_chat_id:
             log.info("[dry-run] approval card for %s", slot.key)
-            return
-        self.api.send_message(
-            self.settings.admin_chat_id,
-            approval.card(content, slot),
-            parse_mode="HTML",
-            reply_markup=approval.keyboard(slot.key),
-        )
+            return False
+        try:
+            self.api.send_message(
+                self.settings.admin_chat_id,
+                approval.card(content, slot),
+                parse_mode="HTML",
+                reply_markup=approval.keyboard(slot.key),
+            )
+        except TelegramError:
+            # Left unrecorded on purpose: the next pass retries it.
+            log.exception("approval card for %s did not send; will retry", slot.key)
+            return False
+        self.store.set_runtime(f"card_sent:{slot.key}", now_tashkent().isoformat())
+        return True
+
+    def pending_approvals(self) -> list[tuple[Content, Slot]]:
+        return [
+            (c, slot_from_key(c.slot_key))
+            for c in self.store.content_in_state(State.PENDING_APPROVAL)
+        ]
+
+    def send_pending_digest(self) -> int:
+        """Re-send every card still awaiting a decision.
+
+        Cards arrive as slots cross the drafting horizon, which in Tashkent time
+        can be the middle of the night in Sweden. One missed notification used to
+        mean that post was gone. This makes the queue pullable on demand.
+        """
+        waiting = sorted(self.pending_approvals(), key=lambda pair: pair[1].at)
+        if not waiting:
+            self._alert("✅ Hammasi koʻrildi — kutayotgan post yoʻq.")
+            return 0
+        self._alert(f"🗂 <b>{len(waiting)} ta post</b> tasdiqlashni kutmoqda:")
+        for content, slot in waiting:
+            self._send_for_approval(content, slot)
+        return len(waiting)
 
     def _alert(self, html: str) -> None:
         """Tell the founders something went wrong, and never raise doing it.

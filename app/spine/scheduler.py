@@ -70,6 +70,11 @@ def slots_between(start: datetime, end: datetime) -> list[Slot]:
     return sorted(out)
 
 
+def slot_from_key(key: str) -> Slot:
+    """Rebuild a Slot from its stored key. Inverse of ``Slot.key``."""
+    return Slot(datetime.strptime(key, "%Y-%m-%d_%H:%M").replace(tzinfo=TASHKENT))
+
+
 def next_slot(clock: datetime | None = None) -> Slot:
     """The next slot strictly after now."""
     now = now_tashkent(clock)

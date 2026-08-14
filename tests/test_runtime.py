@@ -10,7 +10,9 @@ import pytest
 from app.agents.replier import AI_DISCLOSURE, with_disclosure
 from app.config import Settings
 from app.runtime import Runtime, kind_for
+from app.spine import approval
 from app.spine.scheduler import Slot
+from app.telegram.api import TelegramError
 from app.spine.states import Content, State
 from app.spine.store import Store
 
@@ -470,3 +472,87 @@ def test_failing_slot_alerts_and_does_not_block_the_next_one(rt, monkeypatch):
     assert done == [b.key], "a failing slot must not take the next slot down"
     assert rt.store.last_seen is not None, "last_seen must advance despite failure"
     assert any("chiqmadi" in s["text"] for s in rt.api.sent), "founders were not told"
+
+
+# --- approval cards must actually arrive ------------------------------------
+#
+# Cards stopped reaching the founders on 2026-08-14 and no slot recovered on its
+# own: the state was committed before the send, and the guard in
+# prepare_upcoming skips anything not REJECTED, so a card that failed to send
+# was never retried.
+
+
+class RefusingAPI(FakeAPI):
+    """Telegram rejecting the card, the way a parse-entities error does."""
+
+    def __init__(self, fail_times=1):
+        super().__init__()
+        self.left = fail_times
+
+    def send_message(self, chat_id, text, **kw):
+        if self.left and kw.get("reply_markup"):
+            self.left -= 1
+            raise TelegramError("sendMessage", "Bad Request: can't parse entities")
+        return super().send_message(chat_id, text, **kw)
+
+
+def test_a_card_that_fails_to_send_is_retried_not_lost(rt):
+    rt.api = RefusingAPI(fail_times=1)
+    c = pending_content(rt.store, "2026-08-14_21:00")
+    slot = Slot(datetime(2026, 8, 14, 21, 0, tzinfo=TASHKENT))
+
+    assert rt._send_for_approval(c, slot) is False
+    assert rt.store.get_runtime("card_sent:2026-08-14_21:00") is None, (
+        "a failed send must not be recorded as delivered")
+
+    assert rt._send_for_approval(c, slot) is True
+    assert rt.store.get_runtime("card_sent:2026-08-14_21:00")
+
+
+def test_pending_slot_with_no_delivered_card_gets_one_on_the_next_pass(rt, monkeypatch):
+    """The exact shape of the outage: content is PENDING_APPROVAL, no card ever
+    reached anyone, and drafting is skipped because the slot is not REJECTED."""
+    slot = Slot(datetime(2026, 8, 14, 21, 0, tzinfo=TASHKENT))
+    pending_content(rt.store, slot.key)
+    monkeypatch.setattr("app.runtime.slots_needing_approval", lambda *a, **k: [slot])
+    monkeypatch.setattr("app.runtime.write_post",
+                        lambda *a, **k: pytest.fail("must not redraft an approved-pending slot"))
+
+    rt.prepare_upcoming()
+    assert any(s.get("reply_markup") for s in rt.api.sent), "card was not resent"
+
+
+def test_post_text_with_html_characters_does_not_break_the_card():
+    """Model-written text goes into a parse_mode=HTML message. One '<' used to
+    make Telegram reject the card, permanently orphaning that slot."""
+    c = Content(slot_key="2026-08-14_21:00", kind="technique",
+                text="Prompt: <lighting> & 2 > 1")
+    body = approval.card(c, Slot(datetime(2026, 8, 14, 21, 0, tzinfo=TASHKENT)))
+    assert "<lighting>" not in body
+    assert "&lt;lighting&gt;" in body and "&amp;" in body
+
+
+def test_pending_digest_resends_every_waiting_card(rt):
+    for key in ("2026-08-15_10:00", "2026-08-14_21:00"):
+        pending_content(rt.store, key)
+
+    assert rt.send_pending_digest() == 2
+    cards = [s for s in rt.api.sent if s.get("reply_markup")]
+    assert len(cards) == 2
+    assert "21:00" in cards[0]["text"], "earliest deadline first"
+
+
+def test_pending_command_from_the_approver_pulls_the_queue(rt):
+    pending_content(rt.store, "2026-08-14_21:00")
+    rt.handle_update({"update_id": 9, "message": {
+        "message_id": 1, "chat": {"id": ADMIN, "type": "private"},
+        "from": {"id": ADMIN, "is_bot": False}, "text": "/pending"}})
+    assert any(s.get("reply_markup") for s in rt.api.sent)
+
+
+def test_pending_command_from_a_stranger_is_ignored(rt):
+    pending_content(rt.store, "2026-08-14_21:00")
+    rt.handle_update({"update_id": 9, "message": {
+        "message_id": 1, "chat": {"id": ADMIN, "type": "private"},
+        "from": {"id": 4242, "is_bot": False}, "text": "/pending"}})
+    assert rt.api.sent == []

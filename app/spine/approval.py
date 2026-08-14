@@ -12,6 +12,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime
+from html import escape
 
 from app.spine.scheduler import Slot, approval_deadline
 from app.spine.states import Content, IllegalTransition, State
@@ -49,14 +50,20 @@ def keyboard(slot_key: str) -> dict:
 
 def card(content: Content, slot: Slot) -> str:
     """The approval card. Shows the post exactly as it will appear, because a
-    preview that differs from production is worse than no preview."""
+    preview that differs from production is worse than no preview.
+
+    The post body is escaped. It is model-written text going into a message sent
+    with parse_mode=HTML, so a single ``<`` or ``&`` makes Telegram reject the
+    whole card with "can't parse entities" — and a card that fails to send is a
+    slot the founders never see.
+    """
     deadline = approval_deadline(slot)
     media = f"\n📎 {len(content.media_paths)} ta media" if content.media_paths else ""
     return (
-        f"🗓 <b>{slot.at.strftime('%d.%m %H:%M')}</b> · {content.kind}{media}\n"
+        f"🗓 <b>{slot.at.strftime('%d.%m %H:%M')}</b> · {escape(content.kind)}{media}\n"
         f"<i>tasdiqlash muddati: {deadline.strftime('%d.%m %H:%M')}</i>\n"
         f"{'─' * 22}\n"
-        f"{content.text}\n"
+        f"{escape(content.text)}\n"
         f"{'─' * 22}"
     )
 
