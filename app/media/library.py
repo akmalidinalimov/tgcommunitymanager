@@ -67,6 +67,19 @@ def load(path: Path | None = None) -> list[Asset]:
     ]
 
 
+def get(asset_id: str, *, assets: list[Asset] | None = None) -> Asset | None:
+    """Resolve an asset by id.
+
+    Content records the id, never the URL: vendor CDN links expire, and a post
+    approved on Monday must still resolve on Friday.
+    """
+    for asset in (assets if assets is not None else load()):
+        if asset.id == asset_id:
+            return asset
+    log.warning("asset %s is no longer in the library", asset_id)
+    return None
+
+
 def pick(post_kind: str, *, used: set[str] | None = None,
          assets: list[Asset] | None = None) -> Asset | None:
     """Choose an asset that genuinely illustrates ``post_kind``.

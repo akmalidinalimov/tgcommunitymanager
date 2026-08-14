@@ -27,6 +27,7 @@ from app.agents.replier import (
 )
 from app.agents.writer import POST_KINDS, write_post
 from app.config import Settings
+from app.media.library import get as asset_by_id
 from app.media.library import pick as pick_asset
 from app.spine import approval
 from app.spine.scheduler import (
@@ -38,6 +39,7 @@ from app.spine.store import Store
 from app.telegram.api import BotAPI, TelegramError
 from app.telegram.classifier import Kind, classify
 from app.telegram.publisher import find_thread_root
+from app.text.lint import CAPTION_CAP
 
 log = logging.getLogger("runtime")
 
@@ -410,9 +412,14 @@ class Runtime:
         # earn a read — people want to see what the thing can do first. If no
         # asset genuinely matches, the post still goes out as text; a mismatched
         # video is worse than none.
-        used = {row[0] for row in self.store._conn.execute(
-            "SELECT value FROM runtime WHERE key LIKE 'asset_used:%'")}
-        asset = pick_asset(kind_for(slot), used=used)
+        #
+        # Approved content publishes the visual it was approved WITH. Picking one
+        # here would mean the post that shipped is not the post anyone said yes
+        # to. Only a backup, which nobody previewed, chooses at publish time.
+        if content and publishable(content):
+            asset = self.bound_asset(content)
+        else:
+            asset = pick_asset(kind_for(slot), used=self._assets_used())
 
         if self.dry_run:
             log.info("[dry-run] would publish slot %s with %s", slot.key,
@@ -486,10 +493,22 @@ class Runtime:
                 self.store.save_content(content)
                 continue
 
+            # Bind the visual now, not at publish time. Founder direction is that
+            # every post ships with a visual, and an approver who only ever sees
+            # the caption is approving half the post. Choosing the asset after
+            # approval would also mean what shipped was not what was said yes to.
+            asset = pick_asset(kind, used=self._assets_used())
+            if asset:
+                content.attach_media(asset.id)
+            else:
+                log.warning("%s (%s) has no matching asset; it will publish as "
+                            "text only", slot.key, kind)
+
             content.submit_for_approval()
             self.store.save_content(content)
             self._send_for_approval(content, slot)
-            log.info("approval card sent for %s (%s)", slot.key, kind)
+            log.info("approval card sent for %s (%s) with %s", slot.key, kind,
+                     asset.id if asset else "no media")
 
     def _send_for_approval(self, content: Content, slot: Slot) -> bool:
         """Deliver the card, and record delivery only once it has happened.
@@ -502,19 +521,43 @@ class Runtime:
         if self.dry_run or not self.settings.admin_chat_id:
             log.info("[dry-run] approval card for %s", slot.key)
             return False
+        body = approval.card(content, slot)
+        buttons = approval.keyboard(slot.key)
+        asset = self.bound_asset(content)
         try:
-            self.api.send_message(
-                self.settings.admin_chat_id,
-                approval.card(content, slot),
-                parse_mode="HTML",
-                reply_markup=approval.keyboard(slot.key),
-            )
+            if asset and len(body) <= CAPTION_CAP:
+                # The card IS the post: the visual with the caption under it,
+                # exactly as the channel will see it. A preview that differs from
+                # production is worse than no preview.
+                sender = self.api.send_video if asset.is_video else self.api.send_photo
+                sender(self.settings.admin_chat_id, asset.url, caption=body,
+                       parse_mode="HTML", reply_markup=buttons)
+            elif asset:
+                # Too long to ride as a caption. Show the visual, then the text
+                # with the buttons, rather than silently dropping either.
+                sender = self.api.send_video if asset.is_video else self.api.send_photo
+                sender(self.settings.admin_chat_id, asset.url)
+                self.api.send_message(self.settings.admin_chat_id, body,
+                                      parse_mode="HTML", reply_markup=buttons)
+            else:
+                self.api.send_message(self.settings.admin_chat_id, body,
+                                      parse_mode="HTML", reply_markup=buttons)
         except TelegramError:
             # Left unrecorded on purpose: the next pass retries it.
             log.exception("approval card for %s did not send; will retry", slot.key)
             return False
         self.store.set_runtime(f"card_sent:{slot.key}", now_tashkent().isoformat())
         return True
+
+    def _assets_used(self) -> set[str]:
+        return {row[0] for row in self.store._conn.execute(
+            "SELECT value FROM runtime WHERE key LIKE 'asset_used:%'")}
+
+    def bound_asset(self, content: Content | None):
+        """The asset this content was drafted and approved with, if any."""
+        if not content or not content.media_paths:
+            return None
+        return asset_by_id(content.media_paths[0])
 
     def pending_approvals(self) -> list[tuple[Content, Slot]]:
         return [
@@ -535,8 +578,25 @@ class Runtime:
             return 0
         self._alert(f"🗂 <b>{len(waiting)} ta post</b> tasdiqlashni kutmoqda:")
         for content, slot in waiting:
+            self.ensure_media(content, slot)
             self._send_for_approval(content, slot)
         return len(waiting)
+
+    def ensure_media(self, content: Content, slot: Slot) -> None:
+        """Bind a visual to content drafted before visuals were bound.
+
+        Anything already in the queue was written when the asset was chosen at
+        publish time, so it carries none. Resending those as bare text would
+        reproduce the very thing being fixed.
+        """
+        if content.media_paths or content.frozen:
+            return
+        asset = pick_asset(content.kind, used=self._assets_used())
+        if not asset:
+            return
+        content.attach_media(asset.id)
+        self.store.save_content(content)
+        log.info("bound %s to %s on resend", asset.id, slot.key)
 
     def _alert(self, html: str) -> None:
         """Tell the founders something went wrong, and never raise doing it.

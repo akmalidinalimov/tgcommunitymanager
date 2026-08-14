@@ -40,6 +40,18 @@ class FakeAPI:
         self.sent.append({"chat_id": chat_id, "text": text, **kw})
         return {"message_id": self._next_id}
 
+    def send_photo(self, chat_id, photo, **kw):
+        return self._media(chat_id, photo, "photo", **kw)
+
+    def send_video(self, chat_id, video, **kw):
+        return self._media(chat_id, video, "video", **kw)
+
+    def _media(self, chat_id, url, kind, **kw):
+        self._next_id += 1
+        self.sent.append({"chat_id": chat_id, "media": url, "media_kind": kind,
+                          "text": kw.get("caption") or "", **kw})
+        return {"message_id": self._next_id}
+
     def set_message_reaction(self, chat_id, message_id, emoji, **kw):
         self.reactions.append((chat_id, message_id, emoji))
         return True
@@ -340,6 +352,16 @@ class MediaAPI(FakeAPI):
         return {"message_id": self._next_id}
 
 
+def approved_with_media(store, slot_key, asset_id, text="post matni"):
+    c = Content(slot_key=slot_key, kind="commercial_craft", text=text)
+    c.attach_media(asset_id)
+    c.submit_for_approval()
+    c.approve(ADMIN, (ADMIN,), at=datetime(2026, 8, 13, 20, 0, tzinfo=TASHKENT))
+    c.schedule()
+    store.save_content(c)
+    return c
+
+
 def approved(store, slot_key, text="post matni"):
     c = Content(slot_key=slot_key, kind="commercial_craft", text=text)
     c.submit_for_approval()
@@ -371,25 +393,55 @@ def test_a_post_with_no_matching_asset_still_publishes(rt, monkeypatch):
     assert rt.api.sent[0]["text"] == "post matni"
 
 
-def test_a_post_with_a_matching_asset_ships_as_a_caption(tmp_path):
+def _clip():
+    from app.media.library import Asset
+    return Asset(id="clip", url="https://cdn/x.mp4", kind="video",
+                 good_for=("commercial_craft",), duration=5)
+
+
+def test_a_post_with_a_matching_asset_ships_as_a_caption(tmp_path, monkeypatch):
     """Founder direction: every post carries a visual. The text becomes the
     caption rather than a separate message."""
-    from app.media.library import Asset
-
     api = MediaAPI()
     rt = Runtime(settings=SETTINGS, store=Store(tmp_path / "v.db"), api=api, bot_id=BOT)
-    asset = Asset(id="clip", url="https://cdn/x.mp4", kind="video",
-                  good_for=("commercial_craft",), duration=5)
-    import app.runtime as runtime_mod
-    original = runtime_mod.pick_asset
-    runtime_mod.pick_asset = lambda kind, used=None: asset
-    try:
-        approved(rt.store, "2026-08-10_21:00")
-        rt.publish_slot(Slot(datetime(2026, 8, 10, 21, 0, tzinfo=TASHKENT)))
-    finally:
-        runtime_mod.pick_asset = original
+    monkeypatch.setattr("app.runtime.asset_by_id", lambda aid, **k: _clip())
+
+    c = approved_with_media(rt.store, "2026-08-10_21:00", "clip")
+    rt.publish_slot(Slot(datetime(2026, 8, 10, 21, 0, tzinfo=TASHKENT)))
+
     assert api.videos and api.videos[0]["caption"] == "post matni"
     assert api.sent == [], "text was sent separately instead of as a caption"
+    assert c.media_paths == ["clip"]
+
+
+def test_approved_content_publishes_the_visual_it_was_approved_with(rt, monkeypatch):
+    """The asset used to be chosen at publish time, so what shipped was not what
+    anyone said yes to. Approved content now publishes its bound asset and
+    nothing else."""
+    monkeypatch.setattr("app.runtime.asset_by_id", lambda aid, **k: _clip())
+    monkeypatch.setattr("app.runtime.pick_asset",
+                        lambda kind, used=None: pytest.fail(
+                            "approved content must not re-pick its visual"))
+    approved_with_media(rt.store, "2026-08-10_21:00", "clip")
+    rt.publish_slot(Slot(datetime(2026, 8, 10, 21, 0, tzinfo=TASHKENT)))
+    assert rt.api.sent[0]["media"] == "https://cdn/x.mp4"
+
+
+def test_the_approval_card_carries_the_visual_and_the_buttons(rt, monkeypatch):
+    """The founders were approving captions with no idea what image would go
+    out. The card is now the post itself: visual, caption under it, buttons."""
+    monkeypatch.setattr("app.runtime.asset_by_id", lambda aid, **k: _clip())
+    c = Content(slot_key="2026-08-16_21:00", kind="commercial_craft", text="matn")
+    c.attach_media("clip")
+    c.submit_for_approval()
+    rt.store.save_content(c)
+
+    rt._send_for_approval(c, Slot(datetime(2026, 8, 16, 21, 0, tzinfo=TASHKENT)))
+
+    card = rt.api.sent[0]
+    assert card["media"] == "https://cdn/x.mp4"
+    assert "matn" in card["text"], "the post text must ride as the caption"
+    assert card.get("reply_markup"), "the card lost its approve/revise buttons"
 
 
 # --- rejected drafts must not poison their slot ----------------------------
@@ -596,3 +648,20 @@ def test_a_rewrite_loop_is_bounded_by_max_redrafts(rt, monkeypatch):
         rt.prepare_upcoming()
 
     assert len(calls) == MAX_REDRAFTS + 1, "redrafting must not burn tokens forever"
+
+
+def test_resending_binds_a_visual_to_a_card_drafted_without_one(rt, monkeypatch):
+    """Everything already queued was written when the asset was chosen at publish
+    time, so it carries none. Resending those as bare text would reproduce the
+    exact problem being fixed."""
+    monkeypatch.setattr("app.runtime.pick_asset", lambda kind, used=None: _clip())
+    monkeypatch.setattr("app.runtime.asset_by_id", lambda aid, **k: _clip())
+    c = Content(slot_key="2026-08-16_21:00", kind="commercial_craft", text="matn")
+    c.submit_for_approval()
+    rt.store.save_content(c)
+    assert c.media_paths == []
+
+    rt.send_pending_digest()
+
+    assert rt.store.get_content("2026-08-16_21:00").media_paths == ["clip"]
+    assert any(s.get("media") for s in rt.api.sent), "resent card still had no visual"

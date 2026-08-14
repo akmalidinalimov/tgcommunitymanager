@@ -121,6 +121,7 @@ class BotAPI:
     def send_video(
         self, chat_id: int | str, video: str, *, caption: str | None = None,
         parse_mode: str | None = None, supports_streaming: bool = True,
+        reply_markup: dict | None = None,
     ) -> dict:
         """Post a video with its caption.
 
@@ -133,16 +134,17 @@ class BotAPI:
         return self.call(
             "sendVideo", chat_id=chat_id, video=video, caption=caption,
             parse_mode=parse_mode, supports_streaming=supports_streaming,
+            reply_markup=reply_markup,
         )
 
     def send_photo(
         self, chat_id: int | str, photo: str, *, caption: str | None = None,
-        parse_mode: str | None = None,
+        parse_mode: str | None = None, reply_markup: dict | None = None,
     ) -> dict:
         """Post a photo with its caption. Same 1024-character caption cap."""
         return self.call(
             "sendPhoto", chat_id=chat_id, photo=photo, caption=caption,
-            parse_mode=parse_mode,
+            parse_mode=parse_mode, reply_markup=reply_markup,
         )
 
     def answer_callback_query(
