@@ -43,33 +43,41 @@ assets:
   - poll
   - recap
   expires: true
-- id: honey-compare-gpt
+- id: tandyr-baker
   kind: photo
   aspect: '16:9'
-  url: https://d8j0ntlcm91z4.cloudfront.net/user_2zJUonmh6cW6tDKlBEl4CIohbsI/hf_20260814_062937_df45a81b-7416-476f-a946-f679bb3bd554.png
+  url: https://d8j0ntlcm91z4.cloudfront.net/user_2zJUonmh6cW6tDKlBEl4CIohbsI/hf_20260814_073915_ce4d51f1-eb35-412c-9e6a-b015e25af551.png
   model: gpt_image_2
   duration: null
   shows:
-  - honey jar at a Tashkent bazaar
-  - backlit haze
-  - textile foreground
-  - blurred figures
+  - Uzbek baker at a tandyr before dawn
+  - fire as the only light source
+  - skin pores, sweat and grey stubble
+  - flour on the forearm
+  - glowing tandyr rim in the foreground
+  - stacked non behind
+  - clear dark left third for text
   good_for:
-  - comparison
+  - mission
+  - commercial_craft
+  - why_content
   expires: true
-- id: honey-compare-nano
+- id: non-chekich-hands
   kind: photo
   aspect: '16:9'
-  url: https://d8j0ntlcm91z4.cloudfront.net/user_2zJUonmh6cW6tDKlBEl4CIohbsI/hf_20260814_062946_2fca8bad-6982-4877-9c30-fb3daec09897.png
-  model: nano_banana_pro
+  url: https://d8j0ntlcm91z4.cloudfront.net/user_2zJUonmh6cW6tDKlBEl4CIohbsI/hf_20260814_073927_bedaa9b0-6b0f-4b9c-8bc6-745b87e67fcf.png
+  model: gpt_image_2
   duration: null
   shows:
-  - honey jar at a Tashkent bazaar
-  - shopper shoulder foreground
-  - honey running off the dipper
-  - comb crumb
+  - weathered hands stamping chekich into non dough
+  - cracked skin and flour in the knuckle creases
+  - sesame and nigella on the board
+  - hard raking light, black background
+  - clear dark left third for text
   good_for:
-  - comparison
+  - commercial_craft
+  - technique
+  - why_content
   expires: true
 - id: cafe-coffee-169-a
   kind: photo
