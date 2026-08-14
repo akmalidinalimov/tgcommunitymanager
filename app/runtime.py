@@ -53,6 +53,12 @@ MAX_REPLY_AGE_S = 15 * 60
 #: than eight.
 MAX_REPLIES_PER_THREAD_PER_RUN = 2
 
+#: States where the slot still owes a draft. Everything else is either waiting on
+#: the approver or already settled. Stated positively on purpose: the old check
+#: was "is not REJECTED", which quietly excluded DRAFTING and NEEDS_REVISION and
+#: turned the revise button into a way to delete a slot.
+NEEDS_DRAFTING = {State.DRAFTING, State.NEEDS_REVISION, State.REJECTED}
+
 #: How many times a slot may be redrafted after rejection before it is left
 #: to the backup pool. Bounded so a genuinely impossible brief cannot burn
 #: tokens every fifteen minutes forever.
@@ -439,7 +445,7 @@ class Runtime:
         log.info("preparing: %s slot(s) inside the horizon", len(upcoming))
         for slot in upcoming:
             existing = self.store.get_content(slot.key)
-            if existing and existing.state is not State.REJECTED:
+            if existing and existing.state not in NEEDS_DRAFTING:
                 log.debug("%s already %s", slot.key, existing.state.value)
                 if (existing.state is State.PENDING_APPROVAL
                         and not self.store.get_runtime(f"card_sent:{slot.key}")):
@@ -448,17 +454,19 @@ class Runtime:
                     self._send_for_approval(existing, slot)
                 continue
             if existing:
-                # A rejected draft used to block its slot forever: the check was
-                # "does content exist" rather than "is it still viable". One bad
-                # draft — produced while the knowledge base was missing — meant
-                # that slot silently never produced an approval card again.
+                # A draft that still owes work used to block its slot forever:
+                # the check was "does content exist" rather than "is it still
+                # viable". Pressing ✏️ Qayta yozish was the worst case — it moves
+                # content to DRAFTING, which is not REJECTED, so asking for a
+                # rewrite silently killed the slot instead of producing one.
                 attempts = int(self.store.get_runtime(f"redraft:{slot.key}") or 0)
                 if attempts >= MAX_REDRAFTS:
-                    log.warning("%s rejected %s times; leaving it to the backup pool",
-                                slot.key, attempts)
+                    log.warning("%s still %s after %s attempts; leaving it to the "
+                                "backup pool", slot.key, existing.state.value, attempts)
                     continue
                 self.store.set_runtime(f"redraft:{slot.key}", str(attempts + 1))
-                log.info("%s was rejected; redrafting (attempt %s)", slot.key, attempts + 1)
+                log.info("%s is %s; redrafting (attempt %s)",
+                         slot.key, existing.state.value, attempts + 1)
 
             kind = kind_for(slot)
             log.info("drafting %s for %s", kind, slot.key)

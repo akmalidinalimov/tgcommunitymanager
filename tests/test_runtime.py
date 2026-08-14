@@ -9,7 +9,9 @@ import pytest
 
 from app.agents.replier import AI_DISCLOSURE, with_disclosure
 from app.config import Settings
-from app.runtime import Runtime, kind_for
+from types import SimpleNamespace
+
+from app.runtime import MAX_REDRAFTS, Runtime, kind_for
 from app.spine import approval
 from app.spine.scheduler import Slot
 from app.telegram.api import TelegramError
@@ -556,3 +558,41 @@ def test_pending_command_from_a_stranger_is_ignored(rt):
         "message_id": 1, "chat": {"id": ADMIN, "type": "private"},
         "from": {"id": 4242, "is_bot": False}, "text": "/pending"}})
     assert rt.api.sent == []
+
+
+# --- the revise button must produce a revision ------------------------------
+
+
+def test_asking_for_a_rewrite_actually_redrafts_the_slot(rt, monkeypatch):
+    """✏️ Qayta yozish moves content to DRAFTING. prepare_upcoming skipped
+    anything that was not REJECTED, so pressing it silently killed the slot —
+    no rewrite, no card, and the backup pool covered for it. Observed live on
+    2026-08-15_10:00."""
+    slot = Slot(datetime(2026, 8, 15, 10, 0, tzinfo=TASHKENT))
+    pending_content(rt.store, slot.key)
+
+    rt.handle_update(callback(slot.key, action="rv"))
+    assert rt.store.get_content(slot.key).state is State.DRAFTING
+
+    monkeypatch.setattr("app.runtime.slots_needing_approval", lambda *a, **k: [slot])
+    monkeypatch.setattr("app.runtime.write_post",
+                        lambda kind, **k: SimpleNamespace(
+                            ok=True, text="qayta yozilgan post", kind=kind, problem=""))
+
+    rt.prepare_upcoming()
+    assert rt.store.get_content(slot.key).state is State.PENDING_APPROVAL
+    assert rt.store.get_content(slot.key).text == "qayta yozilgan post"
+
+
+def test_a_rewrite_loop_is_bounded_by_max_redrafts(rt, monkeypatch):
+    slot = Slot(datetime(2026, 8, 15, 10, 0, tzinfo=TASHKENT))
+    monkeypatch.setattr("app.runtime.slots_needing_approval", lambda *a, **k: [slot])
+    calls = []
+    monkeypatch.setattr("app.runtime.write_post",
+                        lambda kind, **k: (calls.append(kind), SimpleNamespace(
+                            ok=False, text="yomon", kind=kind, problem="lint"))[1])
+
+    for _ in range(MAX_REDRAFTS + 3):
+        rt.prepare_upcoming()
+
+    assert len(calls) == MAX_REDRAFTS + 1, "redrafting must not burn tokens forever"
