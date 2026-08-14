@@ -11,17 +11,33 @@
 # URL at send time, so an expired asset means a post goes out as text instead.
 # Mirror anything relied on long-term.
 assets:
-- id: ai-news-banner
+- id: ai-yangiliklari-banner
   kind: photo
   aspect: '16:9'
-  url: https://d8j0ntlcm91z4.cloudfront.net/user_2zJUonmh6cW6tDKlBEl4CIohbsI/hf_20260814_062958_a4093db5-a19e-4c05-aeea-e204e236189d.png
+  url: https://d8j0ntlcm91z4.cloudfront.net/user_2zJUonmh6cW6tDKlBEl4CIohbsI/hf_20260814_063914_1fae901f-6af6-4d90-a39e-3fb6101d426a.png
   model: gpt_image_2
   duration: null
   reusable: true
   shows:
   - charcoal and amber banner
-  - the words AI NEWS
+  - the words AI YANGILIKLARI
+  - faint neural-network constellation
   - thin amber rule
+  good_for:
+  - news
+  - poll
+  - recap
+  expires: true
+- id: ai-yangiliklari-banner-alt
+  kind: photo
+  aspect: '16:9'
+  url: https://d8j0ntlcm91z4.cloudfront.net/user_2zJUonmh6cW6tDKlBEl4CIohbsI/hf_20260814_063914_eb318b89-1bb2-46b6-8fe3-8995674e7029.png
+  model: gpt_image_2
+  duration: null
+  reusable: true
+  shows:
+  - charcoal and amber banner
+  - the words AI YANGILIKLARI
   good_for:
   - news
   - poll

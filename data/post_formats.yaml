@@ -14,7 +14,7 @@
 formats:
   news:
     visual: template
-    template_id: ai-news-banner
+    template_id: ai-yangiliklari-banner
     why: >
       A recurring branded banner makes the news slot recognisable at a glance in
       a feed. The reader knows what kind of post this is before reading a word.
@@ -62,7 +62,7 @@ formats:
 
   poll:
     visual: template
-    template_id: ai-news-banner
+    template_id: ai-yangiliklari-banner
     cta_style: vote
     cta_examples:
       - "Ovoz bering 👇"
@@ -95,7 +95,7 @@ formats:
 
   recap:
     visual: template
-    template_id: ai-news-banner
+    template_id: ai-yangiliklari-banner
     cta_style: pick_a_side
 
 # --- CTA styles, and what makes each one work ------------------------------
