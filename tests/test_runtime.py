@@ -219,7 +219,8 @@ def test_empty_backup_pool_stays_silent_rather_than_publishing_unapproved(rt):
     a human never approved would be a worse one."""
     pending_content(rt.store, "2026-08-14_10:00")
     rt.publish_slot(Slot(datetime(2026, 8, 14, 10, 0, tzinfo=TASHKENT)))
-    assert rt.api.sent == []
+    assert [s for s in rt.api.sent if s["chat_id"] == CHANNEL] == []
+    assert any("jim qoldi" in s["text"] for s in rt.api.sent), "silence went unreported"
 
 
 # --- the weekly grid --------------------------------------------------------
@@ -440,3 +441,32 @@ def _ok_post(kind):
     p = Post(text="yangi post", seed_comment="savol?", kind=kind)
     p.critic_passed = True
     return p
+
+
+# --- a silent slot must never be silent to the founders ---------------------
+#
+# The 2026-08-14 10:00 slot published nothing and nobody noticed for hours,
+# because a missed slot produced no signal anywhere. These pin the two ways a
+# slot can go quiet.
+
+
+def test_failing_slot_alerts_and_does_not_block_the_next_one(rt, monkeypatch):
+    from app.spine.scheduler import Slot, TASHKENT
+    import datetime
+
+    a = Slot(datetime.datetime(2026, 8, 14, 10, 0, tzinfo=TASHKENT))
+    b = Slot(datetime.datetime(2026, 8, 14, 21, 0, tzinfo=TASHKENT))
+    done = []
+
+    def flaky(slot):
+        if slot.key == a.key:
+            raise RuntimeError("send_photo blew up")
+        done.append(slot.key)
+
+    monkeypatch.setattr(rt, "publish_slot", flaky)
+    monkeypatch.setattr("app.runtime.due_slots", lambda *_, **__: ([a, b], []))
+    rt.publish_due()
+
+    assert done == [b.key], "a failing slot must not take the next slot down"
+    assert rt.store.last_seen is not None, "last_seen must advance despite failure"
+    assert any("chiqmadi" in s["text"] for s in rt.api.sent), "founders were not told"

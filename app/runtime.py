@@ -29,7 +29,9 @@ from app.agents.writer import POST_KINDS, write_post
 from app.config import Settings
 from app.media.library import pick as pick_asset
 from app.spine import approval
-from app.spine.scheduler import Slot, due_slots, now_tashkent, slots_needing_approval
+from app.spine.scheduler import (
+    Slot, due_slots, next_slot, now_tashkent, slots_needing_approval,
+)
 from app.spine.states import Content, State, publishable
 from app.spine.store import Store
 from app.telegram.api import BotAPI, TelegramError
@@ -297,8 +299,39 @@ class Runtime:
 
     # --- publishing ---------------------------------------------------------
 
+    def report_state(self) -> None:
+        """Log everything needed to explain a missed slot, at every startup.
+
+        A slot went unpublished and the container had been replaced, so the only
+        record of why was gone. Scheduler state is cheap to print and impossible
+        to reconstruct afterwards.
+        """
+        last = self.store.last_seen
+        log.info("state: last_seen=%s", last.isoformat() if last else "NONE (first boot — publishes nothing)")
+        log.info("state: now=%s next_slot=%s", now_tashkent().isoformat(timespec="seconds"),
+                 next_slot().key)
+        # times_used is the forensic record. A slot that fell back to the pool
+        # leaves a used row behind; a slot that never reached publish_slot at all
+        # leaves the pool pristine. Nothing else distinguishes those two.
+        for row in self.store._conn.execute(
+            "SELECT id, times_used, last_used_at, substr(text,1,40) AS head "
+            "FROM backup_pool ORDER BY id"
+        ):
+            log.info("state: backup #%s used=%s at=%s | %s",
+                     row["id"], row["times_used"], row["last_used_at"] or "never", row["head"])
+
+        for row in self.store._conn.execute(
+            "SELECT slot_key, kind, state FROM content ORDER BY slot_key DESC LIMIT 8"
+        ):
+            log.info("state: content %s (%s) -> %s", row["slot_key"], row["kind"], row["state"])
+
     def publish_due(self) -> None:
-        publish, too_late = due_slots(self.store.last_seen)
+        last = self.store.last_seen
+        publish, too_late = due_slots(last)
+        if publish or too_late:
+            log.info("due: last_seen=%s publish=%s too_late=%s",
+                     last.isoformat(timespec="seconds") if last else None,
+                     [s.key for s in publish], [s.key for s in too_late])
         for slot in too_late:
             log.warning("slot %s missed its window; skipped", slot.key)
             content = self.store.get_content(slot.key)
@@ -307,7 +340,14 @@ class Runtime:
                 self.store.save_content(content)
 
         for slot in publish:
-            self.publish_slot(slot)
+            try:
+                self.publish_slot(slot)
+            except Exception as exc:
+                # One slot's failure must not take the next one down with it, and
+                # must not stall last_seen — a stalled last_seen re-attempts the
+                # same broken slot every tick until the lateness cap, silently.
+                log.exception("slot %s failed to publish", slot.key)
+                self._alert(f"❌ <b>{slot.key}</b> chiqmadi\n\n<code>{exc}</code>")
         self.store.last_seen = now_tashkent()
 
     def publish_slot(self, slot: Slot) -> None:
@@ -319,9 +359,13 @@ class Runtime:
             if content and not content.is_terminal:
                 content.expire()
                 self.store.save_content(content)
+            log.warning("slot %s has no approved content (%s); falling back to backup",
+                        slot.key, content.state.value if content else "nothing drafted")
             picked = self.store.take_backup()
             if not picked:
                 log.error("slot %s unapproved and backup pool is EMPTY — channel silent", slot.key)
+                self._alert(f"🔇 <b>{slot.key}</b> — kanal jim qoldi.\n"
+                            f"Zaxira postlar tugagan.")
                 return
             log.warning("slot %s unapproved; publishing backup %s", slot.key, picked[0])
             text = picked[1]
@@ -415,6 +459,20 @@ class Runtime:
             reply_markup=approval.keyboard(slot.key),
         )
 
+    def _alert(self, html: str) -> None:
+        """Tell the founders something went wrong, and never raise doing it.
+
+        A missed slot used to be entirely invisible: the channel simply stayed
+        quiet and nobody knew until someone thought to look. Silence is the one
+        failure mode this bot must never keep to itself.
+        """
+        if self.dry_run or not self.settings.admin_chat_id:
+            return
+        try:
+            self.api.send_message(self.settings.admin_chat_id, html, parse_mode="HTML")
+        except Exception:
+            log.exception("could not deliver alert to the admin chat")
+
     def _send_problem(self, slot: Slot, post) -> None:
         if self.dry_run or not self.settings.admin_chat_id:
             return
@@ -432,6 +490,7 @@ class Runtime:
 
     def run(self, *, prepare_every: int = 900) -> None:
         last_prepare = 0.0
+        self.report_state()
         log.info("runtime started; next slot handling on tick")
         while True:
             try:
