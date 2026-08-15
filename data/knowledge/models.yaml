@@ -163,6 +163,51 @@ models:
     duration_s: [12, 15]
     good_for: "one-click product ads, TikTok/Reels-ready commercial output"
 
+# --- How multi-shot video is actually made in our account --------------------
+# Read from the live Higgsfield generation records on 2026-08-15, not from
+# memory. This is the most frequently asked question under our video posts —
+# "is that one clip or several?", "did you use one image?" — and the honest
+# answer is that we have done it BOTH ways, which is more useful than either
+# answer alone.
+#
+# The VPS cannot look this up. The Higgsfield connector is bound to an
+# interactive session, so provenance must be recorded HERE at generation time,
+# during the weekly batch on the laptop. A generation whose parameters were
+# never written down is a question the bot cannot answer later.
+multi_shot_video:
+  source: catalog
+  verified_on: "2026-08-15"
+  verified_from: "our own Higgsfield generation records"
+
+  from_one_reference_image:
+    real: true
+    evidence: "generations 2026-08-10, refs=1, multi_shots=true, 12-15s, 16:9"
+    how: >
+      One reference image, multi_shots enabled, and the shots written as
+      sections in the prompt — "// Shot 1 – Extreme Close-Up", "// Shot 2 ...".
+      The model cuts between them itself.
+    say_to_members: >
+      Ha — bitta rasmdan koʻp sahnali video chiqadi. Kadrlarni promptda
+      "// Shot 1", "// Shot 2" deb boʻlib yozasiz.
+
+  from_several_reference_images:
+    real: true
+    evidence: "generation 2026-08-14, 5 reference images, 30s, 9:16, multi_shots=false"
+    how: >
+      Five references — one for the person, one for the outfit, three for the
+      locations — and the cuts written as TIMED sections in a single prompt
+      ("0.0-2.3s STATIC extreme close-up ..."). multi_shots was OFF; the timing
+      did the work.
+    why_it_matters: >
+      This is how character and wardrobe stay identical across scenes. One image
+      cannot hold a person, an outfit and three locations at once.
+
+  do_not_assume: >
+    Never state how a specific video was made without checking its record. The
+    30-second reel looks like a one-image job and used five references; the
+    12-second ones look elaborate and used one. Guessing either way is exactly
+    the confident-wrong answer that costs authority.
+
 # --- Our own published work. Answers "how did you make that?" ---------------
 our_posts:
   "606":

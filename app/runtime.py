@@ -45,6 +45,7 @@ from app.telegram.api import BotAPI, TelegramError
 from app.telegram.classifier import Kind, classify
 from app.telegram.publisher import find_thread_root
 from app.text.lint import CAPTION_CAP
+from app.text.orthography import normalize_apostrophes
 
 log = logging.getLogger("runtime")
 
@@ -179,10 +180,20 @@ class Runtime:
     COMMANDS = ("/pending", "/kutilmoqda", "/holat", "/status")
 
     def handle_admin_command(self, message: dict) -> None:
-        text = (message.get("text") or "").strip().lower().split("@")[0]
+        raw = (message.get("text") or "").strip()
+        text = raw.lower().split("@")[0]
         user_id = (message.get("from") or {}).get("id")
         if self.settings.approver_ids and user_id not in self.settings.approver_ids:
             return
+
+        # Replying to an escalation card delivers that answer to the member.
+        # Checked before the command table so an answer that happens to start
+        # with a slash is still an answer.
+        replied_to = (message.get("reply_to_message") or {}).get("message_id")
+        if replied_to and raw:
+            if self.relay_founder_answer(replied_to, raw):
+                return
+
         if text in ("/pending", "/kutilmoqda"):
             log.info("admin asked for the approval queue")
             self.send_pending_digest()
@@ -193,6 +204,51 @@ class Runtime:
                 f"⏳ Tasdiqlashni kutmoqda: <b>{waiting}</b>\n"
                 f"🛟 Zaxira postlar: <b>{self.store.backup_count()}</b>"
             )
+
+    def relay_founder_answer(self, card_message_id: int, answer: str) -> bool:
+        """Deliver a founder's typed answer into the member's comment thread.
+
+        The escalation used to be one-way: the bot asked, the founders answered
+        in the admin chat, and the answer stopped there because nothing was
+        listening. The member — who asked in public and waited — got nothing.
+
+        Sent verbatim. It is the founders' own sentence, so it is not rewritten,
+        not shortened, and not given the AI-disclosure line: that line exists to
+        stop a reader mistaking machine text for human text, and this is human
+        text. It is recorded with its own decision so the disclosure gate still
+        counts the bot's own replies correctly.
+        """
+        stored = self.store.get_runtime(f"esc:{card_message_id}")
+        if not stored:
+            return False
+
+        link = json.loads(stored)
+        member_message_id = link["member_message_id"]
+        if self.dry_run:
+            log.info("[dry-run] would relay founder answer to %s", member_message_id)
+            return True
+
+        try:
+            sent = self.api.send_message(
+                self.settings.discussion_group_id,
+                normalize_apostrophes(answer),
+                reply_to_message_id=member_message_id,
+            )
+        except TelegramError as exc:
+            log.warning("could not relay the founder answer: %s", exc)
+            self._alert(f"⚠️ Javobingizni yetkaza olmadim: <code>{escape(str(exc))}</code>")
+            return True
+
+        self.store.record_comment(
+            member_message_id, link["thread_id"],
+            author_id=None, author_name=link.get("author", "?"),
+            text="", script="", decision="founder_reply",
+            reply_message_id=sent["message_id"], reply_text=answer,
+        )
+        self.store.set_runtime(f"esc:{card_message_id}", "")
+        log.info("relayed a founder answer to member message %s", member_message_id)
+        self._alert(f"✅ Javobingiz <b>{escape(link.get('author', '?'))}</b> ga yuborildi.")
+        return True
 
     def handle_comment(self, message: dict, batch: list[dict] | None = None) -> None:
         roots = self.store.known_roots()
@@ -371,7 +427,8 @@ class Runtime:
             log.info("escalation (not sent): %s", draft.needs_from_founders)
             return
 
-        card = f"{NEEDS_YOU}\n\n{to_admin_card(ctx, draft)}"
+        card = (f"{NEEDS_YOU}\n\n{to_admin_card(ctx, draft)}"
+                f"\n\n<i>↩️ Shu xabarga javob yozing — men uni aʼzoga yetkazaman.</i>")
         if finding is not None and finding.searched:
             # Raising a question with the legwork already done is the difference
             # between "someone asked about pricing" and "here is what the web
@@ -384,7 +441,17 @@ class Runtime:
             )
             if finding.source_url:
                 card += f"\n\n{escape(finding.source_url)}"
-        self.api.send_message(self.settings.admin_chat_id, card, parse_mode="HTML")
+        sent = self.api.send_message(self.settings.admin_chat_id, card, parse_mode="HTML")
+
+        # Remember which member this card is about, so replying to it in the
+        # admin chat delivers the answer into the right comment thread. Without
+        # this the founders' answers went nowhere — they were typed into a DM the
+        # bot was not listening to.
+        self.store.set_runtime(f"esc:{sent['message_id']}", json.dumps({
+            "member_message_id": ctx.target.message_id,
+            "thread_id": getattr(ctx, "thread_root_id", None) or 0,
+            "author": ctx.target.author,
+        }))
 
     def handle_callback(self, query: dict) -> None:
         action, slot_key = approval.parse_callback(query.get("data", ""))

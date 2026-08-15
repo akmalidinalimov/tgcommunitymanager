@@ -37,7 +37,10 @@ class FakeAPI:
 
     def send_message(self, chat_id, text, **kw):
         self._next_id += 1
-        self.sent.append({"chat_id": chat_id, "text": text, **kw})
+        # Record the id Telegram would have assigned: the escalation link is
+        # keyed on it, so a fake that drops it cannot exercise the relay.
+        self.sent.append({"chat_id": chat_id, "text": text,
+                          "message_id": self._next_id, **kw})
         return {"message_id": self._next_id}
 
     def upload_photo(self, chat_id, image, **kw):
