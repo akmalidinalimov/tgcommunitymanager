@@ -1,0 +1,78 @@
+# Posts written by hand for a specific slot. These win over the Writer.
+#
+# Everything downstream is unchanged: a planned post still goes to Shahlo for
+# approval, still publishes through the same path, still falls back to the
+# backup pool if nobody approves it. The only difference is where the words
+# came from.
+#
+# Lint runs at load, not at publish. A hand-written post can break the caption
+# cap or carry a banned construction exactly like a generated one, and finding
+# that out at 10:00 on the day is finding out too late — a post that fails is
+# refused here and the slot falls through to the Writer.
+#
+# `asset` is a media-library id, or `card` to render one on the VPS.
+
+posts:
+  "2026-08-17_10:00":
+    kind: technique
+    asset: uzum-tea-set-card
+    note: >
+      Opens by correcting the myth rather than repeating it. The proof is the
+      visual itself — a marketplace card a seller would actually pay for, not a
+      demo — so the claim is commercially useful rather than a curiosity.
+    text: |
+      «AI oʻzbekcha yozolmaydi» — buni tez-tez eshitamiz. Biz sinab koʻrdik.
+
+      Tepadagi karta — marketpleys uchun mahsulot kartasi. Rasmni ham, ustidagi yozuvni ham GPT Image 2 chiqargan. «6 KISHILIK TOʻPLAM» dagi oʻ joyida turibdi.
+
+      Butun gap bitta jumlada: promptda «reading exactly:» deb yozasiz va matnni aynan koʻchirasiz. Shunchaki «mahsulot kartasi» desangiz, model oʻzi biror inglizcha soʻz oʻylab topadi.
+
+      Sotuvchi chiroyli rasmga emas, mana shunday kartaga pul toʻlaydi.
+
+      Toʻliq promptni birinchi kommentga qoʻydim. Bugun oʻz mahsulotingizga bittasini qiling va shu yerga tashlang 👇
+    seed_comment: |
+      Prompt shu. Mahsulot va yozuvni oʻzingiznikiga almashtiring — «reading exactly:» qismini tegmang.
+
+      A wide product banner for an Uzbek marketplace. Right two thirds: the product. Left third: a clean text column.
+
+      PRODUCT: Uzbek ceramic tea bowls and a matching teapot, glossy white porcelain, deep cobalt cotton-flower pattern. Four bowls stacked, one tipped forward so the pattern inside is readable.
+
+      BACKGROUND: pale cream to warm sand gradient, soft contact shadow under the group.
+
+      TEXT, left third:
+      - cobalt badge reading exactly: -35%
+      - large headline reading exactly: 6 KISHILIK TOʻPLAM
+      - smaller text reading exactly: BEPUL YETKAZIB BERISH
+      No other words in the frame.
+
+      LIGHT: one softbox from camera-left. 100mm at f/8.
+
+  "2026-08-17_21:00":
+    kind: commercial_craft
+    asset: uzum-card-annotated
+    note: >
+      The second half of Monday. Morning showed how the card was made; this shows
+      why a business pays for it. The four numbered callouts on the image match
+      the four numbered lines in the caption, so the reader sees decision 3 while
+      reading decision 3. CTA has four defensible answers, so it is a real
+      question rather than a rhetorical one.
+    text: |
+      Ertalab kartani koʻrsatdim. Endi eng muhim qismi — nega u aynan shunday.
+
+      Sotuvchi sizga rasm uchun emas, mana shu toʻrtta qaror uchun pul toʻlaydi:
+
+      1️⃣ Chegirma yorligʻi chap yuqorida. Koʻz birinchi oʻsha yerga tushadi.
+
+      2️⃣ Sarlavhada mahsulot nomi emas, xaridor nima olishi: «6 kishilik toʻplam».
+
+      3️⃣ «Bepul yetkazib berish» kartaning oʻzida. Xarid qarorini koʻpincha shu yopadi.
+
+      4️⃣ Bitta rang oilasi. Karta katalogda begona boʻlib koʻrinmaydi.
+
+      Rasm chiqarishni hamma oʻrganadi. Bu qarorlarni kim qila oladi — oʻsha pul oladi.
+
+      Sizningcha qaysi biri eng koʻp sotadi? Bitta raqam yozing 👇
+    seed_comment: |
+      Toʻrttasidan bittasi eng koʻp bahs tugʻdiradi: sarlavhada mahsulot nomi emas, xaridor nima olishi.
+
+      «Choy servizi» — bu nom. «6 kishilik toʻplam» — bu xaridor uyiga nima kelishi. Ikkinchisi sotadi.

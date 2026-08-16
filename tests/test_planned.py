@@ -1,0 +1,166 @@
+"""Hand-written posts, and the seed comment that was being thrown away."""
+
+from __future__ import annotations
+
+from datetime import datetime
+from types import SimpleNamespace
+
+import pytest
+
+from app.runtime import Runtime
+from app.spine.planned import PlannedPost, load
+from app.spine.scheduler import Slot
+from app.spine.states import Content, State
+from app.spine.store import Store
+from tests.test_runtime import BOT, CHANNEL, FakeAPI, GROUP, SETTINGS, TASHKENT, auto_forward
+
+
+@pytest.fixture
+def rt(tmp_path):
+    return Runtime(settings=SETTINGS, store=Store(tmp_path / "p.db"),
+                   api=FakeAPI(), bot_id=BOT)
+
+
+def write_plan(tmp_path, body: str):
+    p = tmp_path / "planned.yaml"
+    p.write_text(body, encoding="utf-8")
+    return p
+
+
+# --- loading ----------------------------------------------------------------
+
+
+def test_a_planned_post_is_loaded_for_its_slot(tmp_path):
+    plan = write_plan(tmp_path, """
+posts:
+  "2026-08-17_10:00":
+    kind: technique
+    asset: uzum-tea-set-card
+    text: |
+      Bugun bitta kadr oling.
+    seed_comment: |
+      Prompt shu yerda.
+""")
+    got = load(plan)
+    assert set(got) == {"2026-08-17_10:00"}
+    assert got["2026-08-17_10:00"].asset == "uzum-tea-set-card"
+    assert got["2026-08-17_10:00"].seed_comment.startswith("Prompt")
+
+
+def test_a_planned_post_that_fails_lint_is_refused_not_published(tmp_path):
+    """A hand-typed post reaches 3,326 people exactly like a generated one.
+    Refusing at load means the slot falls through to the Writer instead of
+    publishing something over the caption cap at 10:00 on the day."""
+    plan = write_plan(tmp_path, 'posts:\n  "2026-08-17_10:00":\n    text: |\n      '
+                                + ("x" * 2000) + "\n")
+    assert load(plan) == {}
+
+
+def test_an_empty_planned_post_is_ignored(tmp_path):
+    assert load(write_plan(tmp_path, 'posts:\n  "2026-08-17_10:00":\n    text: ""\n')) == {}
+
+
+def test_a_missing_file_is_not_an_error():
+    assert load(__import__("pathlib").Path("nope.yaml")) == {}
+
+
+def test_the_shipped_plan_is_valid():
+    """The real file, so a typo in it fails here rather than in the channel."""
+    for key, post in load().items():
+        assert not post.problems, f"{key}: {post.problems}"
+        assert post.text and post.kind
+
+
+# --- using one --------------------------------------------------------------
+
+
+def test_a_planned_slot_skips_the_writer(rt, monkeypatch):
+    slot = Slot(datetime(2026, 8, 17, 10, 0, tzinfo=TASHKENT))
+    monkeypatch.setattr("app.runtime.slots_needing_approval", lambda *a, **k: [slot])
+    monkeypatch.setattr("app.runtime.load_planned", lambda: {
+        slot.key: PlannedPost(slot_key=slot.key, kind="technique",
+                              text="Rejalashtirilgan matn", seed_comment="Izoh",
+                              asset="uzum-tea-set-card")})
+    monkeypatch.setattr("app.runtime.write_post",
+                        lambda *a, **k: pytest.fail("the Writer must not run for a planned slot"))
+
+    rt.prepare_upcoming()
+
+    content = rt.store.get_content(slot.key)
+    assert content.text == "Rejalashtirilgan matn"
+    assert content.state is State.PENDING_APPROVAL
+    assert content.media_paths == ["uzum-tea-set-card"]
+    assert content.seed_comment == "Izoh"
+
+
+def test_an_unplanned_slot_still_uses_the_writer(rt, monkeypatch):
+    slot = Slot(datetime(2026, 8, 18, 10, 0, tzinfo=TASHKENT))
+    monkeypatch.setattr("app.runtime.slots_needing_approval", lambda *a, **k: [slot])
+    monkeypatch.setattr("app.runtime.load_planned", lambda: {})
+    monkeypatch.setattr("app.runtime.write_post", lambda kind, **k: SimpleNamespace(
+        ok=True, text="yozilgan", kind=kind, problem="", seed_comment="izoh"))
+
+    rt.prepare_upcoming()
+    assert rt.store.get_content(slot.key).text == "yozilgan"
+
+
+# --- seeding ----------------------------------------------------------------
+
+
+def published(store, slot_key="2026-08-17_10:00", seed="Birinchi izoh"):
+    c = Content(slot_key=slot_key, kind="technique", text="post", seed_comment=seed)
+    store.save_content(c)
+    store.record_thread(606, 0, slot_key=slot_key)
+    return c
+
+
+def test_the_seed_comment_is_posted_when_the_thread_opens(rt):
+    """The auto-forward is the only moment the thread mapping exists, so it is
+    the only moment the seed can be placed."""
+    published(rt.store)
+    rt.handle_update(auto_forward(group_msg_id=3, channel_msg_id=606))
+
+    seeded = [s for s in rt.api.sent if s["chat_id"] == GROUP]
+    assert seeded, "the thread was never seeded"
+    assert "Birinchi izoh" in seeded[0]["text"]
+    assert seeded[0]["reply_to_message_id"] == 3, (
+        "must reply to the forwarded message — message_thread_id is ignored on send")
+
+
+def test_the_seed_carries_the_ai_disclosure(rt):
+    """It is the bot's first message in the thread, so Art. 50 applies."""
+    from app.agents.replier import AI_DISCLOSURE
+
+    published(rt.store)
+    rt.handle_update(auto_forward(group_msg_id=3, channel_msg_id=606))
+    assert AI_DISCLOSURE in [s for s in rt.api.sent if s["chat_id"] == GROUP][0]["text"]
+
+
+def test_a_post_with_no_seed_comment_opens_no_thread_chatter(rt):
+    published(rt.store, seed="")
+    rt.handle_update(auto_forward(group_msg_id=3, channel_msg_id=606))
+    assert not [s for s in rt.api.sent if s["chat_id"] == GROUP]
+
+
+def test_a_forward_we_did_not_publish_is_not_seeded(rt):
+    """Founders post to the channel by hand too. Those threads are not ours."""
+    rt.handle_update(auto_forward(group_msg_id=3, channel_msg_id=999))
+    assert not [s for s in rt.api.sent if s["chat_id"] == GROUP]
+
+
+def test_the_seeded_message_id_is_recorded(rt):
+    published(rt.store)
+    rt.handle_update(auto_forward(group_msg_id=3, channel_msg_id=606))
+    row = rt.store._conn.execute(
+        "SELECT seeded_message_id FROM threads WHERE channel_message_id=606").fetchone()
+    assert row["seeded_message_id"]
+
+
+def test_the_seed_survives_a_restart(tmp_path):
+    """It is written at draft time and read at publish time, hours apart."""
+    path = tmp_path / "s.db"
+    with Store(path) as s:
+        s.save_content(Content(slot_key="2026-08-17_10:00", kind="technique",
+                               text="post", seed_comment="saqlangan izoh"))
+    with Store(path) as s:
+        assert s.get_content("2026-08-17_10:00").seed_comment == "saqlangan izoh"

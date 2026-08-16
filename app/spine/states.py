@@ -67,6 +67,11 @@ class Content:
     slot_key: str
     kind: str
     text: str = ""
+    seed_comment: str = ""
+    """The bot's own first comment, posted into the thread once Telegram
+    announces the auto-forward. The Writer produced one on every draft and it was
+    dropped on the floor here — so the mechanism meant to open a comment section
+    that has never been used had never actually run."""
     state: State = State.DRAFTING
     revision_rounds: int = 0
     media_paths: list[str] = field(default_factory=list)

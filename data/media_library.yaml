@@ -299,3 +299,41 @@ assets:
   refs: 0
   multi_shots: false
   provenance: higgsfield record, read 2026-08-16
+- id: uzum-tea-set-card
+  url: https://d8j0ntlcm91z4.cloudfront.net/user_2zJUonmh6cW6tDKlBEl4CIohbsI/hf_20260816_104350_d82aaf16-187c-4071-ab85-072216a9f8a0.png
+  kind: photo
+  model: gpt_image_2
+  shows:
+  - marketplace product card
+  - uzbek ceramic tea set
+  - paxta-gul cobalt pattern
+  - 6 KISHILIK TOʻPLAM headline
+  - okina rendered correctly
+  - -35% badge
+  good_for:
+  - technique
+  - commercial_craft
+  - why_content
+  aspect: '16:9'
+  resolution: 2k
+  refs: 0
+  expires: true
+  provenance: higgsfield job d82aaf16, generated 2026-08-16; okina in TOʻPLAM verified by eye at 2x crop
+- id: uzum-card-annotated
+  url: https://d8j0ntlcm91z4.cloudfront.net/user_2zJUonmh6cW6tDKlBEl4CIohbsI/hf_20260816_210417_9eaa87f0-3dbb-4d22-b64c-39d55d6cdb5b.png
+  kind: photo
+  model: gpt_image_2
+  shows:
+  - annotated product card
+  - four numbered callouts
+  - Chegirma yorligʻi
+  - Foyda, nom emas
+  - design case study
+  good_for:
+  - commercial_craft
+  - why_content
+  aspect: '16:9'
+  resolution: 2k
+  refs: 0
+  expires: true
+  provenance: higgsfield job 9eaa87f0, generated 2026-08-16; all labels verified by eye

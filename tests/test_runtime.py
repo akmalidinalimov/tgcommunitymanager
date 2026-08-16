@@ -641,7 +641,7 @@ def test_asking_for_a_rewrite_actually_redrafts_the_slot(rt, monkeypatch):
     monkeypatch.setattr("app.runtime.slots_needing_approval", lambda *a, **k: [slot])
     monkeypatch.setattr("app.runtime.write_post",
                         lambda kind, **k: SimpleNamespace(
-                            ok=True, text="qayta yozilgan post", kind=kind, problem=""))
+                            ok=True, text="qayta yozilgan post", kind=kind, problem="", seed_comment=""))
 
     rt.prepare_upcoming()
     assert rt.store.get_content(slot.key).state is State.PENDING_APPROVAL
@@ -654,7 +654,7 @@ def test_a_rewrite_loop_is_bounded_by_max_redrafts(rt, monkeypatch):
     calls = []
     monkeypatch.setattr("app.runtime.write_post",
                         lambda kind, **k: (calls.append(kind), SimpleNamespace(
-                            ok=False, text="yomon", kind=kind, problem="lint"))[1])
+                            ok=False, text="yomon", kind=kind, problem="lint", seed_comment=""))[1])
 
     for _ in range(MAX_REDRAFTS + 3):
         rt.prepare_upcoming()

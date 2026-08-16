@@ -27,6 +27,7 @@ CREATE TABLE IF NOT EXISTS content (
     slot_key              TEXT PRIMARY KEY,
     kind                  TEXT NOT NULL,
     text                  TEXT NOT NULL DEFAULT '',
+    seed_comment          TEXT NOT NULL DEFAULT '',
     state                 TEXT NOT NULL,
     revision_rounds       INTEGER NOT NULL DEFAULT 0,
     media_paths           TEXT NOT NULL DEFAULT '[]',
@@ -102,6 +103,14 @@ class Store:
         if "reply_text" not in existing:
             self._conn.execute("ALTER TABLE comments ADD COLUMN reply_text TEXT")
 
+        # CREATE TABLE IF NOT EXISTS does nothing to a table that already exists,
+        # so a new column in SCHEMA never reaches a live database. The volume on
+        # the VPS holds one; without this the first save after deploy fails.
+        content_cols = {r[1] for r in self._conn.execute("PRAGMA table_info(content)")}
+        if "seed_comment" not in content_cols:
+            self._conn.execute(
+                "ALTER TABLE content ADD COLUMN seed_comment TEXT NOT NULL DEFAULT ''")
+
     def close(self) -> None:
         self._conn.close()
 
@@ -126,19 +135,20 @@ class Store:
 
     def save_content(self, c: Content) -> None:
         self._conn.execute(
-            """INSERT INTO content (slot_key, kind, text, state, revision_rounds,
+            """INSERT INTO content (slot_key, kind, text, seed_comment, state, revision_rounds,
                    media_paths, history, approved_by, approved_at,
                    published_message_id, updated_at)
-               VALUES (?,?,?,?,?,?,?,?,?,?,?)
+               VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
                ON CONFLICT(slot_key) DO UPDATE SET
-                   kind=excluded.kind, text=excluded.text, state=excluded.state,
+                   kind=excluded.kind, text=excluded.text,
+                   seed_comment=excluded.seed_comment, state=excluded.state,
                    revision_rounds=excluded.revision_rounds,
                    media_paths=excluded.media_paths, history=excluded.history,
                    approved_by=excluded.approved_by, approved_at=excluded.approved_at,
                    published_message_id=excluded.published_message_id,
                    updated_at=excluded.updated_at""",
             (
-                c.slot_key, c.kind, c.text, c.state.value, c.revision_rounds,
+                c.slot_key, c.kind, c.text, c.seed_comment, c.state.value, c.revision_rounds,
                 json.dumps(c.media_paths),
                 json.dumps([[a.value, b.value, r] for a, b, r in c.history]),
                 c.approved_by,
@@ -166,6 +176,7 @@ class Store:
             slot_key=row["slot_key"],
             kind=row["kind"],
             text=row["text"],
+            seed_comment=row["seed_comment"] if "seed_comment" in row.keys() else "",
             state=State(row["state"]),
             revision_rounds=row["revision_rounds"],
             media_paths=json.loads(row["media_paths"]),
@@ -202,6 +213,14 @@ class Store:
     def known_roots(self) -> set[int]:
         """Every thread root seen. The only valid keys for thread resolution."""
         return {r[0] for r in self._conn.execute("SELECT group_root_id FROM threads")}
+
+    def slot_for_post(self, channel_message_id: int) -> str | None:
+        """Which slot published this channel post, if this bot published it."""
+        row = self._conn.execute(
+            "SELECT slot_key FROM threads WHERE channel_message_id=?",
+            (channel_message_id,),
+        ).fetchone()
+        return row["slot_key"] if row else None
 
     def root_for_post(self, channel_message_id: int) -> int | None:
         row = self._conn.execute(

@@ -58,7 +58,7 @@ def test_drafting_binds_a_card_when_no_photograph_matches(rt, monkeypatch):
     monkeypatch.setattr("app.runtime.pick_asset", lambda kind, used=None: None)
     monkeypatch.setattr("app.runtime.write_post",
                         lambda kind, **k: SimpleNamespace(
-                            ok=True, text=POST, kind=kind, problem=""))
+                            ok=True, text=POST, kind=kind, problem="", seed_comment="birinchi izoh"))
 
     rt.prepare_upcoming()
 

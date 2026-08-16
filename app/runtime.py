@@ -35,6 +35,7 @@ from app.media import cards
 from app.media.library import get as asset_by_id
 from app.media.library import pick as pick_asset
 from app.spine import approval
+from app.spine.planned import load as load_planned
 from app.spine.scheduler import (
     Slot, due_slots, next_slot, now_tashkent, slot_from_key,
     slots_needing_approval,
@@ -167,6 +168,7 @@ class Runtime:
             if result.origin_message_id:
                 self.store.record_thread(result.origin_message_id, message["message_id"])
                 log.info("thread root %s -> post %s", message["message_id"], result.origin_message_id)
+                self.seed_thread(result.origin_message_id, message["message_id"])
             return
 
         if result.kind is not Kind.HUMAN or self.store.seen_comment(message["message_id"]):
@@ -240,6 +242,41 @@ class Runtime:
         log.info("%s edited by hand in the admin chat", slot_key)
         self._alert(f"✏️ <b>{escape(slot_key)}</b> yangilandi. Tasdiqlang:")
         self._send_for_approval(content, slot)
+        return True
+
+    def seed_thread(self, channel_message_id: int, group_root_id: int) -> bool:
+        """Post the bot's own first comment into a freshly opened thread.
+
+        The auto-forward is the only moment the post-to-thread mapping exists, so
+        this is also the only moment the seed can be placed. It must be a reply to
+        the forwarded message — `message_thread_id` on send is silently ignored
+        and the comment lands in the group's main feed in front of everyone.
+
+        This is the north-star mechanism. The discussion group has three members
+        against the channel's 3,326 because the comment section has effectively
+        never been used, and an empty section is the hardest one to be first in.
+        """
+        slot_key = self.store.slot_for_post(channel_message_id)
+        content = self.store.get_content(slot_key) if slot_key else None
+        if not content or not content.seed_comment.strip():
+            return False
+        if self.dry_run:
+            log.info("[dry-run] would seed thread %s", group_root_id)
+            return True
+
+        try:
+            seeded = self.api.send_message(
+                self.settings.discussion_group_id,
+                with_disclosure(content.seed_comment, first_in_thread=True),
+                reply_to_message_id=group_root_id,
+            )
+        except TelegramError as exc:
+            log.warning("could not seed thread %s: %s", group_root_id, exc)
+            return False
+
+        self.store.record_thread(channel_message_id, group_root_id,
+                                 slot_key=slot_key, seeded_message_id=seeded["message_id"])
+        log.info("seeded thread %s for %s", group_root_id, slot_key)
         return True
 
     def relay_founder_answer(self, card_message_id: int, answer: str) -> bool:
@@ -659,6 +696,22 @@ class Runtime:
                          slot.key, existing.state.value, attempts + 1)
 
             kind = kind_for(slot)
+
+            # A post the founders wrote themselves wins over the Writer. It has
+            # already passed lint in planned.load(), so it goes straight to
+            # approval rather than through the critic loop.
+            planned = load_planned().get(slot.key)
+            if planned:
+                log.info("%s uses a planned post (%s)", slot.key, planned.kind)
+                content = Content(slot_key=slot.key, kind=planned.kind,
+                                  text=planned.text, seed_comment=planned.seed_comment)
+                content.attach_media(planned.asset or CARD)
+                content.submit_for_approval()
+                self.store.save_content(content)
+                self._send_for_approval(content, slot)
+                log.info("approval card sent for %s (planned)", slot.key)
+                continue
+
             log.info("drafting %s for %s", kind, slot.key)
             post = write_post(
                 kind,
@@ -666,7 +719,8 @@ class Runtime:
                 brief=POST_KINDS.get(kind),
                 recent=[c.text for c in self.store.content_in_state(State.PUBLISHED)][-5:],
             )
-            content = Content(slot_key=slot.key, kind=kind, text=post.text)
+            content = Content(slot_key=slot.key, kind=kind, text=post.text,
+                              seed_comment=post.seed_comment)
 
             if not post.ok:
                 # Never silently ship what the critic would not pass.
