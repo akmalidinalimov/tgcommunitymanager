@@ -135,6 +135,8 @@ STYLES: dict[str, CardStyle] = {
     "poll": CardStyle("SOʻROVNOMA"),
     "technique": CardStyle("USUL"),
     "news": CardStyle("AI YANGILIKLARI"),
+    "commercial_craft": CardStyle("BIZNES UCHUN"),
+    "why_content": CardStyle("NEGA SHUNDAY"),
 }
 DEFAULT_STYLE = CardStyle("AI CREATORS")
 

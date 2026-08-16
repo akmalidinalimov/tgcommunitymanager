@@ -47,6 +47,7 @@ class FakeAPI:
         self._next_id += 1
         self.sent.append({"chat_id": chat_id, "media": "<rendered card>",
                           "media_kind": "card", "card_bytes": len(image),
+                          "message_id": self._next_id,
                           "text": kw.get("caption") or "", **kw})
         return {"message_id": self._next_id}
 
@@ -59,6 +60,7 @@ class FakeAPI:
     def _media(self, chat_id, url, kind, **kw):
         self._next_id += 1
         self.sent.append({"chat_id": chat_id, "media": url, "media_kind": kind,
+                          "message_id": self._next_id,
                           "text": kw.get("caption") or "", **kw})
         return {"message_id": self._next_id}
 

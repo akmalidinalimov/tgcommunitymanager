@@ -69,13 +69,12 @@ def test_card_copy_survives_a_single_line_post():
 
 
 def test_every_scheduled_post_kind_has_a_card_style():
-    """A kind with no style still renders, but it gets a generic eyebrow — worth
-    knowing about rather than discovering in the channel."""
+    """A kind with no style falls back to a generic eyebrow. Every kind the
+    weekly grid can schedule now has its own."""
     from app.runtime import WEEKLY_PLAN
 
     missing = sorted({k for k in WEEKLY_PLAN.values() if k not in cards.STYLES})
-    assert missing == ["commercial_craft", "why_content"], (
-        f"unexpected kinds without a card style: {missing}")
+    assert not missing, f"kinds with no card style: {missing}"
 
 
 def test_a_card_renders_for_the_kinds_that_have_no_photograph():

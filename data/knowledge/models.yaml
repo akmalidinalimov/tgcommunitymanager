@@ -140,6 +140,20 @@ models:
     resolution: ["1k", "2k", "4k"]
     good_for: "photorealism, product consistency, diagrams"
 
+  nano_banana_2:
+    name: "Nano Banana 2"
+    provider: Google
+    type: image
+    source: catalog
+    resolution: ["2k"]
+    good_for: "photorealism, portraits"
+    note: >
+      Added 2026-08-16. The portrait comparison asset was labelled
+      nano_banana_pro in the media library while the Higgsfield record says it
+      was generated with nano_banana_2 — so the bot would have described that
+      image using a different model's characteristics. Two distinct models;
+      check the generation record before naming either.
+
   seedream_v4_5:
     name: "Seedream 4.5"
     provider: Bytedance

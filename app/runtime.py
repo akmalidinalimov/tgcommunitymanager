@@ -44,7 +44,7 @@ from app.spine.store import Store
 from app.telegram.api import BotAPI, TelegramError
 from app.telegram.classifier import Kind, classify
 from app.telegram.publisher import find_thread_root
-from app.text.lint import CAPTION_CAP
+from app.text.lint import CAPTION_CAP, blockers, lint
 from app.text.orthography import normalize_apostrophes
 
 log = logging.getLogger("runtime")
@@ -186,12 +186,14 @@ class Runtime:
         if self.settings.approver_ids and user_id not in self.settings.approver_ids:
             return
 
-        # Replying to an escalation card delivers that answer to the member.
-        # Checked before the command table so an answer that happens to start
-        # with a slash is still an answer.
+        # Replying to a card does something with that card. Checked before the
+        # command table so an answer that happens to start with a slash is still
+        # an answer.
         replied_to = (message.get("reply_to_message") or {}).get("message_id")
         if replied_to and raw:
             if self.relay_founder_answer(replied_to, raw):
+                return
+            if self.apply_inline_edit(replied_to, raw):
                 return
 
         if text in ("/pending", "/kutilmoqda"):
@@ -202,8 +204,43 @@ class Runtime:
             self._alert(
                 f"🗓 Keyingi slot: <b>{next_slot().key}</b>\n"
                 f"⏳ Tasdiqlashni kutmoqda: <b>{waiting}</b>\n"
+                f"❓ Javobsiz savollar: <b>{self.unanswered_questions()}</b>\n"
                 f"🛟 Zaxira postlar: <b>{self.store.backup_count()}</b>"
             )
+
+    def apply_inline_edit(self, card_message_id: int, replacement: str) -> bool:
+        """Replace a pending post's text with what the approver just typed.
+
+        ✏️ Qayta yozish costs an LLM round-trip and returns something Shahlo did
+        not write. When one line is wrong, typing the line is faster and exact.
+        The text still goes through the same lint the Writer's output does — a
+        hand-typed post can break the caption cap or the banned constructions
+        just as easily, and it publishes to 3,326 people either way.
+        """
+        slot_key = self.store.get_runtime(f"card:{card_message_id}")
+        if not slot_key:
+            return False
+
+        content = self.store.get_content(slot_key)
+        if not content or content.state is not State.PENDING_APPROVAL:
+            self._alert(f"⚠️ <b>{escape(slot_key)}</b> tahrirlab boʻlmaydi "
+                        f"({content.state.value if content else 'topilmadi'}).")
+            return True
+
+        text = normalize_apostrophes(replacement)
+        problems = blockers(lint(text))
+        if problems:
+            self._alert(f"⚠️ Tahrir qabul qilinmadi:\n\n<code>"
+                        f"{escape('; '.join(str(p) for p in problems))}</code>")
+            return True
+
+        content.set_text(text)
+        self.store.save_content(content)
+        slot = slot_from_key(slot_key)
+        log.info("%s edited by hand in the admin chat", slot_key)
+        self._alert(f"✏️ <b>{escape(slot_key)}</b> yangilandi. Tasdiqlang:")
+        self._send_for_approval(content, slot)
+        return True
 
     def relay_founder_answer(self, card_message_id: int, answer: str) -> bool:
         """Deliver a founder's typed answer into the member's comment thread.
@@ -674,19 +711,57 @@ class Runtime:
                 # Too long to ride as a caption. Show the visual, then the text
                 # with the buttons, rather than silently dropping either.
                 self._deliver(self.settings.admin_chat_id, visual, "")
-                self.api.send_message(self.settings.admin_chat_id, body,
-                                      parse_mode="HTML", reply_markup=buttons)
+                sent = self.api.send_message(self.settings.admin_chat_id, body,
+                                             parse_mode="HTML", reply_markup=buttons)
             else:
                 # The card IS the post: the visual with the caption under it,
                 # exactly as the channel will see it. A preview that differs from
                 # production is worse than no preview.
-                self._deliver(self.settings.admin_chat_id, visual, body,
-                              parse_mode="HTML", reply_markup=buttons)
+                sent = self._deliver(self.settings.admin_chat_id, visual, body,
+                                     parse_mode="HTML", reply_markup=buttons)
         except TelegramError:
             # Left unrecorded on purpose: the next pass retries it.
             log.exception("approval card for %s did not send; will retry", slot.key)
             return False
         self.store.set_runtime(f"card_sent:{slot.key}", now_tashkent().isoformat())
+        if isinstance(sent, dict) and sent.get("message_id"):
+            self.store.set_runtime(f"card:{sent['message_id']}", slot.key)
+        return True
+
+    def unanswered_questions(self) -> int:
+        """Escalations nobody has replied to yet.
+
+        An answered card has its link cleared, so a surviving link is a member
+        still waiting. The count matters more than it sounds: the whole promise
+        is one hour a week, and that only works if the hour is spent on things
+        that are actually waiting rather than on checking whether anything is.
+        """
+        return sum(1 for row in self.store._conn.execute(
+            "SELECT value FROM runtime WHERE key LIKE 'esc:%' AND value != ''"))
+
+    def ping_if_questions_are_waiting(self, *, quiet_hours: int = 6) -> bool:
+        """Nudge the founders when the community is owed an answer.
+
+        Rate-limited hard. A reminder that arrives every fifteen minutes is
+        noise, and noise is how a real alert gets ignored.
+        """
+        waiting = self.unanswered_questions()
+        if not waiting:
+            return False
+
+        last = self.store.get_runtime("last_waiting_ping")
+        now = now_tashkent()
+        if last:
+            since = (now - datetime.fromisoformat(last)).total_seconds()
+            if since < quiet_hours * 3600:
+                return False
+
+        self.store.set_runtime("last_waiting_ping", now.isoformat())
+        self._alert(
+            f"⏳ <b>{waiting} ta savol</b> sizning javobingizni kutmoqda.\n"
+            f"<i>Har biriga shu chatda javob yozsangiz, aʼzoga yetkazaman.</i>"
+        )
+        log.info("pinged the founders about %s unanswered question(s)", waiting)
         return True
 
     def _assets_used(self) -> set[str]:
