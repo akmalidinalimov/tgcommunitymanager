@@ -203,6 +203,21 @@ class BotAPI:
             reply_markup=reply_markup,
         )
 
+    def edit_message_caption(
+        self, chat_id: int | str, message_id: int, caption: str,
+        *, parse_mode: str | None = None, reply_markup: dict | None = None,
+    ) -> dict:
+        """Mutate a media message's caption.
+
+        editMessageText refuses a photo — "there is no text in the message to
+        edit" — so an approval card carrying a visual could never show its own
+        verdict without this.
+        """
+        return self.call(
+            "editMessageCaption", chat_id=chat_id, message_id=message_id,
+            caption=caption, parse_mode=parse_mode, reply_markup=reply_markup,
+        )
+
     def set_message_reaction(
         self, chat_id: int | str, message_id: int, emoji: str, *, is_big: bool = False
     ) -> bool:

@@ -163,6 +163,42 @@ def _wrap(draw, text: str, font, width: int) -> list[str]:
     return lines
 
 
+#: Telegram accepts a 10MB photo upload, against 5MB for one it fetches from a
+#: URL itself. Staying under 9MB leaves room for the multipart envelope.
+MAX_UPLOAD_BYTES = 9_000_000
+
+
+def fetch_image(url: str, *, max_bytes: int = MAX_UPLOAD_BYTES) -> bytes:
+    """Download an asset, shrinking it only if Telegram would refuse the size.
+
+    Re-encoded as JPEG on the way down: these are 2K PNGs of photographic
+    content, where PNG costs several megabytes for no visible benefit.
+    """
+    from io import BytesIO
+
+    from PIL import Image
+
+    from app.net import http_client
+
+    raw = http_client(timeout=120.0).get(url).content
+    if len(raw) <= max_bytes:
+        return raw
+
+    image = Image.open(BytesIO(raw)).convert("RGB")
+    for quality in (88, 80, 70, 60):
+        out = BytesIO()
+        image.save(out, format="JPEG", quality=quality, optimize=True)
+        if out.tell() <= max_bytes:
+            log.info("re-encoded %s bytes to %s at q%s", len(raw), out.tell(), quality)
+            return out.getvalue()
+
+    image.thumbnail((2048, 2048))
+    out = BytesIO()
+    image.save(out, format="JPEG", quality=80, optimize=True)
+    log.warning("downscaled a very large asset to %s bytes", out.tell())
+    return out.getvalue()
+
+
 def card_copy(text: str) -> tuple[str, str]:
     """Split a post into (body, headline) for a card.
 

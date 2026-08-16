@@ -32,6 +32,7 @@ from app.agents.writer import POST_KINDS, write_post
 from app.config import Settings
 from html import escape
 from app.media import cards
+from app.media.cards import fetch_image
 from app.media.library import get as asset_by_id
 from app.media.library import pick as pick_asset
 from app.spine import approval
@@ -541,11 +542,15 @@ class Runtime:
             self.store.save_content(content)
             msg = query.get("message") or {}
             if msg:
+                # A card carrying a visual is a photo with a caption, and
+                # editMessageText refuses one — "there is no text in the message
+                # to edit" — so approving it left the card looking undecided.
+                body = f"{outcome.verdict_line}\n\n{escape(content.text)}"
+                edit = (self.api.edit_message_caption
+                        if msg.get("photo") or msg.get("video")
+                        else self.api.edit_message_text)
                 try:
-                    self.api.edit_message_text(
-                        msg["chat"]["id"], msg["message_id"],
-                        f"{outcome.verdict_line}\n\n{content.text}", parse_mode="HTML",
-                    )
+                    edit(msg["chat"]["id"], msg["message_id"], body, parse_mode="HTML")
                 except TelegramError as exc:
                     log.warning("card edit failed: %s", exc)
 
@@ -720,8 +725,10 @@ class Runtime:
                 content.attach_media(planned.asset or CARD)
                 content.submit_for_approval()
                 self.store.save_content(content)
-                self._send_for_approval(content, slot)
-                log.info("approval card sent for %s (planned)", slot.key)
+                if self._send_for_approval(content, slot):
+                    log.info("approval card sent for %s (planned)", slot.key)
+                else:
+                    log.warning("planned card for %s did not send; will retry", slot.key)
                 continue
 
             log.info("drafting %s for %s", kind, slot.key)
@@ -754,9 +761,11 @@ class Runtime:
 
             content.submit_for_approval()
             self.store.save_content(content)
-            self._send_for_approval(content, slot)
-            log.info("approval card sent for %s (%s) with %s", slot.key, kind,
-                     asset.id if asset else "no media")
+            if self._send_for_approval(content, slot):
+                log.info("approval card sent for %s (%s) with %s", slot.key, kind,
+                         asset.id if asset else "no media")
+            else:
+                log.warning("card for %s did not send; will retry", slot.key)
 
     def _send_for_approval(self, content: Content, slot: Slot) -> bool:
         """Deliver the card, and record delivery only once it has happened.
@@ -866,8 +875,21 @@ class Runtime:
         shape, ref = visual
         if shape == "asset":
             sender = self.api.send_video if ref.is_video else self.api.send_photo
-            return sender(chat_id, ref.url, caption=body, parse_mode=parse_mode,
-                          reply_markup=reply_markup)
+            try:
+                return sender(chat_id, ref.url, caption=body, parse_mode=parse_mode,
+                              reply_markup=reply_markup)
+            except TelegramError as exc:
+                # Telegram fetches a URL itself, and caps photos sent that way at
+                # 5MB — a 2K card crosses that easily, and the only symptom is
+                # "failed to get HTTP URL content". Fetching it here and uploading
+                # the bytes raises the ceiling to 10MB and also survives a CDN
+                # that refuses Telegram's fetcher.
+                if ref.is_video:
+                    raise
+                log.warning("URL send failed (%s); fetching and uploading instead", exc)
+                return self.api.upload_photo(
+                    chat_id, fetch_image(ref.url), filename=f"{ref.id}.jpg",
+                    caption=body, parse_mode=parse_mode, reply_markup=reply_markup)
         if shape == "card":
             return self.api.upload_photo(chat_id, ref, caption=body,
                                          parse_mode=parse_mode, reply_markup=reply_markup)

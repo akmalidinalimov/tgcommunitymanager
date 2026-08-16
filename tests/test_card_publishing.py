@@ -97,3 +97,63 @@ def test_a_broken_renderer_never_costs_the_slot(rt, monkeypatch):
     published = [s for s in rt.api.sent if s["chat_id"] == CHANNEL]
     assert published and published[0]["text"] == "zaxira post"
     assert not published[0].get("media_kind"), "should have degraded to text"
+
+
+# --- Telegram's URL size ceiling --------------------------------------------
+
+
+def test_an_oversized_url_photo_is_fetched_and_uploaded_instead(rt, monkeypatch):
+    """Telegram fetches a URL itself and caps photos sent that way at 5MB. A 2K
+    card crosses it, and the only symptom is "failed to get HTTP URL content" —
+    which is why Monday's 10:00 card never arrived."""
+    from app.media.library import Asset
+    from app.telegram.api import TelegramError
+
+    asset = Asset(id="big", url="https://cdn/big.png", kind="photo",
+                  good_for=("technique",))
+    monkeypatch.setattr("app.runtime.asset_by_id", lambda aid, **k: asset)
+    monkeypatch.setattr("app.runtime.fetch_image", lambda url, **k: b"\x89PNG" + b"x" * 900)
+
+    def refuse_url(chat_id, photo, **kw):
+        raise TelegramError("sendPhoto", "Bad Request: failed to get HTTP URL content", 400)
+
+    monkeypatch.setattr(rt.api, "send_photo", refuse_url)
+
+    c = Content(slot_key="2026-08-17_10:00", kind="technique", text="matn")
+    c.attach_media("big")
+    c.submit_for_approval()
+    rt.store.save_content(c)
+
+    assert rt._send_for_approval(c, Slot(datetime(2026, 8, 17, 10, 0, tzinfo=TASHKENT)))
+    assert any(s.get("media_kind") == "card" for s in rt.api.sent), (
+        "should have fallen back to a byte upload")
+
+
+def test_a_failed_card_is_reported_as_failed(rt, monkeypatch):
+    """prepare_upcoming logged 'approval card sent' unconditionally, so a card
+    that never arrived reported success."""
+    monkeypatch.setattr(rt, "_send_for_approval", lambda *a, **k: False)
+    slot = Slot(datetime(2026, 8, 17, 10, 0, tzinfo=TASHKENT))
+    monkeypatch.setattr("app.runtime.slots_needing_approval", lambda *a, **k: [slot])
+    monkeypatch.setattr("app.runtime.load_planned", lambda: {})
+    monkeypatch.setattr("app.runtime.write_post", lambda kind, **k: SimpleNamespace(
+        ok=True, text="matn", kind=kind, problem="", seed_comment=""))
+
+    rt.prepare_upcoming()
+    assert rt.store.get_runtime(f"card_sent:{slot.key}") is None
+
+
+def test_approving_a_media_card_edits_its_caption_not_its_text(rt):
+    """editMessageText refuses a photo, so the card could never show its verdict."""
+    from tests.test_runtime import ADMIN, callback, pending_content
+
+    edited = []
+    rt.api.edit_message_caption = lambda cid, mid, cap, **kw: edited.append(cap) or {}
+    pending_content(rt.store, "2026-08-17_10:00")
+
+    query = callback("2026-08-17_10:00")
+    query["callback_query"]["message"]["photo"] = [{"file_id": "p"}]
+    rt.handle_update(query)
+
+    assert edited, "a media card must be edited by caption"
+    assert "Tasdiqlandi" in edited[0]
