@@ -672,6 +672,18 @@ class Runtime:
         log.info("preparing: %s slot(s) inside the horizon", len(upcoming))
         for slot in upcoming:
             existing = self.store.get_content(slot.key)
+
+            # A planned post replaces whatever the Writer produced for that slot.
+            # Checked BEFORE the has-content guard: by the time a plan is written
+            # the Writer has usually already drafted and sent a card, and without
+            # this the plan would silently never apply. Approved content is left
+            # alone — what a human said yes to is immutable.
+            plan = load_planned().get(slot.key)
+            if plan and existing and not existing.frozen and existing.text != plan.text:
+                log.info("%s replaced by the planned post", slot.key)
+                self.store.set_runtime(f"card_sent:{slot.key}", "")
+                existing = None
+
             if existing and existing.state not in NEEDS_DRAFTING:
                 log.debug("%s already %s", slot.key, existing.state.value)
                 if (existing.state is State.PENDING_APPROVAL

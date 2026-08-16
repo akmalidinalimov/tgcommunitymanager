@@ -300,16 +300,16 @@ assets:
   multi_shots: false
   provenance: higgsfield record, read 2026-08-16
 - id: uzum-tea-set-card
-  url: https://d8j0ntlcm91z4.cloudfront.net/user_2zJUonmh6cW6tDKlBEl4CIohbsI/hf_20260816_104350_d82aaf16-187c-4071-ab85-072216a9f8a0.png
+  url: https://d8j0ntlcm91z4.cloudfront.net/user_2zJUonmh6cW6tDKlBEl4CIohbsI/hf_20260816_212718_6c8c554c-41d0-4eca-a6ef-088e04018c6f.png
   kind: photo
   model: gpt_image_2
   shows:
   - marketplace product card
   - uzbek ceramic tea set
+  - six bowls in two rows of three
   - paxta-gul cobalt pattern
   - 6 KISHILIK TOʻPLAM headline
   - okina rendered correctly
-  - -35% badge
   good_for:
   - technique
   - commercial_craft
@@ -318,16 +318,16 @@ assets:
   resolution: 2k
   refs: 0
   expires: true
-  provenance: higgsfield job d82aaf16, generated 2026-08-16; okina in TOʻPLAM verified by eye at 2x crop
+  provenance: higgsfield job 6c8c554c, generated 2026-08-16; six bowls counted by eye, okina verified;
+    replaces a five-bowl version that contradicted its own headline
 - id: uzum-card-annotated
-  url: https://d8j0ntlcm91z4.cloudfront.net/user_2zJUonmh6cW6tDKlBEl4CIohbsI/hf_20260816_210417_9eaa87f0-3dbb-4d22-b64c-39d55d6cdb5b.png
+  url: https://d8j0ntlcm91z4.cloudfront.net/user_2zJUonmh6cW6tDKlBEl4CIohbsI/hf_20260816_212944_11bfce2b-4c22-4b92-9075-34d1add8efff.png
   kind: photo
   model: gpt_image_2
   shows:
   - annotated product card
   - four numbered callouts
-  - Chegirma yorligʻi
-  - Foyda, nom emas
+  - six bowls in two rows of three
   - design case study
   good_for:
   - commercial_craft
@@ -336,4 +336,5 @@ assets:
   resolution: 2k
   refs: 0
   expires: true
-  provenance: higgsfield job 9eaa87f0, generated 2026-08-16; all labels verified by eye
+  provenance: higgsfield job 11bfce2b, generated 2026-08-16; six bowls counted, four callouts verified
+    by eye

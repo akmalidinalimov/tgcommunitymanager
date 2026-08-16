@@ -164,3 +164,52 @@ def test_the_seed_survives_a_restart(tmp_path):
                                text="post", seed_comment="saqlangan izoh"))
     with Store(path) as s:
         assert s.get_content("2026-08-17_10:00").seed_comment == "saqlangan izoh"
+
+
+def test_a_planned_post_replaces_what_the_writer_already_drafted(rt, monkeypatch):
+    """By the time a plan is written the Writer has usually already drafted and
+    sent a card. Without this the plan silently never applies."""
+    slot = Slot(datetime(2026, 8, 17, 10, 0, tzinfo=TASHKENT))
+    stale = Content(slot_key=slot.key, kind="technique", text="Writer yozgan matn")
+    stale.submit_for_approval()
+    rt.store.save_content(stale)
+
+    monkeypatch.setattr("app.runtime.slots_needing_approval", lambda *a, **k: [slot])
+    monkeypatch.setattr("app.runtime.load_planned", lambda: {
+        slot.key: PlannedPost(slot_key=slot.key, kind="technique",
+                              text="Rejadagi matn", asset="uzum-tea-set-card")})
+    monkeypatch.setattr("app.runtime.write_post",
+                        lambda *a, **k: pytest.fail("must not redraft a planned slot"))
+
+    rt.prepare_upcoming()
+    assert rt.store.get_content(slot.key).text == "Rejadagi matn"
+
+
+def test_an_approved_post_is_never_replaced_by_a_plan(rt, monkeypatch):
+    """Approved content is immutable — what a human said yes to is what ships."""
+    slot = Slot(datetime(2026, 8, 17, 10, 0, tzinfo=TASHKENT))
+    c = Content(slot_key=slot.key, kind="technique", text="Tasdiqlangan matn")
+    c.submit_for_approval()
+    c.approve(6542876935, (6542876935,), at=datetime(2026, 8, 16, 20, 0, tzinfo=TASHKENT))
+    c.schedule()
+    rt.store.save_content(c)
+
+    monkeypatch.setattr("app.runtime.slots_needing_approval", lambda *a, **k: [slot])
+    monkeypatch.setattr("app.runtime.load_planned", lambda: {
+        slot.key: PlannedPost(slot_key=slot.key, kind="technique", text="Kech keldi")})
+
+    rt.prepare_upcoming()
+    assert rt.store.get_content(slot.key).text == "Tasdiqlangan matn"
+
+
+def test_a_plan_already_applied_is_not_resent_every_pass(rt, monkeypatch):
+    slot = Slot(datetime(2026, 8, 17, 10, 0, tzinfo=TASHKENT))
+    plan = PlannedPost(slot_key=slot.key, kind="technique", text="Bir xil matn",
+                       asset="uzum-tea-set-card")
+    monkeypatch.setattr("app.runtime.slots_needing_approval", lambda *a, **k: [slot])
+    monkeypatch.setattr("app.runtime.load_planned", lambda: {slot.key: plan})
+
+    rt.prepare_upcoming()
+    first = len(rt.api.sent)
+    rt.prepare_upcoming()
+    assert len(rt.api.sent) == first, "the same plan was sent twice"

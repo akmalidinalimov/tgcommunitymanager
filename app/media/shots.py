@@ -102,6 +102,42 @@ CINEMATIC = {
     ),
 }
 
+#: What the model adds that nobody asked for, and what it silently gets wrong.
+#:
+#: Every entry below was found by looking at output, not by reasoning about it.
+#: None of them can be caught downstream: the lint reads the caption, the claims
+#: ledger reads numbers in text, and neither can see inside a PNG.
+COMMERCIAL_GUARDS = {
+    "no_trademarks": (
+        "Ask for a generic product and the model reaches for a real brand. A "
+        "camera came back stamped 'Canon', a shoe with a Nike swoosh — neither "
+        "requested. Shipping that to a client is a legal problem, not a blemish. "
+        "Always: 'no brand names, no logos, no trademarks, no manufacturer "
+        "wordmarks anywhere in the frame.'"
+    ),
+    "no_invented_data": (
+        "Leave a rating, a review count or a price unspecified and the model "
+        "fills it with something plausible. On a listing that is fabricated "
+        "social proof. Specify every number that appears, or forbid numbers."
+    ),
+    "counts_are_not_countable": (
+        "The model reproduces STRINGS faithfully and QUANTITIES not at all. "
+        "'6 KISHILIK TOʻPLAM' over five bowls; saying 'EXACTLY SIX' three ways "
+        "made it worse, producing seven and then eight — emphasis gives it a "
+        "number to anchor on, not a quantity to hit.\n"
+        "  What works is compositional, not verbal: two rows of three, spaced "
+        "apart, each item separate. Small groups are within reach; a stack of "
+        "six is a texture it approximates.\n"
+        "  Better still, do not show a countable set. Anything a customer could "
+        "count or dispute belongs in type you set yourself."
+    ),
+    "copy_and_frame_must_agree": (
+        "Nothing checks a headline against its own picture. If the copy claims "
+        "six, the composition brief must say six — and then you must count them "
+        "in the output before it ships."
+    ),
+}
+
 #: Small physical wrongnesses are what separate a photograph from a render.
 IMPERFECTIONS = (
     "slight motion blur on the moving hand",
