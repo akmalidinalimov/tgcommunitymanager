@@ -261,3 +261,38 @@ def test_the_shipped_poll_card_renders():
     assert post.card_text, "the poll needs its own card text"
     png = cards.render_post(post.kind, post.card_text)
     assert png[:8] == b"\x89PNG\r\n\x1a\n" and len(png) > 5000
+
+
+def test_a_planned_slot_beyond_the_horizon_still_gets_its_card(rt, monkeypatch):
+    """The 36-hour horizon bounds drafting cost. A planned post is already
+    written, so waiting only delays the card and shortens review time."""
+    from app.spine.planned import PlannedPost
+
+    far = Slot(datetime(2026, 8, 25, 21, 0, tzinfo=TASHKENT))   # a week out
+    monkeypatch.setattr("app.runtime.slots_needing_approval", lambda *a, **k: [])
+    monkeypatch.setattr("app.runtime.now_tashkent",
+                        lambda *a, **k: datetime(2026, 8, 17, 14, 0, tzinfo=TASHKENT))
+    monkeypatch.setattr("app.runtime.load_planned", lambda: {
+        far.key: PlannedPost(slot_key=far.key, kind="poll", text="Uzoq post",
+                             asset="uzum-tea-set-card")})
+    monkeypatch.setattr("app.runtime.write_post",
+                        lambda *a, **k: pytest.fail("must not draft a planned slot"))
+
+    rt.prepare_upcoming()
+    assert rt.store.get_content(far.key) is not None, "the planned slot was skipped"
+    assert any(s.get("reply_markup") for s in rt.api.sent), "no card was sent"
+
+
+def test_a_planned_slot_in_the_past_is_not_resurrected(rt, monkeypatch):
+    """Yesterday's plan entry must not produce a card today."""
+    from app.spine.planned import PlannedPost
+
+    past = Slot(datetime(2026, 8, 10, 21, 0, tzinfo=TASHKENT))
+    monkeypatch.setattr("app.runtime.slots_needing_approval", lambda *a, **k: [])
+    monkeypatch.setattr("app.runtime.now_tashkent",
+                        lambda *a, **k: datetime(2026, 8, 17, 14, 0, tzinfo=TASHKENT))
+    monkeypatch.setattr("app.runtime.load_planned", lambda: {
+        past.key: PlannedPost(slot_key=past.key, kind="poll", text="Eski post")})
+
+    rt.prepare_upcoming()
+    assert rt.store.get_content(past.key) is None

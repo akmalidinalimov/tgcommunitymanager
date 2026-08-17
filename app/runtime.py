@@ -684,9 +684,25 @@ class Runtime:
     # --- preparing ----------------------------------------------------------
 
     def prepare_upcoming(self) -> None:
-        """Draft and send for approval anything inside the horizon."""
+        """Draft and send for approval anything inside the horizon.
+
+        Planned slots are included whatever their distance. The 36-hour horizon
+        bounds *drafting* — it stops the Writer burning tokens on a week nobody
+        has reached yet. A planned post is already written, so waiting only
+        delays the card and gives the founders less time to review it.
+        """
         upcoming = slots_needing_approval()
-        log.info("preparing: %s slot(s) inside the horizon", len(upcoming))
+        known = {s.key for s in upcoming}
+        now = now_tashkent()
+        ahead = [
+            slot for key in load_planned()
+            if key not in known and (slot := slot_from_key(key)).at > now
+        ]
+        if ahead:
+            log.info("%s planned slot(s) beyond the horizon: %s",
+                     len(ahead), ", ".join(s.key for s in ahead))
+        upcoming = sorted(upcoming + ahead)
+        log.info("preparing: %s slot(s)", len(upcoming))
         for slot in upcoming:
             existing = self.store.get_content(slot.key)
 
