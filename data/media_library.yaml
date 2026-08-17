@@ -338,3 +338,42 @@ assets:
   expires: true
   provenance: higgsfield job 11bfce2b, generated 2026-08-16; six bowls counted, four callouts verified
     by eye
+- id: uzum-backpack-infographic
+  url: https://d8j0ntlcm91z4.cloudfront.net/user_2zJUonmh6cW6tDKlBEl4CIohbsI/hf_20260817_080854_0ebb66dc-e359-4a3a-ba93-d7ab7f4839df.png
+  kind: photo
+  model: gpt_image_2
+  shows:
+  - infographic product card
+  - charcoal city backpack
+  - four numbered callouts on visible features
+  - SHAHAR RYUKZAGI headline
+  - okina in boʻlimi and oʻtkazmaydigan
+  good_for:
+  - why_content
+  - commercial_craft
+  aspect: '16:9'
+  resolution: 2k
+  refs: 0
+  expires: true
+  provenance: higgsfield job 0ebb66dc, generated 2026-08-17; four callouts each point at a feature actually
+    rendered (unzipped compartment, USB port, fabric, luggage strap); okina verified at 3x crop; no trademarks
+- id: uzum-ui-carousel-uz-169
+  url: https://d8j0ntlcm91z4.cloudfront.net/user_2zJUonmh6cW6tDKlBEl4CIohbsI/hf_20260817_080922_5c1c68ae-c6ea-4b91-9000-9db48d48b3a0.png
+  kind: photo
+  model: gpt_image_2
+  shows:
+  - e-commerce carousel UI in Uzbek
+  - five product cards
+  - thirty interface strings
+  - okina at three type sizes
+  - soʻm prices
+  - Savatga qoʻshish button
+  good_for:
+  - technique
+  aspect: '16:9'
+  resolution: 2k
+  refs: 0
+  expires: true
+  provenance: higgsfield job 5c1c68ae, generated 2026-08-17 at 16:9; every string checked against spec,
+    all five prices and ratings exact, no trademarks. Replaces a 3:2 version that failed the library aspect
+    test
