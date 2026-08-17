@@ -131,3 +131,40 @@ posts:
       «6 kishilik toʻplam» deb yozdim, u 5 ta piyola chizdi. «Aniq oltita» deb uch marta takrorladim — 7 ta, keyin 8 ta chizdi.
 
       Ishlagan yechim boshqacha edi: «uch tadan ikki qator». Sanoqni soʻz bilan emas, kompozitsiya bilan hal qilasiz.
+
+  "2026-08-19_21:00":
+    kind: poll
+    asset: card
+    note: >
+      Written by Akmalidin. Four options: two skill blockers (1,2) and two sales
+      blockers (3,4) — whichever side wins says where the channel should invest.
+      Nothing on the list is shameful, so nobody is pushed toward a safe lie.
+      The verb is "yozing" rather than "belgilang" because the bot cannot send a
+      native Telegram poll; promising a tap that does not exist loses the reader.
+      The seed comment answers first: in a group with three members the hardest
+      comment to get is the first one.
+    card_text: |
+      Sizni nima toʻxtatyapti?
+      1  Hali AI oʻrganyapman
+      2  Sifatimga ishonchim yoʻq
+      3  Mijozni qayerdan topishni bilmayman
+      4  Qancha soʻrashni bilmayman
+    text: |
+      Menda bitta savol bor va javobini faqat sizdan olaman.
+
+      Koʻpchilik AI bilan rasm chiqarishni oʻrganadi, keyin bir joyda toʻxtaydi. Har kimda har xil holat.
+
+      Sizda qaysi biri?
+
+      1️⃣ Hali AI oʻrganyapman — tayyor emasman
+      2️⃣ Sifatim yetarli ekaniga ishonchim yoʻq
+      3️⃣ Mijozni qayerdan topishni bilmayman
+      4️⃣ Qancha soʻrashni bilmayman
+
+      Oʻzingizga mos javob raqamini yozing. Keyingi hafta postlarini koʻp tanlangan javobga qarab yozaman 👇
+    seed_comment: |
+      Menikini ham aytaman: eng koʻp uchraydigani — uchinchisi.
+
+      Odam rasm chiqarishni oʻrganadi, lekin mijoz qayerdaligini bilmaydi. Holbuki ular yaqin: Uzumda sotuvchilar, mahalliy doʻkonlar, kichik brendlar.
+
+      Agar 3 ni tanlasangiz — keyingi hafta shu haqda yozaman.

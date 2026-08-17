@@ -37,6 +37,12 @@ class PlannedPost:
     seed_comment: str = ""
     asset: str = ""
     """Media library id, or 'card' to render one. Empty means pick automatically."""
+    card_text: str = ""
+    """What the rendered card should say, when `asset: card`.
+
+    Without this the card is derived from the post itself, whose first line
+    becomes the headline — right for a technique post, wrong for a poll, where
+    the question belongs on the card and the preamble does not."""
     note: str = ""
 
     @property
@@ -62,6 +68,7 @@ def load(path: Path | None = None) -> dict[str, PlannedPost]:
             text=normalize_apostrophes((entry.get("text") or "").strip()),
             seed_comment=normalize_apostrophes((entry.get("seed_comment") or "").strip()),
             asset=entry.get("asset", ""),
+            card_text=normalize_apostrophes((entry.get("card_text") or "").strip()),
             note=entry.get("note", ""),
         )
         if not post.text:

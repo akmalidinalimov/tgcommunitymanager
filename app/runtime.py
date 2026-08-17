@@ -873,8 +873,13 @@ class Runtime:
         if asset:
             return "asset", asset
         if content and CARD in content.media_paths:
+            # A planned post may say what its card should carry. Read from the
+            # plan at send time rather than persisting it: the plan file is the
+            # source, and this avoids a schema change for one string.
+            plan = load_planned().get(content.slot_key)
+            on_card = plan.card_text if plan and plan.card_text else text
             try:
-                return "card", cards.render_post(kind, text)
+                return "card", cards.render_post(kind, on_card)
             except Exception:
                 # A card is a nice-to-have; the post is not. Never lose a slot
                 # to the renderer.

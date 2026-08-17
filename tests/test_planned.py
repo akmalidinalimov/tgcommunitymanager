@@ -213,3 +213,51 @@ def test_a_plan_already_applied_is_not_resent_every_pass(rt, monkeypatch):
     first = len(rt.api.sent)
     rt.prepare_upcoming()
     assert len(rt.api.sent) == first, "the same plan was sent twice"
+
+
+def test_a_planned_post_can_say_what_its_card_carries(tmp_path):
+    """Without this the card is derived from the post, whose first line becomes
+    the headline — right for a technique post, wrong for a poll."""
+    plan = write_plan(tmp_path, """
+posts:
+  "2026-08-19_21:00":
+    kind: poll
+    asset: card
+    card_text: |
+      Sizni nima toʻxtatyapti?
+      1  Hali oʻrganyapman
+    text: |
+      Menda bitta savol bor.
+""")
+    post = load(plan)["2026-08-19_21:00"]
+    assert post.card_text.startswith("Sizni nima")
+    assert post.asset == "card"
+
+
+def test_the_card_uses_the_planned_card_text_not_the_post(rt, monkeypatch):
+    pytest.importorskip("PIL")
+    from app.spine.planned import PlannedPost
+
+    slot_key = "2026-08-19_21:00"
+    monkeypatch.setattr("app.runtime.load_planned", lambda: {
+        slot_key: PlannedPost(slot_key=slot_key, kind="poll", text="Menda savol bor.",
+                              asset="card", card_text="Sizni nima toʻxtatyapti?\n1  Birinchi")})
+    captured = {}
+    monkeypatch.setattr("app.media.cards.render_post",
+                        lambda kind, text, **k: captured.setdefault("text", text) and b"" or b"x" * 2000)
+
+    c = Content(slot_key=slot_key, kind="poll", text="Menda savol bor.")
+    c.attach_media("card")
+    rt.visual(c, "poll", c.text)
+
+    assert captured["text"].startswith("Sizni nima"), "the card ignored its planned text"
+
+
+def test_the_shipped_poll_card_renders():
+    pytest.importorskip("PIL")
+    from app.media import cards
+
+    post = load()["2026-08-19_21:00"]
+    assert post.card_text, "the poll needs its own card text"
+    png = cards.render_post(post.kind, post.card_text)
+    assert png[:8] == b"\x89PNG\r\n\x1a\n" and len(png) > 5000
