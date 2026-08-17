@@ -677,3 +677,30 @@ def test_resending_binds_a_visual_to_a_card_drafted_without_one(rt, monkeypatch)
 
     assert rt.store.get_content("2026-08-16_21:00").media_paths == ["clip"]
     assert any(s.get("media") for s in rt.api.sent), "resent card still had no visual"
+
+
+def test_every_button_press_is_logged(rt, caplog):
+    """A press decides what reaches 3,326 people. Content state appears only in
+    the boot dump, so without this the only way to answer "did that get
+    approved" was to restart a live bot."""
+    import logging
+
+    pending_content(rt.store, "2026-08-18_21:00")
+    with caplog.at_level(logging.INFO, logger="runtime"):
+        rt.handle_update(callback("2026-08-18_21:00"))
+
+    line = " ".join(r.message for r in caplog.records)
+    assert "approval:" in line
+    assert "2026-08-18_21:00" in line
+    assert str(ADMIN) in line
+    assert "scheduled" in line
+
+
+def test_a_refused_press_is_logged_too(rt, caplog):
+    import logging
+
+    pending_content(rt.store, "2026-08-18_21:00")
+    with caplog.at_level(logging.INFO, logger="runtime"):
+        rt.handle_update(callback("2026-08-18_21:00", user_id=4242))
+
+    assert "approval refused" in " ".join(r.message for r in caplog.records)

@@ -538,6 +538,18 @@ class Runtime:
             at=now_tashkent(),
         )
         self.api.answer_callback_query(query["id"], outcome.toast)
+
+        # A button press decides what reaches 3,326 people and used to leave no
+        # trace anywhere. Content state appears only in the boot dump, so the
+        # only way to answer "did that get approved" was to restart a live bot.
+        who = (query.get("from") or {}).get("id", 0)
+        if outcome.handled and content:
+            log.info("approval: %s pressed %r on %s -> %s",
+                     who, action, slot_key, content.state.value)
+        else:
+            log.info("approval refused: %s pressed %r on %s -> %s",
+                     who, action, slot_key, outcome.toast)
+
         if outcome.handled and content:
             self.store.save_content(content)
             msg = query.get("message") or {}
