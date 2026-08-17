@@ -118,6 +118,34 @@ next slot, queue depth and pool depth.
   worked locally. Always `git check-ignore -v <file>`, in both directions.
 - **Deploying immediately after a push pulls the previous image.** Wait for the build to go green.
 
+## Writing the week by hand
+
+`data/planned_posts.yaml` keys a hand-written post to a slot and **wins over the Writer**,
+replacing whatever it already drafted. Everything downstream is unchanged — still approved by
+Shahlo, still published the same way, still covered by the backup pool. Lint runs at LOAD: a slot
+whose text fails falls through to the Writer rather than shipping something broken at 10:00.
+
+Its `drafts:` section holds finished copy whose visual does not exist yet. `load()` reads only
+`posts:`, so nothing there can publish; move an entry up once its asset is in the library.
+
+**Approval cards are the post** — the visual is bound at DRAFT time and the card is sent as that
+image with the caption under it, so what is approved is what ships. Reply to a card with corrected
+text to replace the post outright (faster than ✏️, which costs an LLM round-trip). Reply to a
+🔴 escalation with an answer and it is relayed into the member's comment thread verbatim.
+
+## Traps found by looking at output, not by reasoning (`COMMERCIAL_GUARDS` in `app/media/shots.py`)
+
+- **The model adds what you did not ask for.** A camera came back stamped *Canon*, a shoe with a
+  Nike swoosh, ratings of 4.6 and 4.8 nobody specified. Always forbid explicitly.
+- **It reproduces strings faithfully and quantities not at all.** «6 KISHILIK TOʻPLAM» over five
+  bowls; saying "EXACTLY SIX" three ways produced seven, then eight. What worked was compositional —
+  *two rows of three, spaced apart*. Anything a customer could count belongs in type you set.
+- **Nothing checks a headline against its own picture.** Lint reads the caption, the claims ledger
+  reads numbers in text, neither can see inside a PNG.
+- **Telegram caps a photo fetched from a URL at 5MB.** A 2K card crosses it; the only symptom is
+  "failed to get HTTP URL content". `_deliver` now falls back to fetching and uploading the bytes.
+- **`editMessageText` refuses a photo.** A card carrying a visual is edited by caption.
+
 ## Current state
 
 **Live on Hostinger VM 1411263** as the `tgcommunitymanager` Compose project, alongside `freelanceai` and
@@ -129,7 +157,7 @@ thread resolver · Replier with grounding gate, script mirroring and react-inste
 missed-run recovery · content state machine · SQLite store · day-ahead approval cards · Writer + Voice
 Critic + mechanical lint + claims ledger · media library with 15 tagged assets · runtime loop · deployment.
 
-**~320 tests**, no credentials or network needed.
+**333 tests**, no credentials or network needed.
 
 Visuals: a library asset when one genuinely matches, otherwise a **card rendered on the VPS**
 (`app/media/cards.py`, Pillow). Cards exist because `challenge`, `recognition` and `behind_scenes`
@@ -141,6 +169,12 @@ approval card is sent as that visual with the post as its caption, so what is ap
 Content standard: posts target 600 chars, hard cap 900 (Telegram truncates captions at 1024). Media is
 16:9, stills 2K, video 720p. Every post ships with a visual when one genuinely matches; a mismatch is worse
 than none, so it falls back to text.
+
+The recurring bug shape, six times in one session: **state recorded instead of outcome verified.**
+The card committed before sending; the revise button moved content to DRAFTING which nothing
+redrafted; the pool never retired a disproved post; the Writer's seed comment was generated and
+discarded; a plan could not override a draft; a failed send logged itself as sent. Every one looked
+healthy and did nothing. Prefer verifying the result over recording the intent.
 
 Not started: M2 Mini App batch review · most of M4 (batch generation, variant contact sheet) · M5 analyst
 and the ~87-post shot-vocabulary content spine.

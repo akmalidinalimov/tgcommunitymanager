@@ -76,3 +76,76 @@ posts:
       Toʻrttasidan bittasi eng koʻp bahs tugʻdiradi: sarlavhada mahsulot nomi emas, xaridor nima olishi.
 
       «Choy servizi» — bu nom. «6 kishilik toʻplam» — bu xaridor uyiga nima kelishi. Ikkinchisi sotadi.
+
+# --- Written and linted, waiting on a visual -------------------------------
+#
+# `load()` reads only `posts:`, so nothing here can publish by accident. Move an
+# entry up into `posts:` once its asset exists in the media library.
+#
+# Both were blocked on 2026-08-17 by the claude.ai connectors returning
+# "Unable to verify organization membership" — Higgsfield AND CHATPLACE alike,
+# so it is the connector session, not the Higgsfield account. Hostinger was
+# unaffected because it authenticates on a different path.
+
+drafts:
+  "2026-08-18_21:00":
+    kind: why_content
+    needs_asset: >
+      Infographic product card, 16:9. A charcoal city backpack, three-quarter
+      view, with FOUR callouts on physically visible features — each a short
+      Uzbek label with a thin leader line:
+        15.6" noutbuk boʻlimi  -> padded compartment, slightly open
+        USB quvvatlash porti   -> the port on the side panel
+        Suv oʻtkazmaydigan mato-> fabric with beaded water
+        Chamadonga mahkamlanadi-> luggage strap on the back
+      Plus a -40% badge, headline SHAHAR RYUKZAGI, spec line 25 L.
+      A backpack was chosen over a thermos because its selling points are
+      physically visible — a thermos's are all invisible insulation, so the
+      callouts would point at nothing. No countable set, so the counting
+      failure cannot recur.
+      STRICT: no brand names, no logos, no trademarks, no invented specs.
+    text: |
+      Xaridor kartaga uch soniya qaraydi. Tavsifni oʻqimaydi — rasmga qaraydi.
+
+      Shu uch soniyada uning uchta savoli bor: nima bu? menga nima beradi? ishonsam boʻladimi?
+
+      Shuning uchun sotadigan kartada yozuv boʻladi. Har bir yozuv bitta savolni yopadi: noutbuk sigʻadimi, suv oʻtadimi, quvvat bormi.
+
+      Chiroyli rasm koʻrsatadi. Sotadigan rasm javob beradi.
+
+      Sotuvchi sizga rasm uchun emas, mana shu javoblar uchun toʻlaydi.
+
+      Sizningcha qaysi javob eng koʻp sotadi? 👇
+    seed_comment: |
+      Kichik qoida: bitta kartada 4 tadan ortiq yozuv boʻlmasin.
+
+      Beshtadan keyin xaridor hech birini oʻqimaydi. Eng kuchli toʻrttasini tanlang — qolganini tavsifga qoldiring.
+
+  "2026-08-19_10:00":
+    kind: technique
+    needs_asset: >
+      The Uzbek e-commerce carousel UI mockup, REGENERATED AT 16:9. One already
+      exists at 3:2 (higgsfield job 02a3c8da, hf_20260816_204854_02a3c8da-...)
+      and every string on it was verified — but 3:2 fails the library's
+      aspect-ratio test and the test was deliberately not weakened to admit it.
+      Same prompt, aspect_ratio 16:9.
+    text: |
+      Bu karusel — bitta prompt bilan chiqdi. Butun interfeys, oʻttizga yaqin yozuv, hammasi oʻzbekcha va toʻgʻri.
+
+      Lekin model men soʻramagan ikkita narsani qoʻshib qoʻydi.
+
+      Birinchisi: fotoapparatga mashhur brend nomini yozdi. Krossovkaga esa mashhur belgini. Men promptda hech qaysisini soʻramagan edim.
+
+      Ikkinchisi: reytinglar. 4.6, 4.8 — bu raqamlarni ham model oʻzi oʻylab topdi.
+
+      Mijozga shunday karta topshirsangiz, bu endi sizning muammoyingiz.
+
+      Yechim bitta qator: «no brand names, no logos, no trademarks, no invented ratings».
+
+      AI sizga soʻramagan narsangizni qoʻshib bergan holat boʻlganmi? 👇
+    seed_comment: |
+      Yana bitta chegara: model sanay olmaydi.
+
+      «6 kishilik toʻplam» deb yozdim, u 5 ta piyola chizdi. «Aniq oltita» deb uch marta takrorladim — 7 ta, keyin 8 ta chizdi.
+
+      Ishlagan yechim boshqacha edi: «uch tadan ikki qator». Sanoqni soʻz bilan emas, kompozitsiya bilan hal qilasiz.
