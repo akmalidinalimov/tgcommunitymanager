@@ -458,7 +458,7 @@ def test_the_approval_card_carries_the_visual_and_the_buttons(rt, monkeypatch):
 
 # --- rejected drafts must not poison their slot ----------------------------
 
-def test_a_rejected_draft_does_not_block_its_slot_forever(rt):
+def test_a_rejected_draft_does_not_block_its_slot_forever(rt, monkeypatch):
     """The check was "does content exist" rather than "is it still viable", so
     one bad draft — produced while the knowledge base was missing — meant that
     slot silently never produced an approval card again. No card, no error, no
@@ -466,6 +466,7 @@ def test_a_rejected_draft_does_not_block_its_slot_forever(rt):
     from app.runtime import MAX_REDRAFTS
     from app.spine.scheduler import slots_needing_approval
 
+    monkeypatch.setattr("app.runtime.load_planned", lambda: {})
     slot = slots_needing_approval()[0]
     dead = Content(slot_key=slot.key, kind="technique", text="bad")
     dead.reject("critic never passed it")
@@ -482,11 +483,12 @@ def test_a_rejected_draft_does_not_block_its_slot_forever(rt):
     assert drafted, "a rejected slot was skipped instead of redrafted"
 
 
-def test_redrafting_is_bounded(rt):
+def test_redrafting_is_bounded(rt, monkeypatch):
     """A genuinely impossible brief must not burn tokens every fifteen minutes."""
     from app.runtime import MAX_REDRAFTS
     from app.spine.scheduler import slots_needing_approval
 
+    monkeypatch.setattr("app.runtime.load_planned", lambda: {})
     slot = slots_needing_approval()[0]
     dead = Content(slot_key=slot.key, kind="technique", text="bad")
     dead.reject("nope")

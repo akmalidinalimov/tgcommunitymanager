@@ -112,19 +112,19 @@ posts:
       gets burned by once. The seed comment carries the counting failure with its
       real numbers.
     text: |
-      Bu karusel — bitta prompt bilan chiqdi. Butun interfeys, oʻttizga yaqin yozuv, hammasi oʻzbekcha va toʻgʻri.
+      Bu karuselni bitta prompt bilan chiqardim. Butun interfeys, oʻttizga yaqin yozuv, hammasi oʻzbekcha va joyida, hatto soʻmdagi narxlar ham toʻgʻri chiqibdi.
 
-      Lekin model men soʻramagan ikkita narsani qoʻshib qoʻydi.
+      Lekin diqqat bilan qaraganimda, model men soʻramagan narsalarni oʻzicha qoʻshib qoʻyganini koʻrdim.
 
-      Birinchisi: fotoapparatga mashhur brend nomini yozdi. Krossovkaga esa mashhur belgini. Men promptda hech qaysisini soʻramagan edim.
+      📌 Fotoapparatning ustiga mashhur brendning nomi yozilgan ekan. Krossovkada ham oʻsha firmaning belgisi turibdi, promptda bunday narsa yoʻq edi.
 
-      Ikkinchisi: reytinglar. 4.6, 4.8 — bu raqamlarni ham model oʻzi oʻylab topdi.
+      📌 Reytinglar ham oʻzidan chiqqan. 4.6, 4.8 degan raqamlarni model oʻylab topgan, men unga hech qanday raqam bermagandim.
 
-      Mijozga shunday karta topshirsangiz, bu endi sizning muammoyingiz.
+      ❗️ Shunday kartani mijozga topshirsangiz, javob berish sizga toʻgʻri keladi. Brend belgisi uchun ham, oʻylab topilgan raqamlar uchun ham.
 
-      Yechim bitta qator: «no brand names, no logos, no trademarks, no invented ratings».
+      ✅ Shunchun har bir promptga bitta qator qoʻshib qoʻyaman: «no brand names, no logos, no invented ratings». Bitta gap, lekin ishini qiladi.
 
-      AI sizga soʻramagan narsangizni qoʻshib bergan holat boʻlganmi? 👇
+      Sizda ham AI soʻramagan narsani qoʻshib bergani boʻlganmi? 👇
     seed_comment: |
       Yana bitta chegara: model sanay olmaydi.
 
