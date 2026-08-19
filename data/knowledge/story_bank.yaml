@@ -1,0 +1,93 @@
+# The founders' own story. Supplied by Akmalidin, 2026-08-19.
+#
+# This is the material `behind_scenes` and `mission` posts are built from, and
+# the ONLY source for anything about the founders. Nothing here may be
+# embellished: an invented detail about a real person's life is worse than an
+# invented product fact, because it cannot be quietly corrected later.
+#
+# Sequencing note. `docs/research/` is explicit that the pratfall effect REVERSES
+# when competence is not yet established — a vulnerability post from someone the
+# reader has not seen work reads as a stranger's biography. Three craft posts
+# published before this arrived, which is why it can run now and could not have
+# run in week one.
+
+meta:
+  source: founder
+  supplied_on: "2026-08-19"
+  supplied_by: Akmalidin
+
+people:
+  shahlo:
+    role_before: "Marketing Specialist, several companies in Sweden"
+    role_now: "marketing, content and the business side"
+    voice: "posts are written in her first person"
+  akmalidin:
+    role_before: "Ericsson, Sweden — close to 10 years, engineer working on 5G"
+    role_now: "engineering, AI, systems"
+
+# --- What actually happened, in order ---------------------------------------
+timeline:
+  - year: 2023
+    what: >
+      Shahlo started an Instagram blog. Two children, jobs, and everything else
+      a family carries. No time to find ideas, write scripts, make images and
+      video. AI entered as a fix for a TIME problem, not out of interest in
+      technology.
+  - what: >
+      Went deeper than using the tools: built workflows, worked with AI agents,
+      integrated AI into business and work processes.
+  - what: >
+      Worked with AI companies in Sweden and Europe — Plenty Labs, Syntx,
+      Internet i Fokus.
+    check_before_publishing: >
+      These are real third parties. Confirm the founders are comfortable naming
+      each publicly before any post does.
+  - date: "2026-05-19"
+    what: "Spoke at the Internet i Fokus conference in Malmö."
+  - date: "2027-01"
+    what: "Invited to speak at the AI Live conference."
+  - date: "2026-09"
+    what: "Invited to speak at ICT Week in Uzbekistan."
+  - what: >
+      Clients started arriving for AI image and video work. Orders grew, and the
+      question that followed was «nega buni faqat oʻzimiz qilamiz?» — which is
+      where the teaching began.
+
+# --- The two-people argument, which is the most useful part for the audience -
+partnership:
+  shahlo: "marketing, content, business"
+  akmalidin: "engineering, technology, AI, system-building"
+  why_it_matters: >
+    Two different skills and two ways of thinking, one goal. Useful to the
+    audience because it says you do not have to be both people — you have to
+    know which one you are, and find the other.
+
+mission:
+  headline: "100,000 people"
+  what_is_taught: >
+    Not tool use. Building income with AI, learning the new professions, building
+    a working workflow, discovering your own ability, and believing you have some.
+  who_for: >
+    Especially people at home with children, who feel they have no room to develop
+    themselves. The point is that you do not have to leave your family or your
+    country for this.
+  line_worth_keeping: >
+    «Sizning hayotingizdagi imkoniyatlar tugamagan. Balki siz hali ularni kashf
+    qilmagansiz.»
+
+# --- Handle with care -------------------------------------------------------
+cautions:
+  income_framing: >
+    The channel's rule holds here too. "Businesses pay X for deliverable Y" is
+    allowed; "you can earn X" is not. The mission may say income is possible; no
+    post may promise an amount.
+  no_student_outcomes: >
+    This bank is about the FOUNDERS. It does not license student results,
+    testimonials or earnings — that rule is unchanged.
+  indistinguishable_claim: >
+    "Visuals you cannot tell from real" is the founders' stated goal, not a
+    measured result. Write it as an aim, never as a proven capability.
+  numbers_need_ledger_rows: >
+    Every date and figure below is founder-stated and must exist as a claims
+    ledger row before a post uses it: 10 years at Ericsson, 2023, 2026-05-19,
+    2027-01, 2026-09, 100,000.

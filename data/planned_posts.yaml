@@ -168,3 +168,37 @@ posts:
       Odam rasm chiqarishni oʻrganadi, lekin mijoz qayerdaligini bilmaydi. Holbuki ular yaqin: Uzumda sotuvchilar, mahalliy doʻkonlar, kichik brendlar.
 
       Agar 3 ni tanlasangiz — keyingi hafta shu haqda yozaman.
+
+  "2026-08-20_21:00":
+    kind: behind_scenes
+    asset: card
+    note: >
+      Story post 1 of 6, from data/knowledge/story_bank.yaml. Runs now and could
+      not have run in week one: the research is explicit that the pratfall effect
+      REVERSES when competence is unestablished, and three craft posts have
+      published first. Written in Shahlo's first person.
+      Deliberately NOT chronology. The reader's question is "is this for someone
+      like me", and the answer is that it started from a time problem, not from
+      an interest in technology. No income promise anywhere — the mission line is
+      saved for post 6, framed the channel's way.
+    card_text: |
+      Hammasi vaqt yetishmaganidan boshlandi
+      Ikkita bola, ish, uy. Kontentga esa vaqt yoʻq edi.
+    text: |
+      2023-yilda Instagramda blog yuritishni boshladim. Oʻsha paytda ikkita bola, ish va uy tashvishlari bor edi, kontentga esa vaqt umuman yetmasdi.
+
+      Gʻoya oʻylash, ssenariy yozish, rasm va video tayyorlash. Bularning har biri alohida ish, men esa kechqurun bir soat topsam katta gap edi.
+
+      Shunda AI ni sinab koʻrdik. Rostini aytsam, texnologiya qiziqtirgani uchun emas, oddiygina vaqtim yetmagani uchun.
+
+      📌 Birinchi oylarda men undan bitta narsani soʻradim, xolos: menga vaqt tejab ber.
+
+      Keyinroq koʻrdikki, bu shunchaki vaqt tejaydigan vosita emas ekan. Ilgari katta studiya, aktyor va videograf talab qilgan ishlarni AI bilan qilsa boʻlarkan.
+
+      Oʻshanda yoʻnalishimiz oʻzgardi. Lekin boshlanishi juda oddiy edi, kechqurun bir soat vaqt topolmaganimdan.
+
+      Sizda kunning qaysi payti oʻzingizga qoladi? 👇
+    seed_comment: |
+      Menikini aytaman: bolalar uxlagandan keyingi bir soat.
+
+      Oʻsha bir soatda hamma narsa qilingan, birinchi promptlar ham, birinchi rasmlar ham.
