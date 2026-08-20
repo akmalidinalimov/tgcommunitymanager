@@ -149,6 +149,14 @@ def lint(text: str, *, banned: dict[str, str] | None = None) -> list[Issue]:
             f"cut to under {POST_TARGET}",
         ))
 
+    stray = stray_cyrillic(text)
+    if stray:
+        issues.append(Issue(
+            Severity.BLOCKER, "Cyrillic letters inside a Latin post",
+            "".join(sorted(set(stray)))[:20],
+            "rewrite the affected words in Latin",
+        ))
+
     if has_wrong_apostrophes(text):
         issues.append(Issue(
             Severity.POLISH, "apostrophes not normalized", "'",
@@ -156,6 +164,32 @@ def lint(text: str, *, banned: dict[str, str] | None = None) -> list[Issue]:
         ))
 
     return issues
+
+
+def stray_cyrillic(text: str) -> str:
+    """Cyrillic characters contaminating a Latin post. Returns them, or "".
+
+    Deliberately one-directional. A Cyrillic post naming `Seedance 2.5` or
+    `GPT Image 2` is correct — tool names stay Latin in both scripts, and the
+    live thread is full of them. The reverse has no innocent reading: Uzbek
+    Latin has no use for Cyrillic letters, so their presence means the model
+    slipped scripts mid-word.
+
+    Found by looking at output. A model wrote `reklama kadriдек` — one Latin
+    stem, one Cyrillic suffix, inside an otherwise clean post. The linter read
+    -moqda, banned constructions and length and saw nothing wrong, because none
+    of those rules are about the alphabet.
+    """
+    from app.text.script import CYRILLIC_RANGES, LATIN_RANGES, _count, _strip_non_language
+
+    body = _strip_non_language(text)
+    latin, cyrillic = _count(body, LATIN_RANGES), _count(body, CYRILLIC_RANGES)
+    if not cyrillic or cyrillic >= latin:
+        return ""
+    return "".join(
+        ch for ch in body
+        if any(lo <= ord(ch) <= hi for lo, hi in CYRILLIC_RANGES)
+    )
 
 
 def blockers(issues: list[Issue]) -> list[Issue]:

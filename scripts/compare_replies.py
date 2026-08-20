@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -57,7 +58,11 @@ def register_tells(text: str) -> list[str]:
     stripped = text.strip()
     lowered = stripped.lower()
 
-    sentences = [s for s in stripped.replace("!", ".").replace("?", ".").split(".") if s.strip()]
+    # A model version is not a sentence boundary. "Seedance 2.5 da qilingan"
+    # was counted as two sentences and reported against both vendors, which is
+    # how a counter loses the right to be believed.
+    prose = re.sub(r"(?<=\d)[.,](?=\d)", "•", stripped)
+    sentences = [s for s in prose.replace("!", ".").replace("?", ".").split(".") if s.strip()]
     if len(sentences) > 1:
         out.append(f"{len(sentences)} sentences (comment register is one)")
 

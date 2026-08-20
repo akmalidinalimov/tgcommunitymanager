@@ -189,3 +189,34 @@ def test_technical_numbers_are_not_claims(text):
 
 def test_a_claim_backed_by_the_ledger_passes():
     assert unsupported_numbers("5000 ta o'quvchi", ledger={"5000"}) == []
+
+
+# --- script contamination -----------------------------------------------------
+#
+# Found by reading a draft, not by reasoning about one. Switching the Writer to
+# GPT produced `reklama kadriдек` — a Latin stem with a Cyrillic suffix, inside
+# an otherwise clean post. Every existing rule passed it, because none of them
+# is about the alphabet.
+
+def test_cyrillic_inside_a_latin_post_is_a_blocker():
+    text = "Mahsulot rasmini reklama kadriдек chiroyli qilib chiqarasiz."
+    found = [i for i in blockers(lint(text)) if "Cyrillic" in i.rule]
+    assert found, "a Latin post with Cyrillic suffixes must not pass"
+
+
+def test_a_cyrillic_post_naming_a_latin_tool_is_fine():
+    # One-directional on purpose. Tool names stay Latin in both scripts and the
+    # live thread is full of them; flagging this would block every correct
+    # Cyrillic reply the bot writes.
+    text = "Бу видеони Seedance 2.5 да қилганмиз, GPT Image 2 эмас"
+    assert not [i for i in blockers(lint(text)) if "Cyrillic" in i.rule]
+
+
+def test_a_clean_latin_post_is_untouched():
+    assert not [i for i in blockers(lint("Zoʻr, prompt boʻyicha chiqibdi")) if "Cyrillic" in i.rule]
+
+
+def test_a_cyrillic_url_does_not_flip_the_verdict():
+    # Links are stripped before counting, the same way script detection does it.
+    assert not [i for i in blockers(lint("Havola: https://example.uz/страница"))
+                if "Cyrillic" in i.rule]
