@@ -60,7 +60,23 @@ the VPS (the connector is session-bound). The VPS bot only publishes assets alre
   cannot inspect. Switching vendors needs a key and a compose env change, nothing else. Preflight
   refuses to boot if `REPLY_MODEL` names a vendor whose key is missing, because otherwise the bot
   boots green and *every* comment escalates, which reads as caution rather than a missing variable.
-  Compare candidates on real comments before switching: `python scripts/compare_replies.py`.
+  Compare candidates before switching: `scripts/eval_replies.py` scores any model against
+  `data/evals/replies.yaml` and exits non-zero on a failure, so it can gate the switch;
+  `scripts/compare_replies.py` prints two models' Uzbek side by side for a human to read.
+  **Run it with `--trials 3`.** One run is an anecdote — the same model scored 11, then 9,
+  then 10 on the same fixtures in three consecutive runs. A case counts as clean only if it
+  passes every attempt: a case that passes two runs in three is not two-thirds safe, it is
+  one that publishes something wrong every third time it comes up.
+
+  The eval asserts **decisions, not wording** — answered vs escalated, which knowledge keys
+  were cited, whether the script mirrored the member, and whether a forbidden thing was said.
+  There is no correct sentence for "Promp boyicha qldim", and pinning one makes the eval fail
+  good output, which is how an eval gets switched off. Its first run produced three failures
+  and **all three were the scorer's fault**, not the models': a regex that matched the negated
+  form of the phrase it was banning, an assertion that a safe inline refusal must instead
+  escalate, and exact-matching a grounding key against a model that cited a more specific
+  sub-key. Each is now a unit test in `tests/test_evals.py`. A false failure is worse than no
+  eval.
 
 - **`.env` deliberately wins over the ambient environment.** This machine has a stray
   `TELEGRAM_BOT_TOKEN` in its Windows environment pointing at a different bot; with `setdefault`
@@ -88,7 +104,10 @@ baseline is zero and bot-seeded first comments are the whole mechanism.
 ## Commands
 
 ```bash
-python -m pytest tests/          # 30 tests, no credentials or network needed
+python -m pytest tests/                                   # no credentials or network needed
+python scripts/eval_replies.py --trials 3                 # score the configured model
+python scripts/eval_replies.py --models gpt-5.6-luna gpt-5.6-sol claude-opus-5 --trials 3
+python scripts/compare_replies.py                         # read two models side by side
 ```
 
 ## Spine traps that already bit us — all one bug, four times
