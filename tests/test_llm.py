@@ -70,18 +70,21 @@ class TestMissingKeys:
 
 
 # --- fakes, so the translation is provable without a network or an account ---
+#
+# These model the Responses API, not chat/completions. GPT-5.6 answers 400 to a
+# function tool on chat/completions and says to use /v1/responses — found by
+# calling it, not by reading a spec, which is why the fake mirrors the endpoint
+# the code actually hits.
 
-class _FakeCompletions:
+class _FakeResponses:
     def __init__(self, sink: dict, arguments: str):
         self.sink, self.arguments = sink, arguments
 
     def create(self, **kwargs):
         self.sink.update(kwargs)
-        call = types.SimpleNamespace(
-            function=types.SimpleNamespace(name="submit_reply", arguments=self.arguments)
-        )
-        message = types.SimpleNamespace(tool_calls=[call])
-        return types.SimpleNamespace(choices=[types.SimpleNamespace(message=message)])
+        call = types.SimpleNamespace(type="function_call", name="submit_reply",
+                                     arguments=self.arguments)
+        return types.SimpleNamespace(output=[call], status="completed")
 
 
 DEFAULT_ARGS = json.dumps({"action": "reply", "draft": "Bepul versiyasi bor"})
@@ -92,7 +95,7 @@ def _install_fake_openai(monkeypatch, sink: dict, arguments: str = DEFAULT_ARGS)
 
     class OpenAI:
         def __init__(self, **_):
-            self.chat = types.SimpleNamespace(completions=_FakeCompletions(sink, arguments))
+            self.responses = _FakeResponses(sink, arguments)
 
     module.OpenAI = OpenAI
     monkeypatch.setitem(sys.modules, "openai", module)
@@ -101,17 +104,25 @@ def _install_fake_openai(monkeypatch, sink: dict, arguments: str = DEFAULT_ARGS)
 class TestOpenAITranslation:
     """The agents hold one schema, in Anthropic's shape. This is the adapter."""
 
-    def test_the_anthropic_tool_shape_becomes_an_openai_function(self, monkeypatch):
+    def test_the_anthropic_tool_shape_becomes_a_flat_responses_tool(self, monkeypatch):
         sent: dict = {}
         _install_fake_openai(monkeypatch, sent)
         structured("hi", schema=SCHEMA, model="gpt-5.6-luna", openai_key="sk-test")
 
         tool = sent["tools"][0]
         assert tool["type"] == "function"
-        assert tool["function"]["name"] == "submit_reply"
-        # input_schema -> parameters. Same object, different key: this rename is
-        # the whole reason the adapter exists.
-        assert tool["function"]["parameters"] == SCHEMA["input_schema"]
+        # Flat, not nested under a "function" key — that nesting is the
+        # chat/completions shape and the Responses API rejects it.
+        assert tool["name"] == "submit_reply"
+        assert tool["parameters"] == SCHEMA["input_schema"]
+
+    def test_strict_mode_is_off(self, monkeypatch):
+        # Strict demands every property be required. `needs_from_founders` only
+        # exists when escalating, so strict would reject our own schema.
+        sent: dict = {}
+        _install_fake_openai(monkeypatch, sent)
+        structured("hi", schema=SCHEMA, model="gpt-5.6-luna", openai_key="sk-test")
+        assert sent["tools"][0]["strict"] is False
 
     def test_the_tool_call_is_forced_not_offered(self, monkeypatch):
         # A model that answers in prose is a model whose answer the grounding
@@ -119,9 +130,18 @@ class TestOpenAITranslation:
         sent: dict = {}
         _install_fake_openai(monkeypatch, sent)
         structured("hi", schema=SCHEMA, model="gpt-5.6-luna", openai_key="sk-test")
-        assert sent["tool_choice"] == {
-            "type": "function", "function": {"name": "submit_reply"},
-        }
+        assert sent["tool_choice"] == {"type": "function", "name": "submit_reply"}
+
+    def test_the_token_budget_leaves_room_for_reasoning(self, monkeypatch):
+        # Reasoning tokens come out of the same allowance. At the Anthropic
+        # figure the model can think its whole budget away and emit no call,
+        # which arrives as "returned no tool call" — a config problem wearing a
+        # model-failure costume.
+        sent: dict = {}
+        _install_fake_openai(monkeypatch, sent)
+        structured("hi", schema=SCHEMA, model="gpt-5.6-luna", openai_key="sk-test",
+                   max_tokens=1200)
+        assert sent["max_output_tokens"] >= 4000
 
     def test_arguments_come_back_as_a_dict_like_anthropic(self, monkeypatch):
         # OpenAI returns a JSON *string*; Anthropic returns a dict. draft_reply
@@ -139,11 +159,12 @@ class TestOpenAITranslation:
 
         class OpenAI:
             def __init__(self, **_):
-                message = types.SimpleNamespace(tool_calls=None)
-                self.chat = types.SimpleNamespace(completions=types.SimpleNamespace(
+                self.responses = types.SimpleNamespace(
                     create=lambda **_kw: types.SimpleNamespace(
-                        choices=[types.SimpleNamespace(message=message)])
-                ))
+                        output=[], status="incomplete",
+                        incomplete_details=types.SimpleNamespace(reason="max_output_tokens"),
+                    )
+                )
 
         module.OpenAI = OpenAI
         monkeypatch.setitem(sys.modules, "openai", module)

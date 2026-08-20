@@ -97,33 +97,54 @@ def _anthropic(prompt: str, *, schema: dict, model: str, api_key: str,
 
 def _openai(prompt: str, *, schema: dict, model: str, api_key: str,
             max_tokens: int) -> dict[str, Any]:
+    """The Responses API, not chat/completions.
+
+    GPT-5.6 refuses function tools on /v1/chat/completions outright — it answers
+    400 and tells you to use /v1/responses or turn reasoning off. Turning
+    reasoning off is the wrong trade here: deciding whether a fact is grounded
+    or must escalate is exactly the judgement worth paying for.
+
+    Two shape differences that are easy to get wrong:
+
+    * A Responses function tool is FLAT. chat/completions nests everything under
+      a "function" key; here name, description and parameters sit at the top.
+    * ``strict`` must be off. Strict mode demands every property be required and
+      additionalProperties be false, and our schemas have genuinely optional
+      fields — ``needs_from_founders`` only exists when escalating.
+    """
     # Checked before the import on purpose. The operator's error should name
-    # the variable they forgot, not the package they never installed — and a
-    # missing key is the state this project is actually in.
+    # the variable they forgot, not the package they never installed.
     if not api_key:
         raise ProviderError(f"{model} needs OPENAI_API_KEY")
 
     import openai
 
-    client = openai.OpenAI(api_key=api_key, http_client=http_client(timeout=120.0))
+    client = openai.OpenAI(api_key=api_key, http_client=http_client(timeout=180.0))
     tool = {
         "type": "function",
-        "function": {
-            "name": schema["name"],
-            "description": schema.get("description", ""),
-            "parameters": schema["input_schema"],
-        },
+        "name": schema["name"],
+        "description": schema.get("description", ""),
+        "parameters": schema["input_schema"],
+        "strict": False,
     }
-    response = client.chat.completions.create(
+    response = client.responses.create(
         model=model,
-        max_completion_tokens=max_tokens,
+        input=[{"role": "user", "content": prompt}],
         tools=[tool],
-        tool_choice={"type": "function", "function": {"name": schema["name"]}},
-        messages=[{"role": "user", "content": prompt}],
+        tool_choice={"type": "function", "name": schema["name"]},
+        # Reasoning tokens are drawn from this same budget. At the Anthropic
+        # figure a reasoning model can think its whole allowance away and emit
+        # no call at all, which arrives here as "returned no tool call" — a
+        # configuration problem wearing a model-failure costume.
+        max_output_tokens=max(max_tokens, 4000),
     )
-    calls = response.choices[0].message.tool_calls or []
-    if not calls:
-        raise RuntimeError(f"{model} returned no tool call: {response.choices[0].message!r}")
-    # OpenAI hands arguments back as a JSON string; Anthropic hands back a dict.
-    # Callers should never have to know which vendor they got.
-    return json.loads(calls[0].function.arguments)
+
+    for item in response.output:
+        if getattr(item, "type", "") == "function_call":
+            # Arguments come back as a JSON string; Anthropic hands back a dict.
+            # Callers must never have to know which vendor they got.
+            return json.loads(item.arguments)
+    raise RuntimeError(
+        f"{model} returned no tool call (status={getattr(response, 'status', '?')}, "
+        f"incomplete={getattr(response, 'incomplete_details', None)})"
+    )

@@ -165,24 +165,17 @@ def _read(path: Path) -> str:
     return path.read_text(encoding="utf-8") if path.is_file() else ""
 
 
-def _client(api_key: str):
-    import anthropic
+def _call(tool: dict, prompt: str, model: str, *, api_key: str, openai_key: str) -> dict:
+    """One structured call, whichever vendor `model` names.
 
-    from app.net import http_client
+    The Writer and the Critic go through the same seam as the Replier, so the
+    founders' judgement about which model writes better Uzbek applies to posts
+    as well as to comments — one setting, not two.
+    """
+    from app.agents.llm import structured
 
-    return anthropic.Anthropic(api_key=api_key, http_client=http_client(timeout=120.0))
-
-
-def _call(client, tool: dict, prompt: str, model: str) -> dict:
-    response = client.messages.create(
-        model=model, max_tokens=2000, tools=[tool],
-        tool_choice={"type": "tool", "name": tool["name"]},
-        messages=[{"role": "user", "content": prompt}],
-    )
-    for block in response.content:
-        if block.type == "tool_use":
-            return block.input
-    raise RuntimeError("model returned no tool call")
+    return structured(prompt, schema=tool, model=model, max_tokens=2000,
+                      anthropic_key=api_key, openai_key=openai_key)
 
 
 def writer_prompt(kind: str, brief: str, recent: list[str], feedback: str = "") -> str:
@@ -302,9 +295,9 @@ def write_post(
     ledger: set[str] | None = None,
     max_rounds: int = 3,
     model: str = MODEL,
+    openai_key: str = "",
 ) -> Post:
     """Draft, check, and revise until it passes or the rounds run out."""
-    client = _client(api_key)
     brief = brief or POST_KINDS.get(kind, kind)
     ledger = ledger or set()
     feedback = ""
@@ -312,7 +305,8 @@ def write_post(
 
     for attempt in range(1, max_rounds + 1):
         post.rounds = attempt
-        drafted = _call(client, WRITER_TOOL, writer_prompt(kind, brief, recent or [], feedback), model)
+        drafted = _call(WRITER_TOOL, writer_prompt(kind, brief, recent or [], feedback),
+                        model, api_key=api_key, openai_key=openai_key)
 
         post.needs_facts = (drafted.get("needs_facts") or "").strip()
         if post.needs_facts:
@@ -337,7 +331,8 @@ def write_post(
             feedback = "\n".join(problems)
             continue
 
-        verdict = _call(client, CRITIC_TOOL, critic_prompt(post.text, kind), model)
+        verdict = _call(CRITIC_TOOL, critic_prompt(post.text, kind),
+                        model, api_key=api_key, openai_key=openai_key)
 
         # The model does not always fill this field even though the schema
         # requires it. Treating a missing score as 0 would be fail-open on the

@@ -31,6 +31,14 @@ REQUIRED = (
     "TELEGRAM_ADMIN_CHAT_ID", "TELEGRAM_APPROVER_IDS", "ANTHROPIC_API_KEY",
 )
 
+#: Forwarded when present, and not an error when absent. The bot runs on
+#: Anthropic alone; these only matter once REPLY_MODEL/OPENAI_MODEL names a GPT.
+#: Absent from .env they must still reach compose as empty strings, because an
+#: unset variable there makes Docker warn and substitute nothing — and the
+#: preflight that catches a missing key can only catch it if it is missing
+#: rather than stale.
+OPTIONAL = ("OPENAI_API_KEY", "REPLY_MODEL", "OPENAI_MODEL")
+
 #: Hostinger caps the compose `content` field. freelanceai hit this at 8312.
 COMPOSE_CAP = 8192
 
@@ -88,12 +96,15 @@ def main() -> int:
         print(f"compose is {len(compose)} chars, over Hostinger's {COMPOSE_CAP} cap", file=sys.stderr)
         return 1
 
-    environment = "\n".join(f"{k}={env[k]}" for k in REQUIRED)
+    forwarded = REQUIRED + OPTIONAL
+    environment = "\n".join(f"{k}={env.get(k, '')}" for k in forwarded)
 
     print(f"project    : {PROJECT}   (named explicitly — smmuzbot and freelanceai untouched)")
     print(f"vm         : {VM_ID}")
     print(f"compose    : {len(compose)} chars (cap {COMPOSE_CAP})")
-    print(f"env vars   : {len(REQUIRED)} set, values not shown")
+    chosen = env.get("REPLY_MODEL") or env.get("OPENAI_MODEL") or "claude-opus-5"
+    print(f"env vars   : {len(forwarded)} forwarded, values not shown")
+    print(f"model      : {chosen}")
     if args.check:
         print("\n--check: nothing sent")
         return 0

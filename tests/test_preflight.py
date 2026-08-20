@@ -148,7 +148,7 @@ def test_a_reply_model_with_no_key_fails_preflight():
     That is the failure this project keeps producing: healthy state, no
     outcome. A missing OPENAI_API_KEY reads as the bot being cautious.
     """
-    settings = replace(SETTINGS, reply_model="gpt-5.6-luna", openai_api_key=None)
+    settings = replace(SETTINGS, model="gpt-5.6-luna", openai_api_key=None)
     result = run(settings=settings)
     assert not result.ok
     failed = [name for name, ok, _ in result.checks if not ok]
@@ -158,19 +158,19 @@ def test_a_reply_model_with_no_key_fails_preflight():
 
 
 def test_a_reply_model_with_its_key_passes():
-    settings = replace(SETTINGS, reply_model="gpt-5.6-luna", openai_api_key="sk-openai")
+    settings = replace(SETTINGS, model="gpt-5.6-luna", openai_api_key="sk-openai")
     assert run(settings=settings).ok
 
 
 def test_an_anthropic_key_does_not_satisfy_an_openai_reply_model():
     # Both keys are separate variables and one cannot stand in for the other.
-    settings = replace(SETTINGS, reply_model="gpt-5.6-luna",
+    settings = replace(SETTINGS, model="gpt-5.6-luna",
                        anthropic_api_key="sk-ant-live", openai_api_key=None)
     assert not run(settings=settings).ok
 
 
 def test_an_unknown_reply_model_fails_rather_than_defaulting():
-    settings = replace(SETTINGS, reply_model="llama-3-70b")
+    settings = replace(SETTINGS, model="llama-3-70b")
     result = run(settings=settings)
     assert not result.ok
     assert "reply model has a provider" in [n for n, ok, _ in result.checks if not ok]

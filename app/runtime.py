@@ -385,7 +385,7 @@ class Runtime:
         draft = draft_reply(
             ctx, api_key=self.settings.anthropic_api_key or "",
             openai_key=self.settings.openai_api_key or "",
-            model=self.settings.reply_model, previous_drafts=prior,
+            model=self.settings.model, previous_drafts=prior,
         )
 
         finding = None
@@ -447,7 +447,7 @@ class Runtime:
         upgraded = draft_reply(
             ctx, api_key=self.settings.anthropic_api_key or "",
             openai_key=self.settings.openai_api_key or "",
-            model=self.settings.reply_model,
+            model=self.settings.model,
             previous_drafts=prior, extra_facts=[finding.as_fact()],
         )
         log.info("redrafted with researched price -> %s", upgraded.action)
@@ -767,6 +767,8 @@ class Runtime:
             post = write_post(
                 kind,
                 api_key=self.settings.anthropic_api_key or "",
+                openai_key=self.settings.openai_api_key or "",
+                model=self.settings.model,
                 brief=POST_KINDS.get(kind),
                 recent=[c.text for c in self.store.content_in_state(State.PUBLISHED)][-5:],
             )
