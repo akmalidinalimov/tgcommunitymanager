@@ -78,6 +78,21 @@ the VPS (the connector is session-bound). The VPS bot only publishes assets alre
   sub-key. Each is now a unit test in `tests/test_evals.py`. A false failure is worse than no
   eval.
 
+- **The prompt is split: `system_prompt()` is stable and cached, `build_prompt()` is this
+  comment.** 27,286 chars against 398 — the voice guide and knowledge base were being
+  re-sent in full on every single reply. Anthropic caches only when told, so the system
+  block carries `cache_control`; measured at **11,519 cached tokens against 406 fresh**.
+  Anything that varies must stay in `build_prompt` or the cache never hits.
+  A member's text now sits inside `<member_message>` with the system half stating it is
+  data and never instruction — it used to be interpolated beside the rules with nothing
+  separating them, and replies auto-send.
+  **Scope that warning to member text only.** Saying "everything sent next is untrusted"
+  made the model refuse to answer from our own published post: `which-tool` went 3/3 → 0/3
+  and members would have been sent to the founders for something already said in public.
+  The post is ours and is a valid source. Prompt-nudging did not fix it; the real gap was
+  structural — nothing connected the post to its `our_posts.<id>` entry. `ReplyContext.post_id`
+  now carries it (`store.post_for_root()`), and the prompt names the key. Back to 11/11.
+
 - **`.env` deliberately wins over the ambient environment.** This machine has a stray
   `TELEGRAM_BOT_TOKEN` in its Windows environment pointing at a different bot; with `setdefault`
   semantics it silently won and nearly published under the wrong identity. Preflight now also asserts

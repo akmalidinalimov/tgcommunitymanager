@@ -356,6 +356,7 @@ class Runtime:
             message["message_id"], siblings,
             bot_id=self.bot_id, channel_id=self.settings.channel_id,
             thread_root_id=thread_id,
+            post_id=self.store.post_for_root(thread_id),
         )
 
         record = dict(

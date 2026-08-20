@@ -118,7 +118,7 @@ def stub_ctx():
     from app.text.script import Script
 
     return SimpleNamespace(
-        script=Script.LATIN, history=[], post_text="post",
+        script=Script.LATIN, history=[], post_text="post", post_id=606,
         target=SimpleNamespace(message_id=1, author="Dilnoza", text="narxi qancha?"),
     )
 

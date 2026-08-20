@@ -56,6 +56,7 @@ def structured(
     *,
     schema: dict,
     model: str,
+    system: str = "",
     anthropic_key: str = "",
     openai_key: str = "",
     max_tokens: int = 1200,
@@ -65,29 +66,46 @@ def structured(
     ``schema`` is the Anthropic tool shape — ``{name, description, input_schema}``
     — because that is what the agents already carry. The OpenAI path translates
     it rather than asking every agent to hold two copies of the same thing.
+
+    ``system`` is the part that does not vary between calls: identity, voice,
+    knowledge, rules. Keep it stable — it is cached, and anything that changes
+    per request belongs in ``prompt`` or the cache never hits. It also carries
+    the rules a member's text must not be able to override, which is why the two
+    are separated at all.
     """
     which = provider_for(model)
     if which == "anthropic":
-        return _anthropic(prompt, schema=schema, model=model,
+        return _anthropic(prompt, schema=schema, model=model, system=system,
                           api_key=anthropic_key, max_tokens=max_tokens)
-    return _openai(prompt, schema=schema, model=model,
+    return _openai(prompt, schema=schema, model=model, system=system,
                    api_key=openai_key, max_tokens=max_tokens)
 
 
 def _anthropic(prompt: str, *, schema: dict, model: str, api_key: str,
-               max_tokens: int) -> dict[str, Any]:
+               max_tokens: int, system: str = "") -> dict[str, Any]:
     if not api_key:
         raise ProviderError(f"{model} needs ANTHROPIC_API_KEY")
 
     import anthropic
 
     client = anthropic.Anthropic(api_key=api_key, http_client=http_client(timeout=120.0))
+    extra: dict[str, Any] = {}
+    if system:
+        # Marked cacheable explicitly. Anthropic does not cache by default, and
+        # the Replier's system block is ~25,000 characters of voice guide and
+        # knowledge base that is byte-identical on every reply — paying for it
+        # each time was a bill nobody had looked at.
+        extra["system"] = [{
+            "type": "text", "text": system,
+            "cache_control": {"type": "ephemeral"},
+        }]
     response = client.messages.create(
         model=model,
         max_tokens=max_tokens,
         tools=[schema],
         tool_choice={"type": "tool", "name": schema["name"]},
         messages=[{"role": "user", "content": prompt}],
+        **extra,
     )
     for block in response.content:
         if block.type == "tool_use":
@@ -96,7 +114,7 @@ def _anthropic(prompt: str, *, schema: dict, model: str, api_key: str,
 
 
 def _openai(prompt: str, *, schema: dict, model: str, api_key: str,
-            max_tokens: int) -> dict[str, Any]:
+            max_tokens: int, system: str = "") -> dict[str, Any]:
     """The Responses API, not chat/completions.
 
     GPT-5.6 refuses function tools on /v1/chat/completions outright — it answers
@@ -127,9 +145,11 @@ def _openai(prompt: str, *, schema: dict, model: str, api_key: str,
         "parameters": schema["input_schema"],
         "strict": False,
     }
+    extra: dict[str, Any] = {"instructions": system} if system else {}
     response = client.responses.create(
         model=model,
         input=[{"role": "user", "content": prompt}],
+        **extra,
         tools=[tool],
         tool_choice={"type": "function", "name": schema["name"]},
         # Reasoning tokens are drawn from this same budget. At the Anthropic

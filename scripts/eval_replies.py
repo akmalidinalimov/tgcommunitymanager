@@ -43,6 +43,11 @@ POST_TEXT = (
     "Natijangizni izohga tashlang."
 )
 
+#: The post those comments were left under, and the key its knowledge-base entry
+#: is filed under. In production this comes from store.post_for_root(); the eval
+#: must supply it or it tests a context the bot never actually sees.
+POST_ID = 606
+
 
 def context_for(case: Case) -> ReplyContext:
     return ReplyContext(
@@ -50,6 +55,7 @@ def context_for(case: Case) -> ReplyContext:
                              text=case.text, kind=Kind.HUMAN),
         thread_root_id=1,
         post_text=POST_TEXT,
+        post_id=POST_ID,
         history=[],
         script=detect_script(case.text),
     )

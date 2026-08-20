@@ -222,6 +222,21 @@ class Store:
         ).fetchone()
         return row["slot_key"] if row else None
 
+    def post_for_root(self, group_root_id: int) -> int | None:
+        """Which channel post this discussion thread belongs to.
+
+        The reverse of root_for_post, and the thing that lets a reply cite the
+        knowledge base entry for its own post. The Replier is told the channel
+        post is a trusted source, but `our_posts` is keyed by post number and
+        nothing connected the two — so it escalated questions we had already
+        answered in public.
+        """
+        row = self._conn.execute(
+            "SELECT channel_message_id FROM threads WHERE group_root_id=?",
+            (group_root_id,),
+        ).fetchone()
+        return row["channel_message_id"] if row else None
+
     def root_for_post(self, channel_message_id: int) -> int | None:
         row = self._conn.execute(
             "SELECT group_root_id FROM threads WHERE channel_message_id=?",

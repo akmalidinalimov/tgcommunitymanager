@@ -50,6 +50,12 @@ class ReplyContext:
     target: ThreadMessage
     thread_root_id: int
     post_text: str
+    post_id: int | None = None
+    """The channel post number, which is how `our_posts` is keyed.
+
+    Without it the Replier can be told the channel post is a trusted source and
+    still not know which entry describes it, so it escalates a question the
+    knowledge base already answers."""
     history: list[ThreadMessage] = field(default_factory=list)
     script: Script = Script.LATIN
     decision: Decision = Decision.REPLY
@@ -104,6 +110,7 @@ def build_context(
     bot_id: int,
     channel_id: int,
     thread_root_id: int,
+    post_id: int | None = None,
 ) -> ReplyContext:
     """Build reply context for ``target_id`` and decide whether to answer it."""
     parsed = [to_thread_message(m, bot_id=bot_id, channel_id=channel_id) for m in messages]
@@ -118,6 +125,7 @@ def build_context(
         target=target,
         thread_root_id=thread_root_id,
         post_text=post_text,
+        post_id=post_id,
         history=history,
         script=reply_script(
             target.text,
