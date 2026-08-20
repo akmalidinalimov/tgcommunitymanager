@@ -6,6 +6,8 @@ regression tests rather than hypotheticals.
 
 from __future__ import annotations
 
+from dataclasses import replace
+
 from app.config import Settings, preflight
 
 CHANNEL_ID = -1002708742288
@@ -17,7 +19,7 @@ SETTINGS = Settings(
     channel_id=CHANNEL_ID,
     discussion_group_id=GROUP_ID,
     channel_username="aicreatorsuz",
-    anthropic_api_key=None,
+    anthropic_api_key="sk-ant-live",
 )
 
 # The live values verified on 2026-08-13.
@@ -34,6 +36,7 @@ GOOD_GR_MEMBER = {"status": "administrator", "can_delete_messages": True}
 
 def run(**overrides):
     args = {
+        "settings": SETTINGS,
         "me": GOOD_ME,
         "channel": GOOD_CHANNEL,
         "group": GOOD_GROUP,
@@ -41,7 +44,7 @@ def run(**overrides):
         "group_member": GOOD_GR_MEMBER,
     }
     args.update(overrides)
-    return preflight(settings=SETTINGS, **args)
+    return preflight(**args)
 
 
 def test_the_real_verified_configuration_passes():
@@ -135,3 +138,39 @@ def test_boot_refuses_when_resources_are_missing(tmp_path):
                        settings=SETTINGS)
     assert any("knowledge base" in name for name, _, _ in result.checks), \
         "resource checks are not part of preflight"
+
+
+# --- the reply model must have a key behind it ---------------------------------
+
+def test_a_reply_model_with_no_key_fails_preflight():
+    """Otherwise the bot boots green and escalates every single comment.
+
+    That is the failure this project keeps producing: healthy state, no
+    outcome. A missing OPENAI_API_KEY reads as the bot being cautious.
+    """
+    settings = replace(SETTINGS, reply_model="gpt-5.6-luna", openai_api_key=None)
+    result = run(settings=settings)
+    assert not result.ok
+    failed = [name for name, ok, _ in result.checks if not ok]
+    assert "reply model has a key" in failed
+    detail = next(d for n, _, d in result.checks if n == "reply model has a key")
+    assert "OPENAI_API_KEY" in detail
+
+
+def test_a_reply_model_with_its_key_passes():
+    settings = replace(SETTINGS, reply_model="gpt-5.6-luna", openai_api_key="sk-openai")
+    assert run(settings=settings).ok
+
+
+def test_an_anthropic_key_does_not_satisfy_an_openai_reply_model():
+    # Both keys are separate variables and one cannot stand in for the other.
+    settings = replace(SETTINGS, reply_model="gpt-5.6-luna",
+                       anthropic_api_key="sk-ant-live", openai_api_key=None)
+    assert not run(settings=settings).ok
+
+
+def test_an_unknown_reply_model_fails_rather_than_defaulting():
+    settings = replace(SETTINGS, reply_model="llama-3-70b")
+    result = run(settings=settings)
+    assert not result.ok
+    assert "reply model has a provider" in [n for n, ok, _ in result.checks if not ok]

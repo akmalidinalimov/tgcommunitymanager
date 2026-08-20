@@ -178,6 +178,7 @@ def draft_reply(
     model: str = MODEL,
     previous_drafts: list[str] | None = None,
     extra_facts: list[str] | None = None,
+    openai_key: str = "",
 ) -> Draft:
     """Produce a draft, or an escalation. Never sends anything.
 
@@ -190,29 +191,13 @@ def draft_reply(
     They let a price question be answered instead of deflected, without ever
     letting a price come from model memory.
     """
-    import anthropic
+    from app.agents.llm import structured
 
-    from app.net import http_client
-
-    # The SDK builds its own httpx client, which hits the same TLS-proxy wall as
-    # everything else here, so hand it one wired to the OS trust store.
-    client = anthropic.Anthropic(api_key=api_key, http_client=http_client(timeout=120.0))
-    response = client.messages.create(
-        model=model,
-        max_tokens=1200,
-        tools=[DRAFT_TOOL],
-        tool_choice={"type": "tool", "name": "submit_reply"},
-        messages=[{"role": "user", "content": build_prompt(
-            ctx, previous_drafts=previous_drafts, extra_facts=extra_facts)}],
+    payload = structured(
+        build_prompt(ctx, previous_drafts=previous_drafts, extra_facts=extra_facts),
+        schema=DRAFT_TOOL, model=model, max_tokens=1200,
+        anthropic_key=api_key, openai_key=openai_key,
     )
-
-    payload: dict[str, Any] = {}
-    for block in response.content:
-        if block.type == "tool_use":
-            payload = block.input
-            break
-    if not payload:
-        raise RuntimeError(f"model returned no tool call: {response.content!r}")
 
     text = (payload.get("draft") or "").strip()
     # Latin output carries okina/tutuq; Cyrillic has no apostrophe convention.

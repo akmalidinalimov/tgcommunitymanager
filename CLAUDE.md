@@ -53,6 +53,15 @@ the VPS (the connector is session-bound). The VPS bot only publishes assets alre
   description, and a `🤖 AI yordamchi` line on the bot's first reply in each thread.
 - **Secrets:** `.env` and `.mcp.json` are git-ignored. Gitignore has **no inline comment syntax** — a
   trailing `# comment` silently breaks the pattern. Always verify with `git check-ignore -v <file>`.
+- **The Replier's model is `REPLY_MODEL` in the environment, not a constant.** `app/agents/llm.py`
+  routes by model-id prefix (`claude-*` → Anthropic, `gpt-*`/`o1`/`o3` → OpenAI) and translates the
+  Anthropic tool shape into an OpenAI function, so every agent still carries one schema. Structured
+  output is **forced** on both vendors — a model answering in prose is a model the grounding gate
+  cannot inspect. Switching vendors needs a key and a compose env change, nothing else. Preflight
+  refuses to boot if `REPLY_MODEL` names a vendor whose key is missing, because otherwise the bot
+  boots green and *every* comment escalates, which reads as caution rather than a missing variable.
+  Compare candidates on real comments before switching: `python scripts/compare_replies.py`.
+
 - **`.env` deliberately wins over the ambient environment.** This machine has a stray
   `TELEGRAM_BOT_TOKEN` in its Windows environment pointing at a different bot; with `setdefault`
   semantics it silently won and nearly published under the wrong identity. Preflight now also asserts
@@ -157,7 +166,7 @@ thread resolver · Replier with grounding gate, script mirroring and react-inste
 missed-run recovery · content state machine · SQLite store · day-ahead approval cards · Writer + Voice
 Critic + mechanical lint + claims ledger · media library with 15 tagged assets · runtime loop · deployment.
 
-**333 tests**, no credentials or network needed.
+**357 tests**, no credentials or network needed.
 
 Visuals: a library asset when one genuinely matches, otherwise a **card rendered on the VPS**
 (`app/media/cards.py`, Pillow). Cards exist because `challenge`, `recognition` and `behind_scenes`

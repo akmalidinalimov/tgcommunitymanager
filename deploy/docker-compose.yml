@@ -13,6 +13,8 @@ services:
       TELEGRAM_ADMIN_CHAT_ID: ${TELEGRAM_ADMIN_CHAT_ID}
       TELEGRAM_APPROVER_IDS: ${TELEGRAM_APPROVER_IDS}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      REPLY_MODEL: ${REPLY_MODEL}
     command: ["python", "-m", "app", "--db", "/app/state/bot.db"]
     volumes:
       # Mutable state ONLY. This must never be /app/data: a volume mounted over

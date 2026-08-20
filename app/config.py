@@ -70,6 +70,13 @@ class Settings:
     discussion_group_id: int
     channel_username: str
     anthropic_api_key: str | None
+    openai_api_key: str | None = None
+    reply_model: str = "claude-opus-5"
+    """Which model drafts comment replies.
+
+    A setting rather than a constant because the founders judge Uzbek quality by
+    reading replies, and that judgement should not need a code change. Set
+    REPLY_MODEL=gpt-5.6-luna in the compose environment to switch vendors."""
     #: Where drafts, escalations and approvals are delivered.
     admin_chat_id: int | None = None
     #: Telegram user ids permitted to approve. Anyone else is ignored.
@@ -95,6 +102,8 @@ class Settings:
             discussion_group_id=int(_required("TELEGRAM_DISCUSSION_GROUP_ID")),
             channel_username=os.environ.get("TELEGRAM_CHANNEL_USERNAME", "").lstrip("@"),
             anthropic_api_key=os.environ.get("ANTHROPIC_API_KEY") or None,
+            openai_api_key=os.environ.get("OPENAI_API_KEY") or None,
+            reply_model=os.environ.get("REPLY_MODEL") or "claude-opus-5",
             admin_chat_id=int(os.environ["TELEGRAM_ADMIN_CHAT_ID"])
             if os.environ.get("TELEGRAM_ADMIN_CHAT_ID") else None,
             approver_ids=tuple(
@@ -194,6 +203,27 @@ def preflight(me: dict, channel: dict, group: dict, channel_member: dict, group_
     Callers fetch getMe / getChat / getChatMember and pass the raw results in.
     """
     checks: list[tuple[str, bool, str]] = list(check_resources())
+
+    # The reply model must have a key behind it. Without this the bot boots
+    # green, and then every single comment escalates to the founders with a
+    # ProviderError buried in the log — the failure looks like caution rather
+    # than a missing variable. Same shape as every other bug here: healthy
+    # state, no outcome.
+    from app.agents.llm import ProviderError, provider_for
+
+    try:
+        vendor = provider_for(settings.reply_model)
+    except ProviderError as exc:
+        checks.append(("reply model has a provider", False, str(exc)))
+    else:
+        key = settings.anthropic_api_key if vendor == "anthropic" else settings.openai_api_key
+        var = "ANTHROPIC_API_KEY" if vendor == "anthropic" else "OPENAI_API_KEY"
+        checks.append((
+            "reply model has a key", bool(key),
+            f"{settings.reply_model} via {vendor}" if key
+            else f"REPLY_MODEL={settings.reply_model} needs {var}, which is not set — "
+                 f"every comment would escalate",
+        ))
 
     # Token identity. A stray TELEGRAM_BOT_TOKEN in the machine environment once
     # loaded a completely different bot here. Publishing to 3,326 people under
