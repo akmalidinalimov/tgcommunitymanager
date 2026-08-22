@@ -83,14 +83,23 @@ NEEDS_DRAFTING = {State.DRAFTING, State.NEEDS_REVISION, State.REJECTED}
 MAX_REDRAFTS = 3
 
 #: The weekly grid, by weekday and slot hour. Monday is 0.
+#:
+#: One post a day at 21:00. The week is built as an arc rather than a rotation:
+#: a technique on Monday, what it is worth commercially on Tuesday and
+#: Wednesday, who we are on Thursday, then a thing to DO on Friday, the results
+#: of doing it on Saturday, and a question on Sunday that chooses next week.
+#:
+#: Friday and Saturday are a pair. The challenge is the only post that moves the
+#: north-star metric — artifacts posted in the discussion group — and the
+#: recognition post is what makes posting one worth doing again.
 WEEKLY_PLAN: dict[tuple[int, int], str] = {
-    (0, 10): "technique",      (0, 21): "commercial_craft",
-    (1, 10): "news",           (1, 21): "why_content",
-    (2, 10): "technique",      (2, 21): "poll",
-    (3, 10): "commercial_craft", (3, 21): "behind_scenes",
-    (4, 10): "news",           (4, 21): "challenge",
-    (5, 10): "mission",        (5, 21): "technique",
-    (6, 10): "recognition",    (6, 21): "recap",
+    (0, 21): "technique",
+    (1, 21): "commercial_craft",
+    (2, 21): "why_content",
+    (3, 21): "behind_scenes",
+    (4, 21): "challenge",
+    (5, 21): "recognition",
+    (6, 21): "poll",
 }
 
 

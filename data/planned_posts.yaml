@@ -202,3 +202,50 @@ posts:
       Menikini aytaman: bolalar uxlagandan keyingi bir soat.
 
       Oʻsha bir soatda hamma narsa qilingan, birinchi promptlar ham, birinchi rasmlar ham.
+
+  # --- week of 24 August: one post a day, 21:00 -----------------------------
+
+  "2026-08-24_21:00":
+    kind: technique
+    asset: cafe-uztext-model-wrote-it
+    note: >
+      Written from an experiment run on 22 Aug, not from the research brief.
+      The brief says models garble Uzbek glyphs; three generations say they no
+      longer do. Same photograph, same palette, only the text instruction
+      changed: a loose "write Uzbek promotional text" came back spelled and
+      inflected correctly, and an eleven-word dictated string came back verbatim
+      with the okina intact.
+
+      What the loose one got wrong was register. It chose a -moqda form, the
+      one construction the voice guide bans outright, and wrote a headline with
+      no number, no time and no offer in it. That is a better lesson than the
+      one I set out to teach, and the audience can see it in the image.
+
+      The post cannot quote the offending word: lint blocks -moqda, correctly,
+      and a post about the trap would fail on the trap. So the image carries the
+      evidence and the caption names the suffix. That division is the point of
+      binding the visual at DRAFT time.
+    text: |
+      «AI oʻzbekcha yozolmaydi» degan gapni tez-tez eshitamiz. Kecha yana bir marta sinab koʻrdim va natija meni oʻylantirib qoʻydi.
+
+      Tepadagi kartani GPT Image 2 chiqargan. Men unga matnni bermadim, faqat «oʻzbekcha reklama matni yoz» dedim. Imlo joyida, harflar ham toʻgʻri turibdi.
+
+      Endi sarlavhaning oxirgi soʻzini oʻqing. U -moqda bilan tugaydi.
+
+      📌 Bu xato emas, lekin biror doʻkon egasi mijoziga bunday gapirmaydi. Kitobiy shakl, yangiliklarda ishlatiladi.
+
+      📌 Ikkinchi muammo kattaroq: bu jumla hech nima demaydi. Qanaqa chegirma, necha foiz, soat nechadan nechagacha. Hech biri yoʻq.
+
+      ✅ Shuning uchun matnni oʻzim yozaman, promptda esa «reading exactly:» deb aynan koʻchiraman. Uzun matnni ham sinab koʻrdim, 11 ta soʻzni xatosiz chiqardi.
+
+      AI endi oʻzbekcha yozadi. Faqat sizning ovozingizda emas.
+
+      Sizda AI qanday gʻalati oʻzbekcha yozib bergan? 👇
+    seed_comment: |
+      Promptning ishlaydigan qismi shu. Oʻz matningizni qoʻying, «reading exactly:» ni tegmang.
+
+      - large headline reading exactly: QOʻSHIMCHA 20%
+      - smaller text reading exactly: BEPUL YETKAZIB BERISH
+      No other words in the frame.
+
+      Uzunini ham sinab koʻrdim: «HAR KUNI SOAT 8 DAN 11 GACHA QOʻSHIMCHA CHEGIRMA VA BEPUL YETKAZIB BERISH». 11 ta soʻz, hammasi joyida chiqdi.

@@ -39,18 +39,22 @@ def tk(y, m, d, hh=0, mm=0):
 # --- slots ------------------------------------------------------------------
 
 
-def test_two_slots_a_day_at_ten_and_twentyone():
+def test_one_slot_a_day_at_twentyone():
+    """One post a day. Two slots made the second one a liability: a day with one
+    written post left the other with nothing approved, and an unapproved slot
+    publishes from the backup pool — five pool posts against seven empty slots
+    a week, draining while every log line still said "published"."""
     slots = slots_between(tk(2026, 8, 13, 0, 0), tk(2026, 8, 13, 23, 59))
-    assert [s.at.hour for s in slots] == [10, 21]
+    assert [s.at.hour for s in slots] == [21]
 
 
 def test_next_slot_crosses_midnight():
-    assert next_slot(tk(2026, 8, 13, 22, 0)).at == tk(2026, 8, 14, 10, 0)
+    assert next_slot(tk(2026, 8, 13, 22, 0)).at == tk(2026, 8, 14, 21, 0)
 
 
 def test_next_slot_is_strictly_after_now():
-    """Standing exactly on 10:00 must not re-fire the slot being published."""
-    assert next_slot(tk(2026, 8, 13, 10, 0)).at == tk(2026, 8, 13, 21, 0)
+    """Standing exactly on 21:00 must not re-fire the slot being published."""
+    assert next_slot(tk(2026, 8, 13, 21, 0)).at == tk(2026, 8, 14, 21, 0)
 
 
 def test_server_in_another_timezone_still_resolves_tashkent_slots():
@@ -69,23 +73,23 @@ def test_naive_datetimes_are_rejected():
 
 
 def test_short_outage_publishes_the_missed_slot():
-    publish, too_late = due_slots(tk(2026, 8, 13, 9, 55), clock=tk(2026, 8, 13, 11, 0))
-    assert [s.at.hour for s in publish] == [10]
+    publish, too_late = due_slots(tk(2026, 8, 13, 20, 55), clock=tk(2026, 8, 13, 22, 0))
+    assert [s.at.hour for s in publish] == [21]
     assert too_late == []
 
 
 def test_long_outage_skips_stale_slots_instead_of_dumping_them():
-    """Two days down. Publishing four backdated posts at once would be worse than
-    having published none — only a slot still within its window goes out."""
-    publish, too_late = due_slots(tk(2026, 8, 11, 9, 0), clock=tk(2026, 8, 13, 11, 30))
-    assert [s.key for s in publish] == ["2026-08-13_10:00"]
-    assert len(too_late) == 4
+    """Three days down. Publishing three backdated posts at once would be worse
+    than having published none — only a slot still within its window goes out."""
+    publish, too_late = due_slots(tk(2026, 8, 10, 20, 0), clock=tk(2026, 8, 13, 22, 30))
+    assert [s.key for s in publish] == ["2026-08-13_21:00"]
+    assert len(too_late) == 3
 
 
-def test_a_morning_post_never_lands_at_midnight():
-    publish, too_late = due_slots(tk(2026, 8, 13, 9, 0), clock=tk(2026, 8, 14, 0, 30))
+def test_an_evening_post_never_lands_in_the_small_hours():
+    publish, too_late = due_slots(tk(2026, 8, 13, 20, 0), clock=tk(2026, 8, 14, 1, 30))
     assert publish == []
-    assert [s.key for s in too_late] == ["2026-08-13_10:00", "2026-08-13_21:00"]
+    assert [s.key for s in too_late] == ["2026-08-13_21:00"]
 
 
 def test_first_ever_boot_publishes_nothing():
@@ -95,13 +99,13 @@ def test_first_ever_boot_publishes_nothing():
 
 
 def test_no_missed_slots_when_nothing_elapsed():
-    publish, too_late = due_slots(tk(2026, 8, 13, 10, 1), clock=tk(2026, 8, 13, 10, 2))
+    publish, too_late = due_slots(tk(2026, 8, 13, 21, 1), clock=tk(2026, 8, 13, 21, 2))
     assert publish == [] and too_late == []
 
 
 def test_approval_deadline_precedes_the_slot():
-    slot = Slot(tk(2026, 8, 14, 10, 0))
-    assert approval_deadline(slot) == tk(2026, 8, 13, 22, 0)
+    slot = Slot(tk(2026, 8, 14, 21, 0))
+    assert approval_deadline(slot) == tk(2026, 8, 14, 9, 0)
 
 
 # --- state machine ----------------------------------------------------------

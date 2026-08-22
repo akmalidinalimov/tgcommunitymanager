@@ -15,10 +15,13 @@ from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo
 
+from app.config import POST_SLOTS
+
 TASHKENT = ZoneInfo("Asia/Tashkent")
 
-#: (hour, minute) in Tashkent local time.
-SLOTS: tuple[tuple[int, int], ...] = ((10, 0), (21, 0))
+#: (hour, minute) in Tashkent local time. One definition, in config, because
+#: there used to be two — this one and POST_SLOTS — and only this one was read.
+SLOTS: tuple[tuple[int, int], ...] = POST_SLOTS
 
 #: A slot older than this is not worth publishing late — a "good morning" post
 #: landing at midnight is worse than no post. It is skipped and recorded.

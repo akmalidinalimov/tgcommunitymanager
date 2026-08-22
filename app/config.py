@@ -17,7 +17,19 @@ TASHKENT = ZoneInfo("Asia/Tashkent")
 
 #: Publishing slots, local Tashkent time. Uzbekistan does not observe DST, so
 #: these are stable year-round.
-POST_SLOTS = ((10, 0), (21, 0))
+#:
+#: **One post a day, at 21:00.** Two slots is what the channel ran at first, and
+#: it made the second slot a liability: a day with one written post leaves the
+#: other slot with nothing approved, and an unapproved slot publishes from the
+#: backup pool. Five pool posts against seven empty slots a week drains it, and
+#: then the channel repeats itself while every log line still says "published".
+#:
+#: Evening because the point of this bot is comments, and that is when people
+#: have the phone in hand with nothing else to do.
+#:
+#: `app/spine/scheduler.py` imports this. It used to hold its own copy, so
+#: editing the one here changed nothing at all.
+POST_SLOTS = ((21, 0),)
 
 
 class ConfigError(RuntimeError):

@@ -377,3 +377,44 @@ assets:
   provenance: higgsfield job 5c1c68ae, generated 2026-08-17 at 16:9; every string checked against spec,
     all five prices and ratings exact, no trademarks. Replaces a 3:2 version that failed the library aspect
     test
+- id: cafe-uztext-model-wrote-it
+  url: https://d8j0ntlcm91z4.cloudfront.net/user_2zJUonmh6cW6tDKlBEl4CIohbsI/hf_20260822_130043_40d0f72e-5f8a-4def-950c-99d2b8a15fab.png
+  kind: photo
+  model: gpt_image_2
+  shows:
+  - iced latte cafe banner
+  - Uzbek headline the MODEL chose
+  - Ertalabki chegirmalar sizi kutmoqda
+  - a -moqda form
+  - no number, no time, no actual offer
+  good_for:
+  - technique
+  - why_content
+  aspect: '16:9'
+  resolution: 2k
+  refs: 0
+  expires: true
+  provenance: 'higgsfield job 40d0f72e, 2026-08-22. The control in a three-way test: the prompt asked
+    for ''promotional text in the Uzbek language'' without dictating the words. Spelling and grammar came
+    back correct, which refutes the research brief''s claim that models garble Uzbek glyphs. What it got
+    wrong was register: it chose kutmoqda, the form the voice guide bans outright, and wrote a headline
+    containing no number, no time and no offer. This asset IS the evidence for that post.'
+- id: cafe-uztext-we-wrote-it
+  url: https://d8j0ntlcm91z4.cloudfront.net/user_2zJUonmh6cW6tDKlBEl4CIohbsI/hf_20260822_130043_270e0d35-c3a7-49ab-93ee-8c64ccc2661b.png
+  kind: photo
+  model: gpt_image_2
+  shows:
+  - iced latte cafe banner
+  - 11 words of dictated Uzbek, verbatim
+  - HAR KUNI SOAT 8 DAN 11 GACHA QOʻSHIMCHA CHEGIRMA VA BEPUL YETKAZIB BERISH
+  - okina correct in QOʻSHIMCHA
+  good_for:
+  - technique
+  - commercial_craft
+  aspect: '16:9'
+  resolution: 2k
+  refs: 0
+  expires: true
+  provenance: 'higgsfield job 270e0d35, 2026-08-22. The long-string arm of the same test. ''reading exactly:''
+    with an eleven-word Uzbek sentence reproduced verbatim, okina included, broken over five lines. Paired
+    with cafe-uztext-model-wrote-it: same photograph, same palette, only the text instruction differs.'
