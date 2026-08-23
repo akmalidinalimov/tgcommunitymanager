@@ -1,326 +1,345 @@
-# AI model knowledge base — the ONLY source the Replier may cite for model facts.
-#
-# The Replier never answers a model question from LLM memory. If a claim is not
-# here, it escalates to the founders instead of guessing. Model facts change
-# monthly and a confidently wrong answer in front of 3,326 people costs more
-# authority than staying silent.
-#
-# Every entry carries `source`, and they are not equal:
-#   founder   — Shahlo/Akmalidin said it. Authoritative. Overrides everything.
-#   catalog   — read from the live Higgsfield model catalog. Verified fact.
-#   web       — third-party benchmark or review. Directional only. NEVER quote
-#               a number from here in a post or reply.
-#
-# Verified against the Higgsfield catalog on 2026-08-13.
-
 meta:
-  verified_on: "2026-08-13"
+  verified_on: '2026-08-13'
   reverify_after_days: 30
-  catalog_source: "Higgsfield models_explore (live account catalog)"
-
-# --- What we recommend. Founder-stated, and what the bot leads with. ---------
+  catalog_source: Higgsfield models_explore (live account catalog)
 recommendations:
   video:
-    primary: [seedance_2_5, kling3_0]
+    primary:
+    - seedance_2_5
+    - kling3_0
     source: founder
-    note: "Shahlo/Akmalidin's stated defaults for video."
+    note: Shahlo/Akmalidin's stated defaults for video.
   image:
-    primary: [gpt_image_2, soul_2, midjourney]
+    primary:
+    - gpt_image_2
+    - soul_2
+    - midjourney
     source: founder
-    note: >
-      Stated as 'gpt 2 and Higgsfield Soul'. gpt 2 = GPT Image 2 (OpenAI), confirmed in
-      catalog. Midjourney added 2026-08-13: the founders use it regularly and had simply
-      not listed it. Not available through Higgsfield — used directly.
+    note: 'Stated as ''gpt 2 and Higgsfield Soul''. gpt 2 = GPT Image 2 (OpenAI), confirmed in catalog.
+      Midjourney added 2026-08-13: the founders use it regularly and had simply not listed it. Not available
+      through Higgsfield — used directly.
 
-# --- What may be said about tools ------------------------------------------
-# Founder ruling, 2026-08-13: the test is TRUTH, not a whitelist. The initial
-# list was only what they use most often, and treating it as exhaustive made the
-# bot refuse to name real tools its audience already uses.
-#
-# So: naming any real AI tool is fine, and reporting a genuine, well-established
-# capability is fine.
-#
-# What still requires a knowledge-base row:
-#   - prices, subscription costs, credit costs
-#   - specific capability claims ("X does Y at Z resolution/quality")
-#   - comparative verdicts ("X is better than Y for Z")
-#   - anything about OUR OWN work, results, or settings
-#
-# For a tool the founders have not tested, say so plainly and invite the member's
-# result — the honest answer, and it produces exactly the member-generated
-# artifacts the channel exists to create.
+      '
 tool_mentions:
   naming_allowed: true
   source: founder
   requires_grounding:
-    - price
-    - credit_cost
-    - specific_capability_claim
-    - comparison_verdict
-    - our_own_results_or_settings
-
-# --- Models we actually have access to. Facts from the live catalog. ---------
+  - price
+  - credit_cost
+  - specific_capability_claim
+  - comparison_verdict
+  - our_own_results_or_settings
 models:
   seedance_2_5:
-    name: "Seedance 2.5"
+    name: Seedance 2.5
     provider: Bytedance
     type: video
     source: catalog
-    duration_s: [4, 30]
-    resolution: ["480p", "720p"]
-    modes: [t2v, omni_reference, video_edit, video_extension]
+    duration_s:
+    - 4
+    - 30
+    resolution:
+    - 480p
+    - 720p
+    modes:
+    - t2v
+    - omni_reference
+    - video_edit
+    - video_extension
     audio: true
-    good_for: "text-to-video, editing or extending an existing video, reference-driven consistency"
-    caveat: >
-      Caps at 720p in our account. Seedance 2.0 reaches 4K. Newer version number
-      does NOT mean higher resolution here — check before promising 1080p+.
+    good_for: text-to-video, editing or extending an existing video, reference-driven consistency
+    caveat: 'Caps at 720p in our account. Seedance 2.0 reaches 4K. Newer version number does NOT mean
+      higher resolution here — check before promising 1080p+.
 
+      '
   seedance_2_0:
-    name: "Seedance 2.0"
+    name: Seedance 2.0
     provider: Bytedance
     type: video
     source: catalog
-    duration_s: [4, 15]
-    resolution: ["480p", "720p", "1080p", "4k"]
-    modes: [std, fast]
-    good_for: "highest-resolution Seedance output, multi-SKU product and e-commerce work"
-    caveat: "4k and 1080p require mode='std'. mode='fast' is 480p/720p only."
-
+    duration_s:
+    - 4
+    - 15
+    resolution:
+    - 480p
+    - 720p
+    - 1080p
+    - 4k
+    modes:
+    - std
+    - fast
+    good_for: highest-resolution Seedance output, multi-SKU product and e-commerce work
+    caveat: 4k and 1080p require mode='std'. mode='fast' is 480p/720p only.
   kling3_0:
-    name: "Kling v3.0"
+    name: Kling v3.0
     provider: Kling
     type: video
     source: catalog
-    duration_s: [3, 15]
-    modes: [std, pro, "4k"]
-    good_for: "cinematic, multi-shot, motion transfer, audio sync"
+    duration_s:
+    - 3
+    - 15
+    modes:
+    - std
+    - pro
+    - 4k
+    good_for: cinematic, multi-shot, motion transfer, audio sync
     cost_tip:
-      text: "sound='off' lowers credit cost; lower resolution is much cheaper"
+      text: sound='off' lowers credit cost; lower resolution is much cheaper
       source: founder
-      founder_words: "Kling 720p kachestvada qilsez ancha arzon"
-    caveat: "Subscription is expensive — a member already raised this (Abdumalik, post 606)."
-
+      founder_words: Kling 720p kachestvada qilsez ancha arzon
+    caveat: Subscription is expensive — a member already raised this (Abdumalik, post 606).
   kling3_0_turbo:
-    name: "Kling 3.0 Turbo"
+    name: Kling 3.0 Turbo
     provider: Kling
     type: video
     source: catalog
-    resolution: ["720p", "1080p"]
-    good_for: "fast, cheaper Kling output when cinematic depth is not required"
-
+    resolution:
+    - 720p
+    - 1080p
+    good_for: fast, cheaper Kling output when cinematic depth is not required
   gpt_image_2:
-    name: "GPT Image 2"
+    name: GPT Image 2
     provider: OpenAI
     type: image
     source: catalog
-    resolution: ["1k", "2k", "4k"]
-    quality: [low, medium, high]
-    good_for: "text rendering, typography, editing, prompt adherence"
-    note: >
-      Renders short Uzbek display text correctly, okina included — tested
-      2026-08-14. See rules.in_image_uzbek_text before repeating the old claim
-      that AI cannot write Uzbek.
+    resolution:
+    - 1k
+    - 2k
+    - 4k
+    quality:
+    - low
+    - medium
+    - high
+    good_for: text rendering, typography, editing, prompt adherence
+    note: 'Renders short Uzbek display text correctly, okina included — tested 2026-08-14. See rules.in_image_uzbek_text
+      before repeating the old claim that AI cannot write Uzbek.
 
+      '
   soul_2:
-    name: "Higgsfield Soul 2.0"
+    name: Higgsfield Soul 2.0
     provider: Higgsfield
     type: image
     source: catalog
-    quality: ["1.5k", "2k"]
-    good_for: "realistic UGC, fashion editorial, portraits, consistent characters via soul_id"
-    caveat: >
-      Preset-driven. Piling style adjectives into the prompt fights the preset and
-      the output drifts. Write subject, wardrobe, pose and light; let the preset carry style.
+    quality:
+    - 1.5k
+    - 2k
+    good_for: realistic UGC, fashion editorial, portraits, consistent characters via soul_id
+    caveat: 'Preset-driven. Piling style adjectives into the prompt fights the preset and the output drifts.
+      Write subject, wardrobe, pose and light; let the preset carry style.
 
+      '
   nano_banana_pro:
-    name: "Nano Banana Pro"
+    name: Nano Banana Pro
     provider: Google
     type: image
     source: catalog
-    resolution: ["1k", "2k", "4k"]
-    good_for: "photorealism, product consistency, diagrams"
-
+    resolution:
+    - 1k
+    - 2k
+    - 4k
+    good_for: photorealism, product consistency, diagrams
   nano_banana_2:
-    name: "Nano Banana 2"
+    name: Nano Banana 2
     provider: Google
     type: image
     source: catalog
-    resolution: ["2k"]
-    good_for: "photorealism, portraits"
-    note: >
-      Added 2026-08-16. The portrait comparison asset was labelled
-      nano_banana_pro in the media library while the Higgsfield record says it
-      was generated with nano_banana_2 — so the bot would have described that
-      image using a different model's characteristics. Two distinct models;
-      check the generation record before naming either.
+    resolution:
+    - 2k
+    good_for: photorealism, portraits
+    note: 'Added 2026-08-16. The portrait comparison asset was labelled nano_banana_pro in the media library
+      while the Higgsfield record says it was generated with nano_banana_2 — so the bot would have described
+      that image using a different model''s characteristics. Two distinct models; check the generation
+      record before naming either.
 
+      '
   seedream_v4_5:
-    name: "Seedream 4.5"
+    name: Seedream 4.5
     provider: Bytedance
     type: image
     source: catalog
-    good_for: "4K output (6K on high), precise control, transformations"
-
+    good_for: 4K output (6K on high), precise control, transformations
   flux_2:
-    name: "FLUX.2"
+    name: FLUX.2
     provider: Black Forest Labs
     type: image
     source: catalog
-    variants: [pro, flex, max]
-    good_for: "precise prompt adherence, high-volume marketing imagery"
-
+    variants:
+    - pro
+    - flex
+    - max
+    good_for: precise prompt adherence, high-volume marketing imagery
   marketing_studio_video:
-    name: "Marketing Studio"
+    name: Marketing Studio
     provider: Higgsfield
     type: video
     source: catalog
-    duration_s: [12, 15]
-    good_for: "one-click product ads, TikTok/Reels-ready commercial output"
+    duration_s:
+    - 12
+    - 15
+    good_for: one-click product ads, TikTok/Reels-ready commercial output
+  nano_banana_flash:
+    name: Nano Banana Flash
+    provider: Google
+    type: image
+    source: tested
+    resolution:
+    - 1k
+    - 2k
+    - 4k
+    good_for: dappled and directional daylight, natural shadow falloff, photorealism
+    note: 'Added 2026-08-23. Reached by asking Higgsfield for nano_banana_2 — it rerouted the job and
+      the generation record came back nano_banana_flash. That is now twice a Nano model has been mislabelled
+      here, so ALWAYS name the model from the generation record, never from what was requested.
 
-# --- How multi-shot video is actually made in our account --------------------
-# Read from the live Higgsfield generation records on 2026-08-15, not from
-# memory. This is the most frequently asked question under our video posts —
-# "is that one clip or several?", "did you use one image?" — and the honest
-# answer is that we have done it BOTH ways, which is more useful than either
-# answer alone.
-#
-# The VPS cannot look this up. The Higgsfield connector is bound to an
-# interactive session, so provenance must be recorded HERE at generation time,
-# during the weekly batch on the laptop. A generation whose parameters were
-# never written down is a question the bot cannot answer later.
+      '
+    tested:
+      daylight: 'Renders dappled light through a canopy convincingly: leaf shadows on a trunk harden or
+        soften correctly with the distance to the occluder. Beat GPT Image 2 on the light itself in a
+        same-prompt test, 2026-08-23.
+
+        '
+      night: 'Will not underexpose. Told three times in one prompt to leave most of the frame dark, it
+        lit an entire stadium evenly. Its disposition is bright and complete and prompting does not override
+        it — choose a different model for a dark frame rather than arguing with this one.
+
+        '
+      texture: Skin and fabric come back smoother than GPT Image 2, with less micro-detail.
 multi_shot_video:
   source: catalog
-  verified_on: "2026-08-15"
-  verified_from: "our own Higgsfield generation records"
-
+  verified_on: '2026-08-15'
+  verified_from: our own Higgsfield generation records
   from_one_reference_image:
     real: true
-    evidence: "generations 2026-08-10, refs=1, multi_shots=true, 12-15s, 16:9"
-    how: >
-      One reference image, multi_shots enabled, and the shots written as
-      sections in the prompt — "// Shot 1 – Extreme Close-Up", "// Shot 2 ...".
-      The model cuts between them itself.
-    say_to_members: >
-      Ha — bitta rasmdan koʻp sahnali video chiqadi. Kadrlarni promptda
-      "// Shot 1", "// Shot 2" deb boʻlib yozasiz.
+    evidence: generations 2026-08-10, refs=1, multi_shots=true, 12-15s, 16:9
+    how: 'One reference image, multi_shots enabled, and the shots written as sections in the prompt —
+      "// Shot 1 – Extreme Close-Up", "// Shot 2 ...". The model cuts between them itself.
 
+      '
+    say_to_members: 'Ha — bitta rasmdan koʻp sahnali video chiqadi. Kadrlarni promptda "// Shot 1", "//
+      Shot 2" deb boʻlib yozasiz.
+
+      '
   from_several_reference_images:
     real: true
-    evidence: "generation 2026-08-14, 5 reference images, 30s, 9:16, multi_shots=false"
-    how: >
-      Five references — one for the person, one for the outfit, three for the
-      locations — and the cuts written as TIMED sections in a single prompt
-      ("0.0-2.3s STATIC extreme close-up ..."). multi_shots was OFF; the timing
-      did the work.
-    why_it_matters: >
-      This is how character and wardrobe stay identical across scenes. One image
-      cannot hold a person, an outfit and three locations at once.
+    evidence: generation 2026-08-14, 5 reference images, 30s, 9:16, multi_shots=false
+    how: 'Five references — one for the person, one for the outfit, three for the locations — and the
+      cuts written as TIMED sections in a single prompt ("0.0-2.3s STATIC extreme close-up ..."). multi_shots
+      was OFF; the timing did the work.
 
-  do_not_assume: >
-    Never state how a specific video was made without checking its record. The
-    30-second reel looks like a one-image job and used five references; the
-    12-second ones look elaborate and used one. Guessing either way is exactly
-    the confident-wrong answer that costs authority.
+      '
+    why_it_matters: 'This is how character and wardrobe stay identical across scenes. One image cannot
+      hold a person, an outfit and three locations at once.
 
-# --- Our own published work. Answers "how did you make that?" ---------------
+      '
+  do_not_assume: 'Never state how a specific video was made without checking its record. The 30-second
+    reel looks like a one-image job and used five references; the 12-second ones look elaborate and used
+    one. Guessing either way is exactly the confident-wrong answer that costs authority.
+
+    '
 our_posts:
-  "606":
-    url: "https://t.me/aicreatorsuz/606"
-    date: "2026-08-13"
-    topic: "recreate yesterday's video from the shared prompt"
+  '606':
+    url: https://t.me/aicreatorsuz/606
+    date: '2026-08-13'
+    topic: recreate yesterday's video from the shared prompt
     referenced_video:
       made_with: seedance_2_5
       source: founder
-      note: >
-        Answers the question Фотима asked in the thread — "Қандай қилганизнм хам
-        кўрсатиб беринг". The model is now answerable; the exact settings are
-        still unknown, so the Replier may name the model and must not invent
-        resolution, mode or reference-image details.
-      still_unknown: [resolution, mode, duration, whether_reference_images_used]
+      note: 'Answers the question Фотима asked in the thread — "Қандай қилганизнм хам кўрсатиб беринг".
+        The model is now answerable; the exact settings are still unknown, so the Replier may name the
+        model and must not invent resolution, mode or reference-image details.
 
-# --- Asked about, but NOT in our toolset. Answer honestly. -------------------
+        '
+      still_unknown:
+      - resolution
+      - mode
+      - duration
+      - whether_reference_images_used
 not_in_our_stack:
   omni_flow:
     asked_by_member: true
     founder_verdict:
-      text: "Cannot produce this level of cinematic quality. Recommend Kling 3.0 instead."
+      text: Cannot produce this level of cinematic quality. Recommend Kling 3.0 instead.
       source: founder
-      founder_words: "Omni bunday darajada qilib bera olmaydi. Kling 3.0 da qilishingizni tavsiya qilaman"
+      founder_words: Omni bunday darajada qilib bera olmaydi. Kling 3.0 da qilishingizni tavsiya qilaman
   veo_3:
     source: catalog
-    fact: "Not available in our Higgsfield catalog."
-    honest_answer: >
-      We don't use it, so we can't vouch for it. Say that plainly rather than
-      reviewing a tool we have not run.
-  flux_3_bfl_site:
-    note: >
-      A member (Abdumalik, post 606) linked bfl.ai claiming Flux 3 competes with
-      Veo3 and speaks Uzbek. UNVERIFIED by us. Do not confirm or deny — invite
-      them to share their result instead.
+    fact: Not available in our Higgsfield catalog.
+    honest_answer: 'We don''t use it, so we can''t vouch for it. Say that plainly rather than reviewing
+      a tool we have not run.
 
-# --- Directional only. Never quote these numbers publicly. ------------------
+      '
+  flux_3_bfl_site:
+    note: 'A member (Abdumalik, post 606) linked bfl.ai claiming Flux 3 competes with Veo3 and speaks
+      Uzbek. UNVERIFIED by us. Do not confirm or deny — invite them to share their result instead.
+
+      '
 external_benchmarks:
   source: web
   verified: false
-  note: "Context for our own decisions. NEVER cite in a post or reply."
+  note: Context for our own decisions. NEVER cite in a post or reply.
   claims:
-    - "Seedance 2.0 ranked #1 on Artificial Analysis text-to-video and image-to-video leaderboards (June 2026)"
-    - "Kling 3.0 released 2026-02-05; phoneme-level multi-character lip-sync"
-    - "Veo 3.1 is the only model with native 48kHz synchronized dialogue"
-    - "GPT Image 2 tops the Artificial Analysis generation and editing arenas"
-    - "Nano Banana 2 leads on photorealism and subject consistency for product work"
-
-# --- Hard rules the Replier applies before sending anything -----------------
+  - 'Seedance 2.0 ranked #1 on Artificial Analysis text-to-video and image-to-video leaderboards (June
+    2026)'
+  - Kling 3.0 released 2026-02-05; phoneme-level multi-character lip-sync
+  - Veo 3.1 is the only model with native 48kHz synchronized dialogue
+  - GPT Image 2 tops the Artificial Analysis generation and editing arenas
+  - Nano Banana 2 leads on photorealism and subject consistency for product work
 rules:
   in_image_uzbek_text:
-    rule: >
-      Do NOT claim that AI cannot write Uzbek. Tested 2026-08-14 on GPT Image 2:
-      short bold display text rendered correctly, INCLUDING the okina —
-      "QOʻSHIMCHA CHEGIRMA", "TOʻYGA TAYYORGARLIK", "AI YANGILIKLARI",
-      "CHEGIRMA BOSHLANDI" all came out clean.
+    rule: 'Do NOT claim that AI cannot write Uzbek. Tested 2026-08-14 on GPT Image 2: short bold display
+      text rendered correctly, INCLUDING the okina — "QOʻSHIMCHA CHEGIRMA", "TOʻYGA TAYYORGARLIK", "AI
+      YANGILIKLARI", "CHEGIRMA BOSHLANDI" all came out clean.
+
+      '
     source: tested
     tested_on: gpt_image_2
     still_unknown:
-      - long paragraphs rather than short display lines
-      - small type
-      - Cyrillic
-      - other models (Soul, Nano Banana, Seedance, Kling)
-    practice: >
-      Overlaying type is still the safer default for client work — it keeps the
-      brand font, allows edits without regenerating, and is not exposed to any of
-      the untested cases. But it is a workflow preference now, not a limitation,
-      and the channel must not teach it as one.
-    history: >
-      The original rule said models garble Uzbek diacritics. It came from research
-      predating this model and was never verified. It was baked into the voice
-      guide, the shot grammar and an approved backup post before anyone tested it.
+    - long paragraphs rather than short display lines
+    - small type
+    - Cyrillic
+    - other models (Soul, Nano Banana, Seedance, Kling)
+    practice: 'Overlaying type is still the safer default for client work — it keeps the brand font, allows
+      edits without regenerating, and is not exposed to any of the untested cases. But it is a workflow
+      preference now, not a limitation, and the channel must not teach it as one.
+
+      '
+    history: 'The original rule said models garble Uzbek diacritics. It came from research predating this
+      model and was never verified. It was baked into the voice guide, the shot grammar and an approved
+      backup post before anyone tested it.
+
+      '
   no_unsupported_claims:
-    rule: "If a model fact is not in this file, do not state it. Escalate to the founders."
+    rule: If a model fact is not in this file, do not state it. Escalate to the founders.
   no_prices_from_memory:
-    rule: >
-      Never quote a subscription price or credit cost from memory. A price is
-      quotable only when it is in this file, or when a live web search just
-      returned it from the VENDOR'S OWN page — with the source and the date.
+    rule: 'Never quote a subscription price or credit cost from memory. A price is quotable only when
+      it is in this file, or when a live web search just returned it from the VENDOR''S OWN page — with
+      the source and the date.
+
+      '
     source: founder
-    founder_direction_2026_08_15: >
-      When a member asks something the open web can answer, go and find it
+    founder_direction_2026_08_15: 'When a member asks something the open web can answer, go and find it
       instead of deflecting. Raise it to the founders only when it is unclear.
-    how_research_is_gated: >
-      app/agents/research.py searches, then refuses to publish unless the price
-      is specific, from the vendor's own domain, free of conflicting sources and
-      high-confidence. Anything less goes to the admin chat WITH the evidence.
-    why_the_gate_is_strict: >
-      The first probe asked what Kling costs. Third-party trackers disagreed
-      materially ($6.99 vs $10-15 for the same plan), no official page appeared
-      in the results, and Kling shows THREE prices on one card — list $10,
-      first-month promo $6.99, renewal $8.80. A bot that answers "$6.99" has
-      told 3,326 people a number that is wrong from month two.
-    always_say: >
-      Quote the RENEWAL price, not the promotional one, and name the date. A
-      price without a date is a price that will be wrong later.
+
+      '
+    how_research_is_gated: 'app/agents/research.py searches, then refuses to publish unless the price
+      is specific, from the vendor''s own domain, free of conflicting sources and high-confidence. Anything
+      less goes to the admin chat WITH the evidence.
+
+      '
+    why_the_gate_is_strict: 'The first probe asked what Kling costs. Third-party trackers disagreed materially
+      ($6.99 vs $10-15 for the same plan), no official page appeared in the results, and Kling shows THREE
+      prices on one card — list $10, first-month promo $6.99, renewal $8.80. A bot that answers "$6.99"
+      has told 3,326 people a number that is wrong from month two.
+
+      '
+    always_say: 'Quote the RENEWAL price, not the promotional one, and name the date. A price without
+      a date is a price that will be wrong later.
+
+      '
   mirror_the_script:
-    rule: "Answer in the script the member wrote in — Latin or Cyrillic."
+    rule: Answer in the script the member wrote in — Latin or Cyrillic.
   do_not_interrupt_members:
-    rule: >
-      If another member has already answered the question, stay out. Member-to-member
-      help is worth more than a bot reply and the bot must not crowd it out.
+    rule: 'If another member has already answered the question, stay out. Member-to-member help is worth
+      more than a bot reply and the bot must not crowd it out.
+
+      '

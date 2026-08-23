@@ -161,6 +161,29 @@ next slot, queue depth and pool depth.
   worked locally. Always `git check-ignore -v <file>`, in both directions.
 - **Deploying immediately after a push pulls the previous image.** Wait for the build to go green.
 
+**A comparison post is one post with two pictures.** `sendMediaGroup` publishes an album;
+`planned_posts.yaml` takes `assets:` (a list) alongside `asset:`, and `media_paths` was already a
+JSON list so no schema change was needed. Three traps, all found by building it:
+
+- **It returns a LIST** where every other send returns a dict. `posted["message_id"]` raises
+  TypeError *after* the album has reached the channel — the post ships, the thread mapping is
+  never written, the seed comment is never placed, and Telegram drops the auto-forward after 24h,
+  so that thread is gone permanently while every symptom reads "published". `anchor()` normalises
+  it. This is the same bug for the seventh time: **the side effect succeeds and the state that
+  gives it meaning is never recorded.**
+- **An album cannot carry an inline keyboard.** An approval card must send the album, then the
+  buttons as their own message, or it arrives with nothing to press.
+- **Upload, never link.** Telegram fetches a URL itself and caps that at 5MB; a 2K render crosses
+  it routinely (the first comparison was 6.2MB and 0.9MB). Multipart raises the ceiling to 10MB.
+
+Also: **name the model from the generation record, not from what was requested.** Asking Higgsfield
+for `nano_banana_2` returned a job recorded as `nano_banana_flash`. Second time a Nano model has
+been mislabelled here.
+
+The channel now publishes **16:9 or 9:16** — vertical was added on founder direction for portrait
+comparisons. Still a closed set: the failure that test catches is a mislabelled ratio, not an
+unusual one.
+
 ## Writing the week by hand
 
 `data/planned_posts.yaml` keys a hand-written post to a slot and **wins over the Writer**,
@@ -200,7 +223,7 @@ thread resolver · Replier with grounding gate, script mirroring and react-inste
 missed-run recovery · content state machine · SQLite store · day-ahead approval cards · Writer + Voice
 Critic + mechanical lint + claims ledger · media library with 15 tagged assets · runtime loop · deployment.
 
-**357 tests**, no credentials or network needed.
+**416 tests**, no credentials or network needed.
 
 Visuals: a library asset when one genuinely matches, otherwise a **card rendered on the VPS**
 (`app/media/cards.py`, Pillow). Cards exist because `challenge`, `recognition` and `behind_scenes`

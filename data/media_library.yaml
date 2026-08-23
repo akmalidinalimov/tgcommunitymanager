@@ -418,3 +418,56 @@ assets:
   provenance: 'higgsfield job 270e0d35, 2026-08-22. The long-string arm of the same test. ''reading exactly:''
     with an eleven-word Uzbek sentence reproduced verbatim, okina included, broken over five lines. Paired
     with cafe-uztext-model-wrote-it: same photograph, same palette, only the text instruction differs.'
+- id: tree-portrait-gpt
+  url: https://d8j0ntlcm91z4.cloudfront.net/user_2zJUonmh6cW6tDKlBEl4CIohbsI/hf_20260823_123905_5a05ccff-4a0d-4e1f-8148-e2e9bba94a6e.png
+  kind: photo
+  model: gpt_image_2
+  shows:
+  - young Uzbek woman resting against a plane tree
+  - backlit canopy leaves glowing translucent
+  - freckles and fine skin texture
+  - visible linen weave in the hijab
+  - flaking plane bark
+  - low camera, out-of-focus grass foreground
+  good_for:
+  - comparison
+  - technique
+  aspect: '9:16'
+  resolution: 2k
+  refs: 0
+  expires: true
+  provenance: 'Same prompt, same subject, same 9:16 2K frame; only the model differs. Paired with tree-portrait-nano
+    — they are published together as one Telegram album and are meaningless apart. Generated 2026-08-23.
+    The prompt specified dappled sunlight through a plane-tree canopy, which is the hardest light to fake:
+    shadow edges must harden as the occluding leaf gets closer, and shaded skin must be filled by cool
+    skylight against warm sun. higgsfield job 5a05ccff. Wins on micro-texture: skin, linen and bark. 6.2MB
+    against the Nano half''s 0.9MB, which is real high-frequency detail rather than a compression difference.
+    Its dappled patches ON the subject are subtler than asked for — mostly rim light. No trademarks, no
+    lettering; both were checked.'
+- id: tree-portrait-nano
+  url: https://d8j0ntlcm91z4.cloudfront.net/user_2zJUonmh6cW6tDKlBEl4CIohbsI/hf_20260823_123905_0540d929-1e91-4422-8551-786b0d727055.png
+  kind: photo
+  model: nano_banana_flash
+  shows:
+  - young Uzbek woman resting against a plane tree
+  - leaf-shaped sun patches on the trunk with correct penumbra
+  - blown-out sunlit leaves in the foreground
+  - smoother skin rendering
+  - higher camera than requested
+  good_for:
+  - comparison
+  - technique
+  aspect: '9:16'
+  resolution: 2k
+  refs: 0
+  expires: true
+  provenance: 'Same prompt, same subject, same 9:16 2K frame; only the model differs. Paired with tree-portrait-gpt
+    — they are published together as one Telegram album and are meaningless apart. Generated 2026-08-23.
+    The prompt specified dappled sunlight through a plane-tree canopy, which is the hardest light to fake:
+    shadow edges must harden as the occluding leaf gets closer, and shaded skin must be filled by cool
+    skylight against warm sun. higgsfield job 0540d929. **Requested nano_banana_2; the generation record
+    says nano_banana_flash** — Higgsfield rerouted it, so that is the name to publish. This is the second
+    time the library and the record have disagreed about a Nano model; always read the record. Wins on
+    the light itself: the leaf shadows on the trunk have correct penumbra behaviour, which is the hard
+    part. Note this REVERSES the night-stadium result, where Nano over-lit and lost — realism has no stable
+    winner, it depends on the light.'

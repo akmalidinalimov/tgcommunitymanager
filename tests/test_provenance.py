@@ -49,12 +49,21 @@ def test_every_model_named_in_the_library_exists_in_the_knowledge_base(assets, k
     )
 
 
-def test_every_asset_is_the_channel_aspect_ratio(assets):
-    """Founder direction: the channel is 16:9. A stray vertical asset is either
-    unpublishable or mislabelled — and mislabelled is what it turned out to be."""
+#: The two shapes this channel publishes. 16:9 was the original founder
+#: direction and is still the default. 9:16 was added on 2026-08-23, when the
+#: founders asked for vertical portrait comparisons — a phone-first audience
+#: gives a vertical image roughly three times the screen a landscape one gets.
+#:
+#: Still a closed set on purpose. The failure this catches was never "an unusual
+#: ratio", it was a 3:2 asset that had been *mislabelled* 16:9 and would have
+#: published cropped.
+CHANNEL_ASPECTS = {"16:9", "9:16"}
+
+
+def test_every_asset_is_one_of_the_channel_aspect_ratios(assets):
     wrong = [(a["id"], a.get("aspect")) for a in assets
-             if a.get("aspect") and a["aspect"] != "16:9"]
-    assert not wrong, f"assets not at 16:9: {wrong}"
+             if a.get("aspect") and a["aspect"] not in CHANNEL_ASPECTS]
+    assert not wrong, f"assets outside {sorted(CHANNEL_ASPECTS)}: {wrong}"
 
 
 def test_provenance_is_recorded_for_every_asset(assets):

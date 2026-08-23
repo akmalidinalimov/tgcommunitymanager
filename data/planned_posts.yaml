@@ -203,9 +203,59 @@ posts:
 
       Oʻsha bir soatda hamma narsa qilingan, birinchi promptlar ham, birinchi rasmlar ham.
 
-  # --- week of 24 August: one post a day, 21:00 -----------------------------
+  # --- week of 24 August: model comparisons, one post a day at 21:00 --------
 
   "2026-08-24_21:00":
+    kind: technique
+    assets:
+      - tree-portrait-gpt
+      - tree-portrait-nano
+    note: >
+      Approved by Akmalidin on 2026-08-23, images and text together.
+
+      One prompt, two models, published as one Telegram album — a comparison is
+      one post with two pictures, not two posts nobody reads together. The
+      prompt is layered: subject, one compound camera setup (low at 40cm,
+      medium, side profile turning to lens), foreground / midground /
+      background, then about ten sentences on the light alone.
+
+      The finding is the post, and it was not the expected one. In an earlier
+      night test GPT dominated and Nano would not underexpose at any amount of
+      instruction. In daylight they swap: Nano renders the dappled leaf shadows
+      with correct penumbra, GPT renders skin, linen and bark. So "which model
+      is more realistic" has no stable answer — it depends on the light, and the
+      practical advice is to choose per shot rather than to have a favourite.
+
+      Names the model from the GENERATION RECORD: nano_banana_flash, not the
+      nano_banana_2 that was requested. Second time a Nano model has been
+      mislabelled here.
+
+      Needs the album path in `_deliver` and `send_media_group`; both were added
+      for this post. The images are 6.2MB and 0.9MB, so they upload as multipart
+      rather than by URL, which Telegram caps at 5MB.
+    text: |
+      Bitta prompt yozdim va uni ikkita modelga berdim. Daraxt tagida oʻtirgan qiz, barglar orasidan tushayotgan quyosh. Rasmni haqiqiyga oʻxshatish uchun eng qiyin yorugʻlik shu.
+
+      GPT Image 2 mayda detalni yaxshiroq oldi. Yuzdagi sepkillar, zigʻir roʻmolning toʻqimasi, chinor poʻstlogʻining qatlam-qatlam boʻlib koʻchishi. Tepadagi barglar quyoshda yarqirab turibdi.
+
+      Nano Banana Flash esa yorugʻlikning oʻzini toʻgʻriroq chizdi. Daraxt tanasiga tushgan barg soyalari: bir joyda chekkasi aniq, bir joyda yumshoq. Haqiqiy quyosh aynan shunday tushadi.
+
+      📌 Xulosa oddiy: bittasi «realroq» emas. Bittasi teri va matoni oladi, ikkinchisi soya bilan yorugʻlikni.
+
+      ✅ Shuning uchun modelni oldindan tanlamayman. Avval kadrda nima muhimligini hal qilaman: mato va teri kerakmi, yoki yorugʻlik oʻyini kerakmi. Model shundan keyin tanlanadi.
+
+      Ikkalasi bitta promptdan chiqqan. Sizningcha qaysi biri tabiiyroq? 👇
+    seed_comment: |
+      Promptning eng uzun qismi yorugʻlikka ketgan, mana shunday: quyosh orqadan, chap tomondan, barglar orasidan tushadi; soyaning chekkasi barg yaqin boʻlsa aniq, uzoq boʻlsa yumshoq; soyadagi yuzni osmonning koʻk yorugʻligi toʻldiradi.
+
+      Bitta jumla emas, oʻn jumla. Yorugʻlikni qanchalik aniq yozsangiz, rasm shunchalik haqiqiyga yaqin chiqadi.
+
+      Toʻliq promptni soʻrasangiz shu yerga tashlayman.
+
+# Finished copy with no slot. `load()` reads only `posts:`, so nothing here can
+# publish — move an entry up when a slot is chosen for it.
+drafts:
+  "unscheduled_uzbek-register":
     kind: technique
     asset: cafe-uztext-model-wrote-it
     note: >

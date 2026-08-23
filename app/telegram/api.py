@@ -106,6 +106,53 @@ class BotAPI:
         )
         return self._result("sendPhoto", response)
 
+    def send_media_group(
+        self, chat_id: int | str, images: list[tuple[str, bytes]], *,
+        caption: str | None = None, parse_mode: str | None = None,
+        reply_to_message_id: int | None = None,
+    ) -> list[dict]:
+        """Send 2-10 images as one album, with the caption under the first.
+
+        This is the only way a comparison post works. Telegram renders an album
+        as a single post, so two images from one prompt sit side by side instead
+        of arriving as two separate posts nobody reads together.
+
+        Uploaded as multipart rather than by URL, deliberately. Telegram fetches
+        a URL itself and refuses anything over 5MB, and a 2K render crosses that
+        routinely — the GPT half of the first comparison is 6.2MB. Multipart
+        raises the ceiling to 10MB and does not depend on a CDN answering
+        Telegram's fetcher. Each file is attached by name and referenced from the
+        media array as ``attach://``.
+
+        **An album cannot carry an inline keyboard.** Telegram rejects
+        reply_markup here, so anything needing buttons — an approval card — must
+        send the album first and the buttons as a following message.
+        """
+        if not 2 <= len(images) <= 10:
+            raise ValueError(f"a media group takes 2-10 images, got {len(images)}")
+
+        media: list[dict] = []
+        files: dict[str, tuple[str, bytes, str]] = {}
+        for i, (filename, blob) in enumerate(images):
+            key = f"file{i}"
+            item: dict[str, Any] = {"type": "photo", "media": f"attach://{key}"}
+            if i == 0 and caption:
+                # Only the first item may carry it; a caption on a later item is
+                # accepted and then never shown.
+                item["caption"] = caption
+                if parse_mode:
+                    item["parse_mode"] = parse_mode
+            media.append(item)
+            files[key] = (filename, blob, "image/jpeg")
+
+        fields: dict[str, str] = {"chat_id": str(chat_id), "media": json.dumps(media)}
+        if reply_to_message_id is not None:
+            fields["reply_parameters"] = json.dumps({"message_id": reply_to_message_id})
+        response = self._client.post(
+            self._base + "sendMediaGroup", data=fields, files=files,
+        )
+        return self._result("sendMediaGroup", response)
+
     # --- the handful of methods this project actually uses -------------------
 
     def get_me(self) -> dict:

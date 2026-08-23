@@ -108,6 +108,25 @@ def _cache_key(question: str) -> str:
     return hashlib.sha256(question.strip().lower().encode()).hexdigest()[:16]
 
 
+def anchor(sent) -> dict:
+    """The one message that represents what was just sent.
+
+    sendMediaGroup returns a LIST where every other send returns a dict, and the
+    caller needs a single message id: the thread mapping is keyed on it, and
+    without that mapping the seed comment is never placed and the comment thread
+    is lost for good, because Telegram drops updates older than 24h.
+
+    Indexing a list with "message_id" raises TypeError — *after* the album has
+    already reached 3,326 people. The side effect succeeds and the state that
+    gives it meaning never gets written. That is the same bug this project has
+    now shipped six times, so it is normalised here rather than at each caller.
+
+    The first item is the anchor: Telegram auto-forwards an album as a unit and
+    the discussion-group copy corresponds to its first message.
+    """
+    return sent[0] if isinstance(sent, list) else sent
+
+
 def kind_for(slot: Slot) -> str:
     return WEEKLY_PLAN.get((slot.at.weekday(), slot.at.hour), "technique")
 
@@ -681,9 +700,14 @@ class Runtime:
             return
 
         try:
-            posted = self._deliver(self.settings.channel_id, visual, text)
+            posted = anchor(self._deliver(self.settings.channel_id, visual, text))
             if visual[0] == "asset":
                 self.store.set_runtime(f"asset_used:{visual[1].id}", visual[1].id)
+            elif visual[0] == "album":
+                # Both halves are spent. Recording only the first would let LRU
+                # hand the other one back as if it had never been published.
+                for used in visual[1]:
+                    self.store.set_runtime(f"asset_used:{used.id}", used.id)
             log.info("published %s with %s", slot.key, visual[0] or "no media")
         except TelegramError as exc:
             # An expired CDN URL must not cost the slot. Fall back to text.
@@ -764,7 +788,8 @@ class Runtime:
                 log.info("%s uses a planned post (%s)", slot.key, planned.kind)
                 content = Content(slot_key=slot.key, kind=planned.kind,
                                   text=planned.text, seed_comment=planned.seed_comment)
-                content.attach_media(planned.asset or CARD)
+                for ref in (planned.assets or (planned.asset or CARD,)):
+                    content.attach_media(ref)
                 content.submit_for_approval()
                 self.store.save_content(content)
                 if self._send_for_approval(content, slot):
@@ -826,12 +851,15 @@ class Runtime:
         buttons = approval.keyboard(slot.key)
         visual = self.visual(content, content.kind, content.text)
         try:
-            if visual[0] and len(body) > CAPTION_CAP:
-                # Too long to ride as a caption. Show the visual, then the text
-                # with the buttons, rather than silently dropping either.
+            if visual[0] == "album" or (visual[0] and len(body) > CAPTION_CAP):
+                # Two reasons to split. A body too long to ride as a caption, and
+                # an album — Telegram refuses an inline keyboard on a media
+                # group, so the buttons must follow as their own message or the
+                # card arrives with nothing to press.
                 self._deliver(self.settings.admin_chat_id, visual, "")
                 sent = self.api.send_message(self.settings.admin_chat_id, body,
                                              parse_mode="HTML", reply_markup=buttons)
+                sent = anchor(sent)
             else:
                 # The card IS the post: the visual with the caption under it,
                 # exactly as the channel will see it. A preview that differs from
@@ -889,10 +917,20 @@ class Runtime:
 
     def bound_asset(self, content: Content | None):
         """The library asset this content was drafted and approved with, if any."""
+        bound = self.bound_assets(content)
+        return bound[0] if bound else None
+
+    def bound_assets(self, content: Content | None) -> list:
+        """Every library asset bound to this content, in order.
+
+        Usually one. A comparison post binds two, because the whole point is
+        seeing them together — the same prompt through two models is not two
+        posts, it is one post with two pictures.
+        """
         if not content or not content.media_paths:
-            return None
-        ref = content.media_paths[0]
-        return None if ref == CARD else asset_by_id(ref)
+            return []
+        found = [asset_by_id(ref) for ref in content.media_paths if ref != CARD]
+        return [a for a in found if a]
 
     def visual(self, content: Content | None, kind: str, text: str):
         """What accompanies this post: ("asset", Asset), ("card", png), or (None, None).
@@ -901,9 +939,16 @@ class Runtime:
         deterministic, so drawing it at send time is cheaper than managing files
         on a volume and cannot go stale against the text it illustrates.
         """
-        asset = self.bound_asset(content)
-        if asset:
-            return "asset", asset
+        bound = self.bound_assets(content)
+        if len(bound) > 1:
+            # An album. Only photos: Telegram allows mixed albums, but a video
+            # beside a still reads as a gallery rather than a comparison, and
+            # every case we have is two stills.
+            photos = [a for a in bound if not a.is_video]
+            if len(photos) > 1:
+                return "album", photos[:10]
+        if bound:
+            return "asset", bound[0]
         if content and CARD in content.media_paths:
             # A planned post may say what its card should carry. Read from the
             # plan at send time rather than persisting it: the plan file is the
@@ -922,6 +967,14 @@ class Runtime:
                  parse_mode: str | None = None, reply_markup: dict | None = None) -> dict:
         """Send a post — or its preview — as the visual with the words under it."""
         shape, ref = visual
+        if shape == "album":
+            # Fetched and uploaded rather than sent by URL: Telegram caps a
+            # URL-fetched photo at 5MB and a 2K render goes past it.
+            return self.api.send_media_group(
+                chat_id,
+                [(f"{a.id}.jpg", fetch_image(a.url)) for a in ref],
+                caption=body or None, parse_mode=parse_mode,
+            )
         if shape == "asset":
             sender = self.api.send_video if ref.is_video else self.api.send_photo
             try:

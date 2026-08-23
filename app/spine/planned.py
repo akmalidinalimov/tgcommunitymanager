@@ -37,6 +37,12 @@ class PlannedPost:
     seed_comment: str = ""
     asset: str = ""
     """Media library id, or 'card' to render one. Empty means pick automatically."""
+    assets: tuple[str, ...] = ()
+    """Several library ids, published as one Telegram album.
+
+    A comparison is one post with two pictures, not two posts. `asset` still
+    works and is the common case; this is for the week where the whole point is
+    seeing both at once."""
     card_text: str = ""
     """What the rendered card should say, when `asset: card`.
 
@@ -68,6 +74,7 @@ def load(path: Path | None = None) -> dict[str, PlannedPost]:
             text=normalize_apostrophes((entry.get("text") or "").strip()),
             seed_comment=normalize_apostrophes((entry.get("seed_comment") or "").strip()),
             asset=entry.get("asset", ""),
+            assets=tuple(entry.get("assets") or ()),
             card_text=normalize_apostrophes((entry.get("card_text") or "").strip()),
             note=entry.get("note", ""),
         )

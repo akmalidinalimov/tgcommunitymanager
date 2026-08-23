@@ -51,6 +51,17 @@ class FakeAPI:
                           "text": kw.get("caption") or "", **kw})
         return {"message_id": self._next_id}
 
+    def send_media_group(self, chat_id, images, **kw):
+        """An album. Returns a LIST, as Telegram does — a caller expecting a
+        dict here is the bug this shape exists to expose."""
+        self._next_id += 1
+        first = self._next_id
+        self.sent.append({"chat_id": chat_id, "media": f"<album of {len(images)}>",
+                          "media_kind": "album", "album_size": len(images),
+                          "message_id": first, "text": kw.get("caption") or "", **kw})
+        self._next_id += len(images) - 1
+        return [{"message_id": first + i} for i in range(len(images))]
+
     def send_photo(self, chat_id, photo, **kw):
         return self._media(chat_id, photo, "photo", **kw)
 
