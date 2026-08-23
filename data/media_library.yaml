@@ -471,3 +471,158 @@ assets:
     the light itself: the leaf shadows on the trunk have correct penumbra behaviour, which is the hard
     part. Note this REVERSES the night-stadium result, where Nano over-lit and lost — realism has no stable
     winner, it depends on the light.'
+- id: uz-speech-seedance-2-5
+  url: https://d8j0ntlcm91z4.cloudfront.net/user_2zJUonmh6cW6tDKlBEl4CIohbsI/hf_20260823_130604_c0b4bcb1-7254-4ebc-aa18-6cd395c17466.mp4
+  kind: video
+  model: seedance_2_5
+  shows:
+  - softest and haziest of the six
+  - low camera as briefed
+  - good bark detail
+  good_for:
+  - comparison
+  - technique
+  aspect: '16:9'
+  resolution: 720p
+  duration: 8
+  refs: 0
+  expires: true
+  multi_shots: false
+  provenance: 'One prompt run across six video models on 2026-08-23, 8s / 16:9, same character and setting
+    as the Monday stills so the whole week is one continuous test. The prompt carried a spoken Uzbek line:
+    ''Assalomu alaykum! Bugun sizga bitta yangi gʻoyani koʻrsataman.'' — chosen to contain both oʻ and
+    gʻ. AUDIO EXISTS AND IS UNJUDGED: an audio stream and its loudness were verified here with ffprobe,
+    but whether the Uzbek is pronounced correctly has NOT been assessed. That needs a native speaker and
+    no post may claim otherwise. 720p here by request; the model reaches 1080p. Smallest file of the group
+    at 2.3MB, and the flattest-looking. Paired against uz-speech-seedance-2-0 for the Tuesday post and
+    against uz-speech-kling-3-0 for Wednesday.'
+- id: uz-speech-seedance-2-0
+  url: https://d8j0ntlcm91z4.cloudfront.net/user_2zJUonmh6cW6tDKlBEl4CIohbsI/hf_20260823_130604_23541c65-1de7-4824-be38-d4d3d792b296.mp4
+  kind: video
+  model: seedance_2_0
+  shows:
+  - brighter and more contrasty than 2.5
+  - sun on the face
+  - sharper foliage
+  good_for:
+  - comparison
+  - technique
+  aspect: '16:9'
+  resolution: 720p
+  duration: 8
+  refs: 0
+  expires: true
+  multi_shots: false
+  provenance: 'One prompt run across six video models on 2026-08-23, 8s / 16:9, same character and setting
+    as the Monday stills so the whole week is one continuous test. The prompt carried a spoken Uzbek line:
+    ''Assalomu alaykum! Bugun sizga bitta yangi gʻoyani koʻrsataman.'' — chosen to contain both oʻ and
+    gʻ. AUDIO EXISTS AND IS UNJUDGED: an audio stream and its loudness were verified here with ffprobe,
+    but whether the Uzbek is pronounced correctly has NOT been assessed. That needs a native speaker and
+    no post may claim otherwise. The Tuesday counterpart. Visibly sharper and more contrasty than 2.5
+    at the same 720p, and a larger file, which is real detail. The post''s point is the counterintuitive
+    one: 2.0 reaches 4K while 2.5 stops at 1080p, so the higher version number is not the higher-resolution
+    model.'
+- id: uz-speech-kling-3-0
+  url: https://d8j0ntlcm91z4.cloudfront.net/user_2zJUonmh6cW6tDKlBEl4CIohbsI/hf_20260823_130604_3e4ec2ed-8085-4ff2-83e0-e44509871e79.mp4
+  kind: video
+  model: kling3_0
+  shows:
+  - widest and lowest framing of the six
+  - full figure
+  - most detail at 720p
+  good_for:
+  - comparison
+  - technique
+  aspect: '16:9'
+  resolution: 720p
+  duration: 8
+  refs: 0
+  expires: true
+  multi_shots: false
+  provenance: 'One prompt run across six video models on 2026-08-23, 8s / 16:9, same character and setting
+    as the Monday stills so the whole week is one continuous test. The prompt carried a spoken Uzbek line:
+    ''Assalomu alaykum! Bugun sizga bitta yangi gʻoyani koʻrsataman.'' — chosen to contain both oʻ and
+    gʻ. AUDIO EXISTS AND IS UNJUDGED: an audio stream and its loudness were verified here with ffprobe,
+    but whether the Uzbek is pronounced correctly has NOT been assessed. That needs a native speaker and
+    no post may claim otherwise. The Wednesday counterpart. Framed widest and lowest — the most cinematic
+    composition of the six — and 8.1MB, the largest of the 720p group. Also the cheapest by a distance:
+    10 credits at 5s against Seedance 2.5''s 32.5, which confirms the founder''s own note that Kling at
+    720p is much cheaper.'
+- id: uz-speech-flux-3
+  url: https://d8j0ntlcm91z4.cloudfront.net/user_2zJUonmh6cW6tDKlBEl4CIohbsI/hf_20260823_130604_41f0ce93-9d3a-4c1a-bd87-3bf56f663709.mp4
+  kind: video
+  model: flux_3_video
+  shows:
+  - warmest grade of the six
+  - golden backlight through the canopy
+  - shallowest depth of field
+  - 1280x704, not a clean 720
+  good_for:
+  - comparison
+  - technique
+  aspect: '16:9'
+  resolution: 720p
+  duration: 8
+  refs: 0
+  expires: true
+  multi_shots: false
+  provenance: 'One prompt run across six video models on 2026-08-23, 8s / 16:9, same character and setting
+    as the Monday stills so the whole week is one continuous test. The prompt carried a spoken Uzbek line:
+    ''Assalomu alaykum! Bugun sizga bitta yangi gʻoyani koʻrsataman.'' — chosen to contain both oʻ and
+    gʻ. AUDIO EXISTS AND IS UNJUDGED: an audio stream and its loudness were verified here with ffprobe,
+    but whether the Uzbek is pronounced correctly has NOT been assessed. That needs a native speaker and
+    no post may claim otherwise. The model Abdumalik told us about under post 606 and which we filed as
+    unverified for ten days. Arguably the best-looking frame of the six. Note the odd 1280x704 rather
+    than 1280x720.'
+- id: uz-speech-gemini-omni
+  url: https://d8j0ntlcm91z4.cloudfront.net/user_2zJUonmh6cW6tDKlBEl4CIohbsI/hf_20260823_130605_9bed8274-2018-4c2a-b3ec-28b31c1b7ab4.mp4
+  kind: video
+  model: gemini_omni
+  shows:
+  - closest framing
+  - brightest and flattest
+  - clearly mid-speech
+  good_for:
+  - comparison
+  - technique
+  aspect: '16:9'
+  resolution: 720p
+  duration: 8
+  refs: 0
+  expires: true
+  multi_shots: false
+  provenance: 'One prompt run across six video models on 2026-08-23, 8s / 16:9, same character and setting
+    as the Monday stills so the whole week is one continuous test. The prompt carried a spoken Uzbek line:
+    ''Assalomu alaykum! Bugun sizga bitta yangi gʻoyani koʻrsataman.'' — chosen to contain both oʻ and
+    gʻ. AUDIO EXISTS AND IS UNJUDGED: an audio stream and its loudness were verified here with ffprobe,
+    but whether the Uzbek is pronounced correctly has NOT been assessed. That needs a native speaker and
+    no post may claim otherwise. The founders'' standing verdict is that this model cannot reach cinematic
+    quality, and this frame does not overturn it: brightest and flattest of the six, smallest file at
+    1.9MB. Its value is elsewhere — reference-driven editing from an existing clip, which is the Friday
+    post.'
+- id: uz-speech-veo-3-1
+  url: https://d8j0ntlcm91z4.cloudfront.net/user_2zJUonmh6cW6tDKlBEl4CIohbsI/hf_20260823_130605_f4ce431d-3b0c-49a9-be0a-b34a6552d09e.mp4
+  kind: video
+  model: veo3_1
+  shows:
+  - 1920x1080 — the only one above 720p
+  - strong contrast
+  - leaf shadows on the bark
+  - warm skin
+  good_for:
+  - comparison
+  - technique
+  aspect: '16:9'
+  resolution: 1080p
+  duration: 8
+  refs: 0
+  expires: true
+  multi_shots: false
+  provenance: 'One prompt run across six video models on 2026-08-23, 8s / 16:9, same character and setting
+    as the Monday stills so the whole week is one continuous test. The prompt carried a spoken Uzbek line:
+    ''Assalomu alaykum! Bugun sizga bitta yangi gʻoyani koʻrsataman.'' — chosen to contain both oʻ and
+    gʻ. AUDIO EXISTS AND IS UNJUDGED: an audio stream and its loudness were verified here with ffprobe,
+    but whether the Uzbek is pronounced correctly has NOT been assessed. That needs a native speaker and
+    no post may claim otherwise. Came back at 1080p unasked, because quality=''high'' was set; every other
+    model was left at 720p. Largest file at 11.6MB. Not a like-for-like comparison on resolution, and
+    the post must say so rather than crediting Veo with sharpness it was simply given more pixels for.'
