@@ -686,3 +686,109 @@ assets:
     of TWO failures in 2.5''s four takes; the other was a potter vessel becoming a thin twisted stalk.
     The caption says two of four, not four of four, because 2.5''s other tandyr take was acceptable. Publishing
     the failure is fair only while the count is stated.'
+- id: tower-dive-2-0-a
+  url: https://d8j0ntlcm91z4.cloudfront.net/user_2zJUonmh6cW6tDKlBEl4CIohbsI/hf_20260823_212750_3c947eb9-42ac-4855-979b-ae6c07c43cfc.mp4
+  kind: video
+  model: seedance_2_0
+  shows:
+  - steel lattice tower with X-bracing
+  - eagle launching from a gantry
+  - strong motion blur on passing structure
+  - golden haze city below
+  good_for:
+  - comparison
+  - technique
+  - mission
+  aspect: '16:9'
+  resolution: 720p
+  duration: 5
+  refs: 0
+  expires: true
+  multi_shots: false
+  provenance: 'Tashkent TV tower dive, 2026-08-23. Same prompt both models, 5s / 720p / 16:9, IMAX framing,
+    camera falling with a golden eagle from the observation deck. Preset ''IN THE DARK'' declined explicitly.
+    IMPORTANT AND UNCLAIMED ELSEWHERE: neither model produced the ACTUAL Tashkent tower. Both invented
+    a generic tall tower. The prompt named it and described three splayed legs, a tapering shaft and a
+    circular deck on angled struts; no take reproduced that silhouette. A post must not present these
+    as the teleminorasi. Assessed from four frames per clip; motion smoothness and flare deceleration
+    are unverified. Take 1. Rendered a LATTICE tower as briefed, with convincing speed blur on the vertical
+    members.'
+- id: tower-dive-2-0-b
+  url: https://d8j0ntlcm91z4.cloudfront.net/user_2zJUonmh6cW6tDKlBEl4CIohbsI/hf_20260823_212750_a5dc2939-1e54-481a-9542-04a2bf18ab9b.mp4
+  kind: video
+  model: seedance_2_0
+  shows:
+  - eagle with wings spread and separated primaries
+  - lattice tower
+  - warm haze depth
+  - wide final frame
+  good_for:
+  - comparison
+  - technique
+  - mission
+  aspect: '16:9'
+  resolution: 720p
+  duration: 5
+  refs: 0
+  expires: true
+  multi_shots: false
+  provenance: 'Tashkent TV tower dive, 2026-08-23. Same prompt both models, 5s / 720p / 16:9, IMAX framing,
+    camera falling with a golden eagle from the observation deck. Preset ''IN THE DARK'' declined explicitly.
+    IMPORTANT AND UNCLAIMED ELSEWHERE: neither model produced the ACTUAL Tashkent tower. Both invented
+    a generic tall tower. The prompt named it and described three splayed legs, a tapering shaft and a
+    circular deck on angled struts; no take reproduced that silhouette. A post must not present these
+    as the teleminorasi. Assessed from four frames per clip; motion smoothness and flare deceleration
+    are unverified. Take 2 and the strongest clip of the whole session. Individual flight feathers read
+    at the wingtips and the wing shape is anatomically plausible through the dive.'
+- id: tower-dive-2-5-a
+  url: https://d8j0ntlcm91z4.cloudfront.net/user_2zJUonmh6cW6tDKlBEl4CIohbsI/hf_20260823_212750_4f0d5d13-f4db-4963-af3d-fe0ab16a7eae.mp4
+  kind: video
+  model: seedance_2_5
+  shows:
+  - smooth white saucer observation deck
+  - pale modern tower, not a lattice
+  - eagle small in frame
+  good_for:
+  - comparison
+  - technique
+  - mission
+  aspect: '16:9'
+  resolution: 720p
+  duration: 5
+  refs: 0
+  expires: true
+  multi_shots: false
+  provenance: 'Tashkent TV tower dive, 2026-08-23. Same prompt both models, 5s / 720p / 16:9, IMAX framing,
+    camera falling with a golden eagle from the observation deck. Preset ''IN THE DARK'' declined explicitly.
+    IMPORTANT AND UNCLAIMED ELSEWHERE: neither model produced the ACTUAL Tashkent tower. Both invented
+    a generic tall tower. The prompt named it and described three splayed legs, a tapering shaft and a
+    circular deck on angled struts; no take reproduced that silhouette. A post must not present these
+    as the teleminorasi. Assessed from four frames per clip; motion smoothness and flare deceleration
+    are unverified. Take 1. Built a smooth white modern tower rather than the steel lattice the prompt
+    asked for.'
+- id: tower-dive-2-5-b
+  url: https://d8j0ntlcm91z4.cloudfront.net/user_2zJUonmh6cW6tDKlBEl4CIohbsI/hf_20260823_212750_20f02a4c-1635-43e8-8416-10f2b847a3b6.mp4
+  kind: video
+  model: seedance_2_5
+  shows:
+  - white saucer deck with glass
+  - eagle compressed mid-dive
+  - wings resolve only in the final frame
+  good_for:
+  - comparison
+  - technique
+  - mission
+  aspect: '16:9'
+  resolution: 720p
+  duration: 5
+  refs: 0
+  expires: true
+  multi_shots: false
+  provenance: 'Tashkent TV tower dive, 2026-08-23. Same prompt both models, 5s / 720p / 16:9, IMAX framing,
+    camera falling with a golden eagle from the observation deck. Preset ''IN THE DARK'' declined explicitly.
+    IMPORTANT AND UNCLAIMED ELSEWHERE: neither model produced the ACTUAL Tashkent tower. Both invented
+    a generic tall tower. The prompt named it and described three splayed legs, a tapering shaft and a
+    circular deck on angled struts; no take reproduced that silhouette. A post must not present these
+    as the teleminorasi. Assessed from four frames per clip; motion smoothness and flare deceleration
+    are unverified. Take 2. The eagle reads as a compressed blob at two of four sampled frames; wing structure
+    only resolves at the end. Weakest of the four.'
