@@ -85,56 +85,52 @@ posts:
   "2026-08-25_21:00":
     kind: technique
     assets:
-      - phys-tandyr-2-0
-      - phys-tandyr-2-5
+      - tower-dive-2-0-a
+      - tower-dive-2-5-b
     note: >
-      Written from the physics test on 2026-08-23, after Akmalidin rejected a
-      spec-sheet comparison twice: first for comparing resolution and duration
-      instead of motion, then for testing with a locked camera and one event
-      instead of running the models at capability.
+      The two clips Akmalidin picked from the Higgsfield gallery. His share
+      links resolve to jobs 3c947eb9 (seedance_2_0, take 1) and 20f02a4c
+      (seedance_2_5, take 2), both generated here on 2026-08-23.
 
-      Two shots, both models, two takes each, everything at 720p so resolution
-      cannot be mistaken for motion quality. The finding is that the version
-      number lies about succession: 2.5 is not an upgrade of 2.0, it is a
-      different tool. 2.0 held both shots. 2.5 broke twice in four takes, and
-      both failures are visible in stills — dough fused to a forearm with no
-      fingers, and a vessel turning into a twisted stalk.
+      Note which 2.5 take that is: take 2, the weaker of its two in the frame
+      read. He watched them in motion and I did not, so his judgement stands,
+      but the caption says two takes were run per model rather than implying
+      this was 2.5's only attempt. Cherry-picking a failure is only fair with
+      the count attached.
 
-      The caption says TWO of four, not four of four, because 2.5's other
-      tandyr take was fine. Publishing the failure frame is fair only while
-      that count is stated.
+      The post carries the finding that matters more than the ranking: NEITHER
+      model produced the actual Toshkent teleminorasi. The prompt named it and
+      described the three splayed legs. Both invented a different tower. Saying
+      that first is the only safe move — this audience has stood under it, and
+      a member pointing it out in the comments is far worse than us pointing it
+      out in the post.
 
-      Not verified and not claimed anywhere in the post: rotation constancy,
-      motion smoothness, slip trajectories, flicker sync, heat shimmer. Those
-      need someone to watch the clips.
+      Replaces the tandyr physics comparison that held this slot. Same topic,
+      and these clips are the ones the founder chose. The tandyr clips stay in
+      the library for a later post.
+
+      The seed comment PROMISES a reference-image follow-up. That is a real
+      commitment and the channel's own callback style, but it has to be kept.
     text: |
-      Seedance 2.5 yangiroq. Lekin bu sinovda 2.0 yutdi.
+      Ikkala videoni bitta prompt chiqargan. Farqni topa olasizmi?
 
-      Ikkalasiga bir xil ikkita sahna berdim: kulolning gʻildiragi va tongdagi tandir. Har birida toʻrtta narsa bir vaqtda sodir boʻladi, kamera esa toʻxtamasdan aylanib tushadi. Oson kadr emas, ataylab.
+      Promptda shunday yozilgan: kamera burgut bilan birga minora yonidan pastga tushadi. Ikkalasi ham 720p, ikkalasi ham 5 soniya, soʻzlar ham bir xil. Faqat model boshqa.
 
-      📌 Seedance 2.0 yorugʻlikni ushladi. Deraza nuri, tutun, koʻmirning issiq rangi va tongning sovuq osmoni bitta kadrda. Xamir devorga yopishdi, loy qoʻl ostida shakl oldi.
+      📌 Seedance 2.0 minorani panjarali temir konstruksiya qilib chiqardi, promptda soʻralganidek. Yonidan oʻtayotgan temirlar tezlikdan yoyilib ketadi. Burgut qanotini yigʻadi, uchidagi patlar ajralib turadi.
 
-      📌 Seedance 2.5 da ikkita urinish buzildi. Birida xamir qoʻlga yopishib, barmoqlar oʻrniga qoʻlning uchida qoʻziqorindek turib qoldi. Boshqasida loy ingichka ustunga aylanib ketdi.
+      📌 Seedance 2.5 esa silliq oq minora chizdi, panjara yoʻq. Burgut sakrashning oʻrtasida qanot shaklini yoʻqotadi.
 
-      ✅ Xulosa: 2.5 yaxshiroq versiya emas, boshqa asbob. Uning kuchi boshqa yerda — 30 soniyagacha video va tayyor videoni tahrirlash.
+      ❗️ Lekin ikkalasi ham Toshkent teleminorasini chiqara olmadi. Men nomini ham yozdim, uchta oyogʻini ham taʼrifladim. Ikkalasi ham oʻzicha boshqa minora oʻylab topdi.
 
-      Sizga qaysi biri kerak: sifatmi yoki uzunlik va tahrirmi? 1 yoki 2 yozing 👇
+      ✅ Model sizning shahringizni bilmaydi. Aniq bir joy kerak boʻlsa, promptga nom yozish yetmaydi, referens rasm kerak.
+
+      Sizningcha qaysi biri tabiiyroq — 1 yoki 2? 👇
     seed_comment: |
-      Sinov shartlari bir xil edi, aks holda solishtirish maʼnosiz boʻlardi: ikkalasi ham 720p, ikkalasi ham 8 soniya, ikkalasida bir xil prompt.
+      Har bir modelga ikki martadan urinish berdim, chunki tez kamera harakati har safar bir xil chiqmaydi. Yuqoridagilar oʻsha urinishlardan.
 
-      Bu muhim. 2.0 4K gacha chiqara oladi, 2.5 esa yoʻq. Agar 2.0 ni 4K da chiqarib solishtirsam, uning aniqligini harakat sifati deb oʻylagan boʻlardim.
+      Sinov shartlari ataylab bir xil: 720p, 5 soniya, bitta prompt. 2.0 aslida 4K gacha chiqara oladi, 2.5 esa yoʻq. Agar 2.0 ni 4K da qoʻysam, uning aniqligini harakat sifati deb oʻylagan boʻlardim.
 
-      Har bir modelga ikki martadan urinish berdim. Bitta video tasodif boʻlishi mumkin.
-
-      Yana bitta belgi: bir xil sifat va uzunlikda 2.0 chiqargan fayllar 2.5 nikidan ancha kattaroq chiqdi. Ichida detal koʻproq degani.
-
-
-# Already published. `load()` reads only `posts:`, so nothing here can fire
-# again — it is kept as a record of what shipped and why.
-#
-# Two of these fail the opening rule added on 2026-08-23 (19 and 20 August both
-# open with a 20-word first line). That is not a bug to fix in history; it is
-# the evidence the rule was needed. New posts are bound by it.
+      Keyingi qadam ham shu yerdan chiqdi: haqiqiy minorani chiqarish uchun referens rasm bilan sinab koʻraman va natijasini shu yerda koʻrsataman.
 
 
 # Finished copy with no slot. `load()` reads only `posts:`, so nothing here can
