@@ -204,6 +204,95 @@ models:
 
         '
       texture: Skin and fabric come back smoother than GPT Image 2, with less micro-detail.
+  veo3:
+    name: Google Veo 3
+    provider: Google
+    type: video
+    source: catalog
+    variants:
+    - veo-3-preview
+    - veo-3-fast
+    audio: true
+    good_for: reliable cinematic, broad creative range, image-to-video
+    note: 'Catalog re-read 2026-08-23. The knowledge base previously said Veo 3 was NOT in our catalog
+      and that we could not vouch for it. That was wrong, and the bot would have told members so while
+      the channel published a Veo 3 comparison. Availability is a catalog fact and must be re-read, not
+      remembered.
+
+      '
+  veo3_1:
+    name: Google Veo 3.1
+    provider: Google
+    type: video
+    source: catalog
+    duration_s:
+    - 4
+    - 6
+    - 8
+    quality:
+    - basic
+    - high
+    - ultra
+    variants:
+    - veo-3-1-preview
+    - veo-3-1-fast
+    audio: true
+    good_for: ultra-realistic, top-tier cinematic quality
+    note: 'Catalog re-read 2026-08-23. Untested by us. Say so plainly rather than reviewing it.
+
+      '
+  flux_3_video:
+    name: FLUX 3 Video
+    provider: Black Forest Labs
+    type: video
+    source: catalog
+    duration_s:
+    - 5
+    - 20
+    resolution:
+    - 720p
+    - 1080p
+    audio: true
+    modes:
+    - text-to-video
+    - multi-frame image-to-video
+    - video continuation
+    good_for: text-to-video and continuation with synchronized audio
+    note: 'Catalog re-read 2026-08-23. The catalog describes generate_audio as ''synchronized speech,
+      effects and ambience''. Abdumalik raised this under post 606 — that Flux 3 rivals Veo 3 and speaks
+      Uzbek — and we recorded it as unverified. The availability and the speech capability are now confirmed
+      from the catalog. Whether its UZBEK speech is any good is still untested; that is what the 27 August
+      post sets out to find.
+
+      '
+    credited_to_member: Abdumalik, post 606, 2026-08-13
+  gemini_omni:
+    name: Gemini Omni Flash
+    provider: Google
+    type: video
+    source: catalog
+    duration_s:
+    - 4
+    - 10
+    resolution:
+    - 720p
+    audio: true
+    modes:
+    - text-to-video
+    - image-to-video
+    - video-to-video
+    good_for: reference-driven video with native audio, editing from an existing clip
+    founder_verdict:
+      text: Cannot produce this level of cinematic quality; Kling 3.0 recommended instead. A quality judgement
+        made 2026-08-13, still on record and NOT overturned.
+      source: founder
+      founder_words: Omni bunday darajada qilib bera olmaydi. Kling 3.0 da qilishingizni tavsiya qilamiz
+    note: 'Catalog re-read 2026-08-23. Filed under not_in_our_stack, which read as unavailable. It IS
+      in the catalog. The founder''s verdict is about cinematic quality and stands; availability is a
+      separate question and was simply wrong. Keep the two apart when answering a member: we have it,
+      and we do not recommend it for cinematic work.
+
+      '
 multi_shot_video:
   source: catalog
   verified_on: '2026-08-15'
@@ -255,24 +344,19 @@ our_posts:
       - duration
       - whether_reference_images_used
 not_in_our_stack:
+  _note: 'Only genuinely absent tools belong here. veo_3, flux_3_bfl_site and omni_flow were all moved
+    into models on 2026-08-23 after the catalog was re-read: every one of them was listed as unavailable
+    while being available. Availability is a catalog fact with a shelf life — re-read it, never answer
+    from what this file said last month.
+
+    '
   omni_flow:
     asked_by_member: true
+    see: models.gemini_omni
     founder_verdict:
       text: Cannot produce this level of cinematic quality. Recommend Kling 3.0 instead.
       source: founder
-      founder_words: Omni bunday darajada qilib bera olmaydi. Kling 3.0 da qilishingizni tavsiya qilaman
-  veo_3:
-    source: catalog
-    fact: Not available in our Higgsfield catalog.
-    honest_answer: 'We don''t use it, so we can''t vouch for it. Say that plainly rather than reviewing
-      a tool we have not run.
-
-      '
-  flux_3_bfl_site:
-    note: 'A member (Abdumalik, post 606) linked bfl.ai claiming Flux 3 competes with Veo3 and speaks
-      Uzbek. UNVERIFIED by us. Do not confirm or deny — invite them to share their result instead.
-
-      '
+      founder_words: Omni bunday darajada qilib bera olmaydi. Kling 3.0 da qilishingizni tavsiya qilamiz
 external_benchmarks:
   source: web
   verified: false
@@ -343,3 +427,12 @@ rules:
       more than a bot reply and the bot must not crowd it out.
 
       '
+  catalog_facts_expire:
+    rule: 'Availability, resolution ceilings and modes are catalog facts, not permanent ones. Three entries
+      here claimed a model was unavailable while it sat in the catalog, which would have had the bot telling
+      members we do not use Veo 3 in the same week the channel published a Veo 3 comparison. Re-read the
+      catalog before answering.
+
+      '
+    source: tested
+    found: '2026-08-23'
