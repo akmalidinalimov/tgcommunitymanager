@@ -109,24 +109,46 @@ posts:
       and these clips are the ones the founder chose. The tandyr clips stay in
       the library for a later post.
 
-      The seed comment PROMISES a reference-image follow-up. That is a real
-      commitment and the channel's own callback style, but it has to be kept.
+      Rewritten as a QUIZ on 2026-08-24 at Akmalidin's direction: ask which
+      clip has the right physics and which model made which, and let people
+      argue in the comments.
+
+      That changed the body, not just the last line. The previous draft named
+      which model did what, which hands over the answer — a quiz whose answer
+      is in the question is not a quiz. The body now gives three concrete
+      things to examine (is the tower a lattice or smooth, does the eagle's
+      body narrow as it folds, does the fall have weight) and withholds the
+      attribution. A scripted check in the drafting script asserts the answer
+      is absent, because that is exactly the sentence a later edit would
+      helpfully put back.
+
+      TWO COMMITMENTS THIS POST MAKES AND SOMEONE HAS TO KEEP: the seed comment
+      says the answer will be posted in this thread tomorrow, and it promises a
+      reference-image follow-up. Both are the channel's own callback style and
+      both are cheap to honour, but a broken one costs more than the post
+      earned.
     text: |
-      Ikkala videoni bitta prompt chiqargan. Farqni topa olasizmi?
+      Ikkala videoni bitta prompt chiqargan. Bittasida fizika toʻgʻri, bittasida yoʻq.
 
-      Promptda shunday yozilgan: kamera burgut bilan birga minora yonidan pastga tushadi. Ikkalasi ham 720p, ikkalasi ham 5 soniya, soʻzlar ham bir xil. Faqat model boshqa.
+      Promptda kamera burgut bilan birga minoradan pastga tushadi. Ikkalasi ham 720p, ikkalasi ham 5 soniya, soʻzlar ham bir xil. Faqat model boshqa: bittasi Seedance 2.0, bittasi Seedance 2.5.
 
-      📌 Seedance 2.0 minorani panjarali temir konstruksiya qilib chiqardi, promptda soʻralganidek. Yonidan oʻtayotgan temirlar tezlikdan yoyilib ketadi. Burgut qanotini yigʻadi, uchidagi patlar ajralib turadi.
+      Qaysi biri qaysi ekanini ataylab aytmayapman.
 
-      📌 Seedance 2.5 esa silliq oq minora chizdi, panjara yoʻq. Burgut sakrashning oʻrtasida qanot shaklini yoʻqotadi.
+      📌 Minora: temir panjara boʻlib turibdimi yoki silliq boʻlib qolganmi?
 
-      ❗️ Lekin ikkalasi ham Toshkent teleminorasini chiqara olmadi. Men nomini ham yozdim, uchta oyogʻini ham taʼrifladim. Ikkalasi ham oʻzicha boshqa minora oʻylab topdi.
+      📌 Burgut: qanotini yigʻganda gavdasi ingichkalashadimi, uchidagi patlar ajraladimi?
 
-      ✅ Model sizning shahringizni bilmaydi. Aniq bir joy kerak boʻlsa, promptga nom yozish yetmaydi, referens rasm kerak.
+      📌 Tushish: haqiqiy ogʻirlikka oʻxshaydimi yoki shunchaki suzib ketyaptimi?
 
-      Sizningcha qaysi biri tabiiyroq — 1 yoki 2? 👇
+      ❗️ Bitta xato ikkalasida ham bor: hech qaysisi Toshkent teleminorasini chiqara olmadi. Nomini yozdim, uchta oyogʻini taʼrifladim, ikkalasi ham oʻzicha boshqa minora oʻylab topdi.
+
+      Sizningcha qaysi birida fizika toʻgʻri? Va qaysi biri 2.0, qaysi biri 2.5? Izohda yozing 👇
     seed_comment: |
-      Har bir modelga ikki martadan urinish berdim, chunki tez kamera harakati har safar bir xil chiqmaydi. Yuqoridagilar oʻsha urinishlardan.
+      Shartlar bir xil edi, aks holda solishtirish maʼnosiz boʻlardi: 720p, 5 soniya, bitta prompt. Har bir modelga ikki martadan urinish berdim, chunki tez kamera harakati har safar bir xil chiqmaydi.
+
+      Javobni ertaga shu yerga yozaman. Hozircha taxminlaringizni kutaman.
+
+      Kichik maslahat: eng oson farq minoraning oʻzida koʻrinadi.
 
       Sinov shartlari ataylab bir xil: 720p, 5 soniya, bitta prompt. 2.0 aslida 4K gacha chiqara oladi, 2.5 esa yoʻq. Agar 2.0 ni 4K da qoʻysam, uning aniqligini harakat sifati deb oʻylagan boʻlardim.
 
