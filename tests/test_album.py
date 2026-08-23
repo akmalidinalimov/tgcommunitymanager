@@ -264,22 +264,46 @@ class TestTuesdayIsWiredUp:
 
         return load()["2026-08-25_21:00"]
 
-    def test_it_binds_both_clips(self):
-        assert self._tuesday().assets == ("phys-tandyr-2-0", "phys-tandyr-2-5")
+    def test_it_binds_exactly_two_clips(self):
+        """Two, because a comparison of one is not a comparison.
+
+        This used to assert the specific asset ids and broke the moment the
+        founder chose different clips for the slot — the same mistake as the
+        poll-card test that pinned a dated post. Assert the invariant: two
+        assets, one per model, same shot. WHICH two is an editorial decision
+        and not a thing tests should hold still.
+        """
+        assert len(self._tuesday().assets) == 2
 
     def test_both_clips_are_videos_in_the_library(self):
         from app.media.library import get
 
         assert all(get(i).is_video for i in self._tuesday().assets)
 
-    def test_the_two_clips_are_the_same_shot_from_different_models(self):
-        # The comparison is meaningless if the shot differs. Same prompt, same
-        # resolution, same duration; only the model changes.
+    def test_one_clip_per_model_and_matched_settings(self):
+        """The comparison is meaningless if anything but the model differs.
+
+        aspect and resolution live in the library YAML and are not loaded onto
+        Asset, so they are read from source here. That is the point: the guard
+        has to hold on what actually ships, not on a convenient subset.
+        """
+        import yaml
+        from pathlib import Path
+
         from app.media.library import get
 
         a, b = (get(i) for i in self._tuesday().assets)
-        assert a.model != b.model
         assert {a.model, b.model} == {"seedance_2_0", "seedance_2_5"}
+        assert a.duration == b.duration
+
+        root = Path(__file__).resolve().parent.parent
+        raw = yaml.safe_load((root / "data" / "media_library.yaml").read_text("utf-8"))
+        by_id = {x["id"]: x for x in raw["assets"]}
+        ra, rb = by_id[a.id], by_id[b.id]
+        assert ra["aspect"] == rb["aspect"]
+        assert ra["resolution"] == rb["resolution"], (
+            "different resolutions would let extra pixels read as better motion"
+        )
 
     def test_the_caption_fits_and_leads_with_a_hook(self):
         from app.text.lint import CAPTION_CAP, blockers, opening_problems
