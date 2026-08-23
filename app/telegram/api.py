@@ -107,11 +107,14 @@ class BotAPI:
         return self._result("sendPhoto", response)
 
     def send_media_group(
-        self, chat_id: int | str, images: list[tuple[str, bytes]], *,
+        self, chat_id: int | str, images: list[tuple], *,
         caption: str | None = None, parse_mode: str | None = None,
         reply_to_message_id: int | None = None,
     ) -> list[dict]:
-        """Send 2-10 images as one album, with the caption under the first.
+        """Send 2-10 photos or videos as one album, caption under the first.
+
+        Each item is ``(filename, bytes)`` for a photo, or ``(filename, bytes,
+        "video")`` to send it as one. Telegram accepts a mixed group.
 
         This is the only way a comparison post works. Telegram renders an album
         as a single post, so two images from one prompt sit side by side instead
@@ -133,9 +136,11 @@ class BotAPI:
 
         media: list[dict] = []
         files: dict[str, tuple[str, bytes, str]] = {}
-        for i, (filename, blob) in enumerate(images):
+        for i, entry in enumerate(images):
+            filename, blob = entry[0], entry[1]
+            kind = entry[2] if len(entry) > 2 else "photo"
             key = f"file{i}"
-            item: dict[str, Any] = {"type": "photo", "media": f"attach://{key}"}
+            item: dict[str, Any] = {"type": kind, "media": f"attach://{key}"}
             if i == 0 and caption:
                 # Only the first item may carry it; a caption on a later item is
                 # accepted and then never shown.
@@ -143,7 +148,8 @@ class BotAPI:
                 if parse_mode:
                     item["parse_mode"] = parse_mode
             media.append(item)
-            files[key] = (filename, blob, "image/jpeg")
+            files[key] = (filename, blob,
+                          "video/mp4" if kind == "video" else "image/jpeg")
 
         fields: dict[str, str] = {"chat_id": str(chat_id), "media": json.dumps(media)}
         if reply_to_message_id is not None:

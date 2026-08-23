@@ -168,6 +168,20 @@ def _wrap(draw, text: str, font, width: int) -> list[str]:
 MAX_UPLOAD_BYTES = 9_000_000
 
 
+def fetch_bytes(url: str) -> bytes:
+    """Download an asset unchanged.
+
+    fetch_image re-encodes as JPEG, which is right for a 2K still and would
+    corrupt an mp4. Anything that is not an image comes through here.
+    """
+    from app.net import http_client
+
+    with http_client(timeout=240.0) as client:
+        response = client.get(url)
+        response.raise_for_status()
+        return response.content
+
+
 def fetch_image(url: str, *, max_bytes: int = MAX_UPLOAD_BYTES) -> bytes:
     """Download an asset, shrinking it only if Telegram would refuse the size.
 

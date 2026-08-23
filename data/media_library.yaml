@@ -626,3 +626,63 @@ assets:
     no post may claim otherwise. Came back at 1080p unasked, because quality=''high'' was set; every other
     model was left at 720p. Largest file at 11.6MB. Not a like-for-like comparison on resolution, and
     the post must say so rather than crediting Veo with sharpness it was simply given more pixels for.'
+- id: phys-tandyr-2-0
+  url: https://d8j0ntlcm91z4.cloudfront.net/user_2zJUonmh6cW6tDKlBEl4CIohbsI/hf_20260823_202212_a79bf281-f4d6-44e8-ad0a-2e60ab94f4ca.mp4
+  kind: video
+  model: seedance_2_0
+  shows:
+  - crane down into a tandyr before dawn
+  - cold blue sky against warm coals
+  - dough slapped onto the inner wall and adhering
+  - cracked clay texture
+  - flame below
+  good_for:
+  - comparison
+  - technique
+  aspect: '16:9'
+  resolution: 720p
+  duration: 8
+  refs: 0
+  expires: true
+  multi_shots: false
+  provenance: 'Physics test, 2026-08-23. Two shots (potter''s wheel, tandyr at dawn), both models, two
+    takes each, ALL at 16:9 / 720p / 8s so nothing is confounded by resolution — 2.0 reaches 4K and 2.5
+    does not, and running them differently would have read as better motion. IMAX 65mm framing, compound
+    moving camera, four concurrent physics systems per shot with no nameable hero event. Higgsfield tried
+    to substitute a preset called ''IN THE DARK'' for every job and had to be declined explicitly; a preset
+    would have overridden the camera move and the physics list, which is the whole experiment. ASSESSED
+    FROM START/MIDDLE/END FRAMES ONLY: rotation constancy, motion smoothness, slip trajectories, firelight
+    flicker sync and heat shimmer cannot be judged from stills and have NOT been checked. The 2.0 half
+    of Tuesday''s pair. Held across both takes: the crane move completes, the dough sticks to the wall
+    where it is put, and the cold pre-dawn sky sits against the warm coals in one frame exactly as briefed.'
+- id: phys-tandyr-2-5
+  url: https://d8j0ntlcm91z4.cloudfront.net/user_2zJUonmh6cW6tDKlBEl4CIohbsI/hf_20260823_202250_6560cdb7-ed98-4605-a9f2-bbc95e02eb4a.mp4
+  kind: video
+  model: seedance_2_5
+  shows:
+  - same tandyr shot, same prompt
+  - HAND-OBJECT CONTACT FAILURE
+  - dough fused to the end of the forearm like a mushroom cap
+  - no fingers holding it
+  good_for:
+  - comparison
+  - technique
+  aspect: '16:9'
+  resolution: 720p
+  duration: 8
+  refs: 0
+  expires: true
+  multi_shots: false
+  provenance: 'Physics test, 2026-08-23. Two shots (potter''s wheel, tandyr at dawn), both models, two
+    takes each, ALL at 16:9 / 720p / 8s so nothing is confounded by resolution — 2.0 reaches 4K and 2.5
+    does not, and running them differently would have read as better motion. IMAX 65mm framing, compound
+    moving camera, four concurrent physics systems per shot with no nameable hero event. Higgsfield tried
+    to substitute a preset called ''IN THE DARK'' for every job and had to be declined explicitly; a preset
+    would have overridden the camera move and the physics list, which is the whole experiment. ASSESSED
+    FROM START/MIDDLE/END FRAMES ONLY: rotation constancy, motion smoothness, slip trajectories, firelight
+    flicker sync and heat shimmer cannot be judged from stills and have NOT been checked. The 2.5 half,
+    and the failure the post is about. The dough is not held — it is fused to the end of the arm as a
+    bulbous cap with no fingers, and it stays that way across the start and middle frames. This is one
+    of TWO failures in 2.5''s four takes; the other was a potter vessel becoming a thin twisted stalk.
+    The caption says two of four, not four of four, because 2.5''s other tandyr take was acceptable. Publishing
+    the failure is fair only while the count is stated.'

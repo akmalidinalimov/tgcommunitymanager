@@ -82,6 +82,61 @@ posts:
 
       Toʻliq promptni soʻrasangiz shu yerga tashlayman.
 
+  "2026-08-25_21:00":
+    kind: technique
+    assets:
+      - phys-tandyr-2-0
+      - phys-tandyr-2-5
+    note: >
+      Written from the physics test on 2026-08-23, after Akmalidin rejected a
+      spec-sheet comparison twice: first for comparing resolution and duration
+      instead of motion, then for testing with a locked camera and one event
+      instead of running the models at capability.
+
+      Two shots, both models, two takes each, everything at 720p so resolution
+      cannot be mistaken for motion quality. The finding is that the version
+      number lies about succession: 2.5 is not an upgrade of 2.0, it is a
+      different tool. 2.0 held both shots. 2.5 broke twice in four takes, and
+      both failures are visible in stills — dough fused to a forearm with no
+      fingers, and a vessel turning into a twisted stalk.
+
+      The caption says TWO of four, not four of four, because 2.5's other
+      tandyr take was fine. Publishing the failure frame is fair only while
+      that count is stated.
+
+      Not verified and not claimed anywhere in the post: rotation constancy,
+      motion smoothness, slip trajectories, flicker sync, heat shimmer. Those
+      need someone to watch the clips.
+    text: |
+      Seedance 2.5 yangiroq. Lekin bu sinovda 2.0 yutdi.
+
+      Ikkalasiga bir xil ikkita sahna berdim: kulolning gʻildiragi va tongdagi tandir. Har birida toʻrtta narsa bir vaqtda sodir boʻladi, kamera esa toʻxtamasdan aylanib tushadi. Oson kadr emas, ataylab.
+
+      📌 Seedance 2.0 yorugʻlikni ushladi. Deraza nuri, tutun, koʻmirning issiq rangi va tongning sovuq osmoni bitta kadrda. Xamir devorga yopishdi, loy qoʻl ostida shakl oldi.
+
+      📌 Seedance 2.5 da ikkita urinish buzildi. Birida xamir qoʻlga yopishib, barmoqlar oʻrniga qoʻlning uchida qoʻziqorindek turib qoldi. Boshqasida loy ingichka ustunga aylanib ketdi.
+
+      ✅ Xulosa: 2.5 yaxshiroq versiya emas, boshqa asbob. Uning kuchi boshqa yerda — 30 soniyagacha video va tayyor videoni tahrirlash.
+
+      Sizga qaysi biri kerak: sifatmi yoki uzunlik va tahrirmi? 1 yoki 2 yozing 👇
+    seed_comment: |
+      Sinov shartlari bir xil edi, aks holda solishtirish maʼnosiz boʻlardi: ikkalasi ham 720p, ikkalasi ham 8 soniya, ikkalasida bir xil prompt.
+
+      Bu muhim. 2.0 4K gacha chiqara oladi, 2.5 esa yoʻq. Agar 2.0 ni 4K da chiqarib solishtirsam, uning aniqligini harakat sifati deb oʻylagan boʻlardim.
+
+      Har bir modelga ikki martadan urinish berdim. Bitta video tasodif boʻlishi mumkin.
+
+      Yana bitta belgi: bir xil sifat va uzunlikda 2.0 chiqargan fayllar 2.5 nikidan ancha kattaroq chiqdi. Ichida detal koʻproq degani.
+
+
+# Already published. `load()` reads only `posts:`, so nothing here can fire
+# again — it is kept as a record of what shipped and why.
+#
+# Two of these fail the opening rule added on 2026-08-23 (19 and 20 August both
+# open with a 20-word first line). That is not a bug to fix in history; it is
+# the evidence the rule was needed. New posts are bound by it.
+
+
 # Finished copy with no slot. `load()` reads only `posts:`, so nothing here can
 # publish — move an entry up when a slot is chosen for it.
 drafts:
@@ -130,13 +185,6 @@ drafts:
 
       Uzunini ham sinab koʻrdim: «HAR KUNI SOAT 8 DAN 11 GACHA QOʻSHIMCHA CHEGIRMA VA BEPUL YETKAZIB BERISH». 11 ta soʻz, hammasi joyida chiqdi.
 
-
-# Already published. `load()` reads only `posts:`, so nothing here can fire
-# again — it is kept as a record of what shipped and why.
-#
-# Two of these fail the opening rule added on 2026-08-23 (19 and 20 August both
-# open with a 20-word first line). That is not a bug to fix in history; it is
-# the evidence the rule was needed. New posts are bound by it.
 published:
   "2026-08-17_10:00":
     kind: technique

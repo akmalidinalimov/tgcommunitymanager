@@ -198,3 +198,92 @@ class TestTheAlbumReturnShape:
         from app.runtime import anchor
 
         assert anchor([{"message_id": 11}, {"message_id": 12}])["message_id"] == 11
+
+
+class TestVideoAlbums:
+    """A comparison of two clips must publish as two clips.
+
+    visual() originally filtered an album to photos only, on the reasoning that
+    every case we had was two stills. The moment Tuesday bound two videos, that
+    filter dropped the album to the single-asset branch and would have published
+    HALF the comparison with no error anywhere — the project's recurring shape,
+    a side effect succeeding while the thing that gave it meaning quietly went
+    missing.
+    """
+
+    def _runtime(self):
+        from app.runtime import Runtime
+
+        return Runtime.__new__(Runtime)
+
+    def test_two_videos_make_an_album(self):
+        rt = self._runtime()
+        content = Content(slot_key="2026-08-25_21:00", kind="technique", text="x")
+        content.attach_media("phys-tandyr-2-0")
+        content.attach_media("phys-tandyr-2-5")
+
+        shape, ref = rt.visual(content, "technique", "x")
+        assert shape == "album"
+        assert [a.id for a in ref] == ["phys-tandyr-2-0", "phys-tandyr-2-5"]
+        assert all(a.is_video for a in ref)
+
+    def test_a_video_item_is_declared_video_and_typed_mp4(self):
+        rec = _Recorder()
+        api_with(rec).send_media_group(
+            -100, [("a.mp4", b"\x00\x00moov", "video"), ("b.mp4", b"\x00\x00moof", "video")],
+            caption="matn")
+
+        media = json.loads(rec.sent["data"]["media"])
+        assert [m["type"] for m in media] == ["video", "video"]
+        assert rec.sent["files"]["file0"][2] == "video/mp4"
+
+    def test_a_two_tuple_still_means_photo(self):
+        # Backwards compatible: Monday's still comparison passes 2-tuples.
+        rec = _Recorder()
+        api_with(rec).send_media_group(-100, IMAGES)
+        media = json.loads(rec.sent["data"]["media"])
+        assert [m["type"] for m in media] == ["photo", "photo"]
+        assert rec.sent["files"]["file0"][2] == "image/jpeg"
+
+    def test_video_bytes_are_not_re_encoded(self):
+        # fetch_image re-encodes to JPEG, which is right for a 2K still and
+        # would hand Telegram a corrupted mp4. Videos must use fetch_bytes.
+        import inspect
+
+        from app import runtime
+
+        source = inspect.getsource(runtime.Runtime._deliver)
+        assert "fetch_bytes" in source
+        video_line = next(l for l in source.split("\n") if "mp4" in l and "fetch" in l)
+        assert "fetch_bytes" in video_line and "fetch_image" not in video_line
+
+
+class TestTuesdayIsWiredUp:
+    def _tuesday(self):
+        from app.spine.planned import load
+
+        return load()["2026-08-25_21:00"]
+
+    def test_it_binds_both_clips(self):
+        assert self._tuesday().assets == ("phys-tandyr-2-0", "phys-tandyr-2-5")
+
+    def test_both_clips_are_videos_in_the_library(self):
+        from app.media.library import get
+
+        assert all(get(i).is_video for i in self._tuesday().assets)
+
+    def test_the_two_clips_are_the_same_shot_from_different_models(self):
+        # The comparison is meaningless if the shot differs. Same prompt, same
+        # resolution, same duration; only the model changes.
+        from app.media.library import get
+
+        a, b = (get(i) for i in self._tuesday().assets)
+        assert a.model != b.model
+        assert {a.model, b.model} == {"seedance_2_0", "seedance_2_5"}
+
+    def test_the_caption_fits_and_leads_with_a_hook(self):
+        from app.text.lint import CAPTION_CAP, blockers, opening_problems
+
+        t = self._tuesday()
+        assert len(t.text) <= CAPTION_CAP
+        assert not blockers(opening_problems(t.text))

@@ -32,7 +32,7 @@ from app.agents.writer import POST_KINDS, write_post
 from app.config import Settings
 from html import escape
 from app.media import cards
-from app.media.cards import fetch_image
+from app.media.cards import fetch_bytes, fetch_image
 from app.media.library import get as asset_by_id
 from app.media.library import pick as pick_asset
 from app.spine import approval
@@ -941,12 +941,11 @@ class Runtime:
         """
         bound = self.bound_assets(content)
         if len(bound) > 1:
-            # An album. Only photos: Telegram allows mixed albums, but a video
-            # beside a still reads as a gallery rather than a comparison, and
-            # every case we have is two stills.
-            photos = [a for a in bound if not a.is_video]
-            if len(photos) > 1:
-                return "album", photos[:10]
+            # An album, of stills or of clips. This used to filter to photos
+            # only, which meant a two-VIDEO comparison silently fell through to
+            # the single-asset branch and published half of itself with no
+            # error — the project's recurring failure, once more.
+            return "album", bound[:10]
         if bound:
             return "asset", bound[0]
         if content and CARD in content.media_paths:
@@ -969,11 +968,16 @@ class Runtime:
         shape, ref = visual
         if shape == "album":
             # Fetched and uploaded rather than sent by URL: Telegram caps a
-            # URL-fetched photo at 5MB and a 2K render goes past it.
+            # URL-fetched photo at 5MB and a 2K render goes past it. Video goes
+            # through fetch_bytes, because fetch_image re-encodes as JPEG and
+            # would hand Telegram a corrupted file.
+            items = [
+                (f"{a.id}.mp4", fetch_bytes(a.url), "video") if a.is_video
+                else (f"{a.id}.jpg", fetch_image(a.url))
+                for a in ref
+            ]
             return self.api.send_media_group(
-                chat_id,
-                [(f"{a.id}.jpg", fetch_image(a.url)) for a in ref],
-                caption=body or None, parse_mode=parse_mode,
+                chat_id, items, caption=body or None, parse_mode=parse_mode,
             )
         if shape == "asset":
             sender = self.api.send_video if ref.is_video else self.api.send_photo
