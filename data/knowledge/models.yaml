@@ -41,6 +41,7 @@ models:
     resolution:
     - 480p
     - 720p
+    - 1080p
     modes:
     - t2v
     - omni_reference
@@ -48,8 +49,12 @@ models:
     - video_extension
     audio: true
     good_for: text-to-video, editing or extending an existing video, reference-driven consistency
-    caveat: 'Caps at 720p in our account. Seedance 2.0 reaches 4K. Newer version number does NOT mean
-      higher resolution here — check before promising 1080p+.
+    caveat: 'Reaches 1080p. Seedance 2.0 reaches 4K, so the higher version number is NOT the higher-resolution
+      model — check before promising 4K.
+
+      Corrected 2026-08-23: this entry said ''caps at 720p in our account'', which the live catalog contradicts.
+      Caught while drafting a post that would have published the wrong number. Third stale catalog fact
+      found this week; re-read, do not remember.
 
       '
   seedance_2_0:
