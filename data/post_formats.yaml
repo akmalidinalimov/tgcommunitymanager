@@ -11,6 +11,45 @@
 # (76% vs 17%, Freedman & Fraser 1966). So every CTA here asks for something
 # cheap — a word, a side, a number — not an essay.
 
+# THE FIRST LINE IS THE POST.
+#
+# In a Telegram feed the reader sees one line and a picture before deciding to
+# expand. A first line that describes process — "I wrote one prompt and gave it
+# to two models" — spends that decision on nothing. The Voice Critic has always
+# asked whether the opening earns attention in three seconds, but a HAND-WRITTEN
+# planned post never reaches the Critic: planned.load() runs mechanical lint and
+# nothing else. So the standard existed and the one path we actually use to
+# publish bypassed it, which is how the first comparison post came to open on a
+# process statement.
+#
+# `opening` below is checked mechanically now, in app/text/lint.py, so it binds
+# hand-written posts too.
+
+opening:
+  rule: >
+    The first line must be a hook and must stand alone as its own paragraph.
+    Never open on what you did; open on what the reader wants to know.
+  shapes:
+    question: >
+      A question the reader cannot answer and wants to. Strongest when it ties
+      the craft to money, which is this channel's whole differentiator.
+      "Qaysi model brendlar pul toʻlaydigan darajada haqiqiy rasm chiqaradi?"
+    contradiction: >
+      A claim that collides with what the reader assumes.
+      "«AI oʻzbekcha yozolmaydi» degan gapni tez-tez eshitamiz. Endi yozadi."
+    reader_question: >
+      A real question a member asked, quoted. Attested in the founders' own
+      posts and the strongest opener they use.
+      "- Buni qanday qildingiz? - degan savol kelibdi."
+    cost: >
+      A number that hurts, stated flat.
+      "Bitta karta uchun 3 kun ketardi. Endi 20 daqiqa."
+  forbidden:
+    - Opening on the process — "bitta prompt yozdim", "sinab koʻrdim", "bugun sizga"
+    - Opening on a tool name, which filters out most of the audience
+    - A first line longer than about 12 words; it stops being a hook
+    - A first line that is not followed by a blank line
+
 formats:
   news:
     visual: template

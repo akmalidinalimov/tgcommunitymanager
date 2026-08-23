@@ -21,7 +21,7 @@ import logging
 from dataclasses import dataclass
 from pathlib import Path
 
-from app.text.lint import blockers, lint
+from app.text.lint import blockers, lint, opening_problems
 from app.text.orthography import normalize_apostrophes
 
 log = logging.getLogger("planned")
@@ -54,6 +54,9 @@ class PlannedPost:
     @property
     def problems(self) -> list[str]:
         out = [str(p) for p in blockers(lint(self.text))]
+        # A hand-written post never reaches the Voice Critic, so the opening
+        # rule has to be checked here or it binds nothing.
+        out += [str(p) for p in blockers(opening_problems(self.text))]
         if self.seed_comment:
             out += [f"seed: {p}" for p in blockers(lint(self.seed_comment))]
         return out

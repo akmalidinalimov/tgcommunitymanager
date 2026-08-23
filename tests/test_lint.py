@@ -220,3 +220,58 @@ def test_a_cyrillic_url_does_not_flip_the_verdict():
     # Links are stripped before counting, the same way script detection does it.
     assert not [i for i in blockers(lint("Havola: https://example.uz/страница"))
                 if "Cyrillic" in i.rule]
+
+
+# --- the opening ---------------------------------------------------------------
+#
+# Telegram shows one line and the picture before the reader decides to expand.
+# The Voice Critic has always asked whether an opening earns attention, but a
+# hand-written planned post never reaches the Critic — planned.load() runs
+# mechanical lint and nothing else. The standard existed and the path we
+# actually publish through bypassed it.
+
+def test_opening_on_process_is_blocked():
+    from app.text.lint import opening_problems
+
+    dead = "Bitta prompt yozdim va uni ikkita modelga berdim.\n\nDavomi."
+    assert [i for i in blockers(opening_problems(dead)) if "process" in i.rule]
+
+
+def test_a_question_hook_passes():
+    from app.text.lint import opening_problems
+
+    good = "Qaysi model brendlar pul toʻlaydigan rasm chiqaradi?\n\nBilish uchun sinadim."
+    assert not blockers(opening_problems(good))
+
+
+def test_a_contradiction_hook_passes():
+    from app.text.lint import opening_problems
+
+    good = "«AI oʻzbekcha yozolmaydi» deyishadi. Endi yozadi.\n\nMana dalil."
+    assert not blockers(opening_problems(good))
+
+
+def test_a_first_line_too_long_to_be_a_hook_is_blocked():
+    from app.text.lint import opening_problems
+
+    long = " ".join(["soz"] * 20) + "\n\nDavomi."
+    found = blockers(opening_problems(long))
+    assert [i for i in found if "too long to be a hook" in i.rule]
+
+
+def test_process_words_are_fine_away_from_the_first_line():
+    # Only the opening is checked. "sinab koʻrdim" mid-post is ordinary Uzbek
+    # and blocking it everywhere would gut the channel's own voice.
+    from app.text.lint import opening_problems
+
+    ok = "Qaysi model yaxshiroq?\n\nBitta prompt yozdim va sinab koʻrdim."
+    assert not blockers(opening_problems(ok))
+
+
+def test_a_hook_glued_to_the_body_is_flagged_but_not_blocking():
+    from app.text.lint import Severity, opening_problems
+
+    glued = "Qaysi model yaxshiroq?\nBilish uchun sinadim."
+    issues = opening_problems(glued)
+    assert any(i.severity is Severity.POLISH for i in issues)
+    assert not blockers(issues)

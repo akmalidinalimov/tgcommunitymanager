@@ -253,11 +253,22 @@ def test_the_card_uses_the_planned_card_text_not_the_post(rt, monkeypatch):
     assert captured["text"].startswith("Sizni nima"), "the card ignored its planned text"
 
 
-def test_the_shipped_poll_card_renders():
+def test_a_planned_card_text_renders():
+    """`card_text` exists because a poll's card must carry the question rather
+    than the post's first line.
+
+    Built here rather than loaded from a dated slot. This used to pin the
+    19 August poll and broke the day that post was archived — a test that fails
+    when history scrolls is testing the wrong thing.
+    """
     pytest.importorskip("PIL")
     from app.media import cards
+    from app.spine.planned import PlannedPost
 
-    post = load()["2026-08-19_21:00"]
+    post = PlannedPost(
+        slot_key="2026-01-01_21:00", kind="poll", text="Savol matni.",
+        card_text="Sizni nima toʻxtatyapti?\n1  Hali oʻrganyapman\n2  Mijoz topolmayman",
+    )
     assert post.card_text, "the poll needs its own card text"
     png = cards.render_post(post.kind, post.card_text)
     assert png[:8] == b"\x89PNG\r\n\x1a\n" and len(png) > 5000

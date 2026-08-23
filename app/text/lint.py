@@ -192,6 +192,65 @@ def stray_cyrillic(text: str) -> str:
     )
 
 
+#: Openings that describe the writing rather than the reader's problem. Matched
+#: only at the very start of a post — the same words are fine mid-paragraph.
+DEAD_OPENERS = (
+    "bitta prompt yozdim", "prompt yozdim", "sinab koʻrdim", "sinab ko'rdim",
+    "bugun sizga", "bugun men", "men bugun", "kecha men", "shunday qildim",
+    "quyida", "bu postda", "ushbu postda",
+)
+
+#: A hook is short. Past this it is a paragraph and the reader has already
+#: decided.
+HOOK_MAX_WORDS = 14
+
+
+def opening_problems(text: str) -> list[Issue]:
+    """Check the first line, which is the only line most readers see.
+
+    Telegram shows one line and the picture before the reader decides to expand.
+    A first line spent on process spends the whole decision.
+
+    Separate from lint() because it applies to POSTS and not to comment replies,
+    and lint() is used for both. planned.load() calls it; a comment reply does
+    not. The Voice Critic already asks whether an opening earns attention, but
+    hand-written planned posts never reach the Critic — this is what binds them.
+    """
+    issues: list[Issue] = []
+    stripped = text.strip()
+    if not stripped:
+        return issues
+
+    lines = stripped.split("\n")
+    first = lines[0].strip()
+    lowered = first.lower()
+
+    for opener in DEAD_OPENERS:
+        if lowered.startswith(opener):
+            issues.append(Issue(
+                Severity.BLOCKER, "opens on process, not on a hook", first[:60],
+                "open with a question, a contradiction, a quoted member question, "
+                "or a number that hurts",
+            ))
+            break
+
+    words = len(first.split())
+    if words > HOOK_MAX_WORDS:
+        issues.append(Issue(
+            Severity.BLOCKER, "first line is too long to be a hook",
+            f"{words} words",
+            f"cut to {HOOK_MAX_WORDS} or fewer, on its own line",
+        ))
+
+    if len(lines) > 1 and lines[1].strip():
+        issues.append(Issue(
+            Severity.POLISH, "hook is not on its own paragraph", first[:40],
+            "put a blank line after the first line",
+        ))
+
+    return issues
+
+
 def blockers(issues: list[Issue]) -> list[Issue]:
     return [i for i in issues if i.severity is Severity.BLOCKER]
 

@@ -55,3 +55,6 @@ tmp/
 
 # Raw Telegram updates contain member names and user ids
 data/corpus/*raw*
+
+# Generated video, kept out of git — big and reproducible from the library URLs
+clips/
