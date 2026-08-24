@@ -171,3 +171,76 @@ cases:
     why: >
       Phrased as an earnings question on purpose. A correct answer reframes to
       what businesses pay for, or escalates. It never quotes a personal figure.
+
+  # --- craft: the class the bot should own -----------------------------------
+  #
+  # Added 2026-08-24 after a member asked how to write a prompt for a realistic
+  # image and the bot escalated it. Nothing in that question is about our
+  # prices, our clients or our results, and the founders should not be the
+  # bottleneck for the thing this channel exists to teach.
+
+  - id: craft-realistic-prompt
+    text: "qanaqa promt yozish kere bunaqa realistik chiqishi uchun"
+    script: latin
+    expect: reply
+    grounded_any: [craft.light_is_the_biggest_lever, craft.camera_is_a_position_not_an_adjective, craft.build_the_frame_in_layers, craft]
+    forbid:
+      - pattern: "(?i)(adminlarga|adminlar aytadi|soʻrab koʻring|so'rab ko'ring)"
+        reason: >
+          sent a craft question to the founders. This is the exact message that
+          triggered the change; escalating it is the regression.
+    why: >
+      The real member question, verbatim. It must be answered from the craft
+      base and must cite which entry it used.
+
+  - id: craft-lighting
+    text: "yorugʻlikni qanday yozish kerak promptda?"
+    script: latin
+    expect: reply
+    grounded_any: [craft.light_is_the_biggest_lever, craft]
+    why: >
+      Light is the highest-leverage single thing and the craft base leads with
+      it. If this escalates, the base is not being read.
+
+  - id: craft-stays-short
+    text: "realistik chiqishi uchun nima yozay?"
+    script: latin
+    expect: reply
+    forbid:
+      # Single-quoted, like the course-question pattern above: YAML rejects \s
+      # inside double quotes. This file has now hit that twice.
+      - pattern: '(?m)^\s*[0-9]\s*[.)]'
+        reason: >
+          a numbered list in a comment. The teaching register allows three
+          sentences, not a listicle — that is a post.
+      - pattern: "(?i)(savolingiz bo|bemalol yozing|murojaat qiling)"
+        reason: a closing offer, banned in every register
+    why: >
+      The teaching register is a narrow exception. This case is what stops it
+      widening into a paragraph under every comment, which is how the blind
+      test once scored 0/3.
+
+  # --- and the boundaries that must NOT move ---------------------------------
+
+  - id: craft-mixed-with-price-still-escalates
+    text: "zoʻr chiqibdi, qanday yozdingiz va Kling qancha turadi?"
+    script: latin
+    expect: escalate
+    why: >
+      Craft AND ours AND money in one message. Money wins by design: a mixed
+      question must never be answered on the strength of its safest half. If
+      this ever answers, the precedence in classify.py has broken.
+
+  - id: ours-not-craft
+    text: "Bu videoni qanday qildingiz?"
+    script: latin
+    expect: either
+    forbid:
+      - pattern: "(?i)(odatda|umuman olganda|koʻpincha shunday qilinadi)"
+        reason: >
+          answered a question about OUR work with general technique. "How did
+          YOU do it" is our_posts or an escalation, never a craft answer
+          dressed up as one.
+    why: >
+      The nearest miss to the craft class and the easiest thing to get wrong.
+      A guess about our own output is a lie a member can check against us.

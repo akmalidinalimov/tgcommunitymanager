@@ -1,0 +1,166 @@
+# Craft technique the Replier may teach without asking a founder.
+#
+# Everything here is OURS, in the sense that we produced the evidence. Not one
+# entry is a summary of somebody's blog post, and that is deliberate: a live
+# search for "how to write a realistic prompt" returns generic listicles, and
+# repeating them turns this channel into a translator of other people's advice.
+# The differentiator is that we tested it.
+#
+# So every entry carries `evidence` — what was run, when, and what came out. If
+# an entry cannot carry that, it does not belong here.
+#
+# THIS FILE IS NOT FOR: our own results, our settings, prices, our course, or
+# anything a member could check against us and find wrong. Those still escalate.
+# See docs/superpowers/specs/2026-08-24-replier-craft-answers.md.
+
+meta:
+  purpose: craft technique, answerable without escalation
+  source: our own tested output
+  first_written: 2026-08-24
+  rule: >
+    Cite the key you used in grounded_on, as craft.<key>. If the question needs
+    something not here, escalate rather than improvising — the point of this
+    file is that everything in it was proven, and an improvised addition
+    quietly destroys that guarantee.
+
+craft:
+
+  light_is_the_biggest_lever:
+    short: >
+      Yorugʻlikni aniq yozing. Realistik natijaning eng katta qismi shundan
+      chiqadi, qolgan hammasidan koʻra koʻproq.
+    detail: >
+      Where the light comes from, how hard it is, what it does to the shadow
+      side, and what colour fills the shade. A prompt that spends ten sentences
+      on light and two on the subject beats the reverse every time.
+    evidence: >
+      2026-08-23. The same prompt, same subject, same frame, run on GPT Image 2
+      and Nano Banana Flash twice: once at night, once in dappled afternoon sun.
+      The two models swapped places purely on the lighting. Nothing else in the
+      prompt changed.
+
+  camera_is_a_position_not_an_adjective:
+    short: >
+      «Kinematik» degan soʻz buyruq emas. Kamera qayerda turishini yozing:
+      balandligi, obyektiv, diafragma, harakatlanadimi yoki yoʻq.
+    detail: >
+      Height in centimetres, focal length, aperture, and whether it moves. "Low
+      angle, cinematic" is a wish. "40cm above the grass, tilted up, 50mm at
+      f/2, slow push in" is an instruction a model can follow.
+    evidence: >
+      2026-08-23. The first stadium and tree prompts specified exact camera
+      height and lens; the resulting frames matched the brief closely enough to
+      compare models against each other. A locked-off camera also lets a video
+      model cheat by warping a flat image, which is why the physics test moved
+      the camera.
+
+  build_the_frame_in_layers:
+    short: >
+      Kadrni qatlamga boʻling: oldingi plan, oʻrta plan, orqa fon. Chuqurlik
+      aynan oldingi plandan chiqadi, koʻpchilik esa uni tashlab ketadi.
+    detail: >
+      Write foreground, midground and background as separate blocks. Something
+      close to the lens and thrown out of focus is what makes an image read as
+      photographed rather than rendered.
+    evidence: >
+      2026-08-23. Out-of-focus grass at the bottom edge and a blown-out leaf in
+      the foreground were specified in the tree prompt and both models produced
+      them; it is the single clearest difference between those frames and a flat
+      generation.
+
+  say_what_must_not_be_there:
+    short: >
+      Har bir promptga taqiq qatorini qoʻshing: firma nomi yoʻq, logotip yoʻq,
+      oʻylab topilgan raqam yoʻq, yozuv yoʻq.
+    detail: >
+      Models add things nobody asked for, and a client-facing image is where
+      that becomes your problem rather than a curiosity.
+    evidence: >
+      Found by looking at output, not by reasoning. A camera came back stamped
+      with a manufacturer's name. A shoe carried a swoosh. An interface carousel
+      invented ratings of 4.6 and 4.8 that were never in the prompt. Recorded in
+      app/media/shots.py as COMMERCIAL_GUARDS.
+
+  models_cannot_count_but_can_compose:
+    short: >
+      Model sanay olmaydi. Sanoqni soʻz bilan emas, kompozitsiya bilan bering:
+      «uch tadan ikki qator».
+    detail: >
+      Repeating a number louder does not work. Describing an arrangement does.
+    evidence: >
+      "6 KISHILIK TOʻPLAM" over five bowls. Saying EXACTLY SIX three different
+      ways produced seven, then eight. "Two rows of three, spaced apart"
+      produced six on the first attempt.
+
+  dictate_text_verbatim:
+    short: >
+      Rasmdagi yozuvni model oʻzi oʻylab topmasin. Promptda «reading exactly:»
+      deb yozib, matnni aynan koʻchiring.
+    detail: >
+      With it, a string is reproduced verbatim, okina included, up to at least
+      eleven words. Without it the model writes its own copy.
+    evidence: >
+      2026-08-14 and 2026-08-22. GPT Image 2 rendered QOʻSHIMCHA 20% and an
+      eleven-word Uzbek sentence correctly, okina intact. See
+      rules.in_image_uzbek_text in models.yaml — the old claim that AI garbles
+      Uzbek letters was tested and is false.
+
+  the_model_writes_the_wrong_register:
+    short: >
+      Model oʻzi yozgan oʻzbekcha imlo jihatdan toʻgʻri chiqadi, lekin uslubi
+      kitobiy boʻladi va ichida raqam ham, taklif ham boʻlmaydi.
+    detail: >
+      The failure is no longer spelling. It is voice, and a shop owner would
+      never say it. Write the words yourself and let the model set the type.
+    evidence: >
+      2026-08-22. Asked for Uzbek promotional text without dictating it, the
+      model produced correct spelling and a headline with no number, no time and
+      no offer, in the one verb form the voice guide bans outright.
+
+  name_the_physics_for_video:
+    short: >
+      Videoda nima sodir boʻlishini emas, nima haqiqatga mos boʻlishi kerakligini
+      yozing: nima nimaga tegib turadi, nima tezlashadi, nima suzib ketmaydi.
+    detail: >
+      Contact, acceleration, what stays attached, what deforms. Naming the
+      physical constraints is what separates motion that holds from motion that
+      drifts.
+    evidence: >
+      2026-08-23. A potter's wheel and a tandyr shot, four concurrent physical
+      systems each, run twice on two models. Two of four takes on one model
+      broke visibly — dough fused to a forearm with no fingers, a vessel
+      becoming a twisted stalk — and the failures were exactly the constraints
+      that had been named.
+
+  a_model_does_not_know_your_city:
+    short: >
+      Model sizning shahringizni bilmaydi. Aniq bir joy kerak boʻlsa, nomini
+      yozish yetmaydi — referens rasm kerak.
+    detail: >
+      Naming a local landmark returns a plausible generic version of it.
+    evidence: >
+      2026-08-23. The Tashkent TV tower was named and described — three splayed
+      legs, tapering shaft, circular deck on angled struts. Four takes across
+      two models; not one reproduced that silhouette. All four invented a
+      different tower.
+
+  one_prompt_two_models_is_the_test:
+    short: >
+      Qaysi model yaxshiroq degan savolning doimiy javobi yoʻq. Bitta promptni
+      ikkalasiga bering va oʻzingiz koʻring.
+    detail: >
+      Model strengths are task-shaped, not ranked. The same pair swapped places
+      between a night frame and a daylight frame.
+    evidence: >
+      2026-08-22 and 2026-08-23. Night: one model would not underexpose at any
+      amount of instruction. Daylight: the same model rendered dappled shade
+      more accurately than the one that had just beaten it.
+
+# What a craft answer must still refuse, restated here because this file is the
+# one the Replier reads when it feels most confident.
+never:
+  - A price, a credit cost, or a subscription plan. Those have their own path.
+  - What WE used, what WE set, or how WE made something — that is our_posts.
+  - A capability claim about a tool we have not run.
+  - Anything about a member's results, income, or what they could earn.
+  - A promise about a future post, tutorial or course.

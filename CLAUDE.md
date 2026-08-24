@@ -184,6 +184,27 @@ The channel now publishes **16:9 or 9:16** — vertical was added on founder dir
 comparisons. Still a closed set: the failure that test catches is a mislabelled ratio, not an
 unusual one.
 
+**The Replier classifies before it grounds.** `app/agents/classify.py` labels every message
+money / ours / craft / other, and the label picks the register. Money and *ours* behave exactly as
+before — knowledge base or escalate. **Craft is new**: general technique is answerable from
+`data/knowledge/craft.yaml`, which holds only things we tested ourselves, each entry carrying the
+evidence that proved it. It exists because a member asked how to write a prompt for a realistic
+image and the bot went to the founders for it.
+
+**Precedence is the safety property**, not an implementation detail. A message is often several
+things at once; money wins, then ours, then craft, so a mixed question is never answered on the
+strength of its safest half. Two traps already hit here: a bare substring test made *kamera
+ra**kurs**i* a money question, so money words match with a LEADING word boundary only — Uzbek is
+agglutinative and `kurs` must still catch `kurslar`. And a heredoc turned `` into a literal
+backspace byte, so the regex silently matched nothing; write regexes with the Write tool, not
+through a shell heredoc.
+
+Craft answers use a **second register** — up to three sentences, still no greeting and no closing
+offer, never a numbered list. The one-sentence rule came from a blind test that scored 0/3, but
+every one of those failures was a *social* reply being too complete. A member asking "what should I
+write" wants an answer; three words is a brush-off. The exception is deliberately narrow and
+`craft-stays-short` in the eval is what keeps it that way.
+
 ## Writing the week by hand
 
 `data/planned_posts.yaml` keys a hand-written post to a slot and **wins over the Writer**,
@@ -223,7 +244,7 @@ thread resolver · Replier with grounding gate, script mirroring and react-inste
 missed-run recovery · content state machine · SQLite store · day-ahead approval cards · Writer + Voice
 Critic + mechanical lint + claims ledger · media library with 15 tagged assets · runtime loop · deployment.
 
-**416 tests**, no credentials or network needed.
+**472 tests**, no credentials or network needed.
 
 Visuals: a library asset when one genuinely matches, otherwise a **card rendered on the VPS**
 (`app/media/cards.py`, Pillow). Cards exist because `challenge`, `recognition` and `behind_scenes`
