@@ -750,7 +750,17 @@ class Runtime:
             # this the plan would silently never apply. Approved content is left
             # alone — what a human said yes to is immutable.
             plan = load_planned().get(slot.key)
-            if plan and existing and not existing.frozen and existing.text != plan.text:
+            # Compares the SEED as well as the text. It used to compare text
+            # alone, so editing only a post's first comment left the stored
+            # copy untouched and the old seed published anyway — the same
+            # "a plan cannot override a draft" bug in a narrower doorway. Found
+            # when a bad edit duplicated a seed and fixing the file changed
+            # nothing on the box.
+            changed = bool(plan and existing and (
+                existing.text != plan.text
+                or existing.seed_comment != plan.seed_comment
+            ))
+            if changed and not existing.frozen:
                 log.info("%s replaced by the planned post", slot.key)
                 self.store.set_runtime(f"card_sent:{slot.key}", "")
                 existing = None

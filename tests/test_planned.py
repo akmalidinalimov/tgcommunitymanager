@@ -307,3 +307,52 @@ def test_a_planned_slot_in_the_past_is_not_resurrected(rt, monkeypatch):
 
     rt.prepare_upcoming()
     assert rt.store.get_content(past.key) is None
+
+
+def test_a_seed_only_edit_still_replaces_stored_content(rt, monkeypatch):
+    """Editing just the first comment must reach the box.
+
+    The override compared text alone, so changing only a seed left the stored
+    copy in place and the old comment published anyway. Same shape as the
+    original "a plan could not override a draft" bug, through a narrower door,
+    and found the hard way: a duplicated seed was corrected in the file and
+    nothing changed on the VPS.
+    """
+    slot = Slot(datetime(2026, 8, 17, 10, 0, tzinfo=TASHKENT))
+    stored = Content(slot_key=slot.key, kind="technique", text="BIR XIL MATN",
+                     seed_comment="eski izoh")
+    stored.submit_for_approval()
+    rt.store.save_content(stored)
+    rt.store.set_runtime(f"card_sent:{slot.key}", "yes")
+
+    monkeypatch.setattr("app.runtime.slots_needing_approval", lambda *a, **k: [slot])
+    monkeypatch.setattr("app.runtime.load_planned", lambda: {
+        slot.key: PlannedPost(slot_key=slot.key, kind="technique",
+                              text="BIR XIL MATN", seed_comment="toʻgʻrilangan izoh")})
+    monkeypatch.setattr("app.runtime.write_post",
+                        lambda *a, **k: pytest.fail("must not redraft a planned slot"))
+
+    rt.prepare_upcoming()
+
+    after = rt.store.get_content(slot.key)
+    assert after.seed_comment == "toʻgʻrilangan izoh"
+    assert after.text == "BIR XIL MATN"
+
+
+def test_an_approved_seed_is_never_replaced_by_a_plan_edit(rt, monkeypatch):
+    """What a human said yes to stays said yes to, seed included."""
+    slot = Slot(datetime(2026, 8, 17, 10, 0, tzinfo=TASHKENT))
+    c = Content(slot_key=slot.key, kind="technique", text="BIR XIL MATN",
+                seed_comment="tasdiqlangan izoh")
+    c.submit_for_approval()
+    c.approve(6542876935, (6542876935,), at=datetime(2026, 8, 16, 20, 0, tzinfo=TASHKENT))
+    c.schedule()
+    rt.store.save_content(c)
+
+    monkeypatch.setattr("app.runtime.slots_needing_approval", lambda *a, **k: [slot])
+    monkeypatch.setattr("app.runtime.load_planned", lambda: {
+        slot.key: PlannedPost(slot_key=slot.key, kind="technique",
+                              text="BIR XIL MATN", seed_comment="kech kelgan izoh")})
+
+    rt.prepare_upcoming()
+    assert rt.store.get_content(slot.key).seed_comment == "tasdiqlangan izoh"

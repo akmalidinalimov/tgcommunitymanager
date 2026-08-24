@@ -150,10 +150,7 @@ posts:
 
       Kichik maslahat: eng oson farq minoraning oʻzida koʻrinadi.
 
-      Sinov shartlari ataylab bir xil: 720p, 5 soniya, bitta prompt. 2.0 aslida 4K gacha chiqara oladi, 2.5 esa yoʻq. Agar 2.0 ni 4K da qoʻysam, uning aniqligini harakat sifati deb oʻylagan boʻlardim.
-
       Keyingi qadam ham shu yerdan chiqdi: haqiqiy minorani chiqarish uchun referens rasm bilan sinab koʻraman va natijasini shu yerda koʻrsataman.
-
 
 # Finished copy with no slot. `load()` reads only `posts:`, so nothing here can
 # publish — move an entry up when a slot is chosen for it.
