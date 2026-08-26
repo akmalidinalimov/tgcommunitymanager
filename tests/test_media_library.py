@@ -55,3 +55,36 @@ def test_the_shipped_library_parses():
         if asset.local:
             assert asset.path.is_file(), f"{asset.id} points at a missing file"
         assert asset.good_for, f"{asset.id} has no good_for; it can never be picked"
+
+
+def test_founder_assets_live_outside_the_ignored_media_cache():
+    """A local asset must be IN the repo, or it is not there at all.
+
+    /data/media/ is gitignored as a cache of regenerable CDN pulls. Seven
+    founder-supplied images were filed there, which made this suite pass
+    locally — the files existed on that machine — and fail on CI, where they
+    had never been committed. They live in /data/assets/ now, which ships.
+    """
+    for asset in load():
+        if asset.local:
+            assert asset.local.startswith("data/assets/"), (
+                f"{asset.id} is local but sits in {asset.local}; "
+                f"only data/assets/ is tracked by git"
+            )
+
+
+def test_a_local_asset_with_a_missing_file_fails_by_name():
+    """Not with an httpx protocol error twenty frames down.
+
+    A local asset has no URL to fall back on, so a missing file used to reach
+    fetch_image("") and surface as UnsupportedProtocol, naming neither the
+    asset nor the path.
+    """
+    import pytest
+
+    from app.media.library import Asset
+    from app.runtime import Runtime
+
+    ghost = Asset(id="ghost", url="", kind="photo", local="data/assets/nope.jpg")
+    with pytest.raises(FileNotFoundError, match="ghost"):
+        Runtime._album_item(ghost)

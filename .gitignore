@@ -31,6 +31,10 @@ htmlcov/
 # which silently swallowed app/media/ — the source module — while its tests
 # were committed. CI then failed on an import that worked locally.
 /data/media/
+# NOT ignored, deliberately: /data/assets/ holds founder-supplied work with no
+# vendor URL. It cannot be regenerated, so it ships inside the image. Filing it
+# under /data/media/ once made the tests pass locally and fail on CI, because
+# the files were never in the repo at all.
 /state/
 storage/
 *.db

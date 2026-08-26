@@ -794,7 +794,7 @@ assets:
     only resolves at the end. Weakest of the four.'
 - id: char-ref-studio
   url: ''
-  local: data/media/char-ref-studio.jpg
+  local: data/assets/char-ref-studio.jpg
   kind: photo
   model: ''
   shows:
@@ -820,7 +820,7 @@ assets:
     the lighting instead of the person.'
 - id: char-vineyard-seated
   url: ''
-  local: data/media/char-vineyard-seated.jpg
+  local: data/assets/char-vineyard-seated.jpg
   kind: photo
   model: ''
   shows:
@@ -846,7 +846,7 @@ assets:
     the reference in every way except the face.'
 - id: char-vineyard-reaching
   url: ''
-  local: data/media/char-vineyard-reaching.jpg
+  local: data/assets/char-vineyard-reaching.jpg
   kind: photo
   model: ''
   shows:
@@ -871,7 +871,7 @@ assets:
     is where the likeness slips first — the face reads slightly fuller here than in the reference.'
 - id: char-vineyard-eating
   url: ''
-  local: data/media/char-vineyard-eating.jpg
+  local: data/assets/char-vineyard-eating.jpg
   kind: photo
   model: ''
   shows:
@@ -896,7 +896,7 @@ assets:
     holds.'
 - id: char-vineyard-pocket
   url: ''
-  local: data/media/char-vineyard-pocket.jpg
+  local: data/assets/char-vineyard-pocket.jpg
   kind: photo
   model: ''
   shows:
@@ -920,7 +920,7 @@ assets:
     — slightly younger than the reference.'
 - id: char-vineyard-chest
   url: ''
-  local: data/media/char-vineyard-chest.jpg
+  local: data/assets/char-vineyard-chest.jpg
   kind: photo
   model: ''
   shows:
@@ -945,7 +945,7 @@ assets:
     hands, and it still reads as the same man. The strongest single piece of evidence in the set.'
 - id: char-vineyard-hand
   url: ''
-  local: data/media/char-vineyard-hand.jpg
+  local: data/assets/char-vineyard-hand.jpg
   kind: photo
   model: ''
   shows:

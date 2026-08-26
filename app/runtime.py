@@ -981,7 +981,17 @@ class Runtime:
         through fetch_bytes, because re-encoding an mp4 as JPEG hands Telegram a
         corrupt file.
         """
-        if asset.path and asset.path.is_file():
+        if asset.local:
+            # Declared local: the file IS the asset and there is no URL to fall
+            # back to. Say so plainly rather than handing "" to httpx, which
+            # surfaces twenty frames down as UnsupportedProtocol and names
+            # nothing. This exact fall-through hid a missing-file bug through a
+            # local green test run and a red CI.
+            if not (asset.path and asset.path.is_file()):
+                raise FileNotFoundError(
+                    f"{asset.id} declares local={asset.local!r} but the file is "
+                    f"not there. It has no URL, so there is nothing to send."
+                )
             blob = asset.path.read_bytes()
             return ((f"{asset.id}.mp4", blob, "video") if asset.is_video
                     else (f"{asset.id}.jpg", blob))
@@ -1003,7 +1013,11 @@ class Runtime:
                 chat_id, items, caption=body or None, parse_mode=parse_mode,
             )
         if shape == "asset":
-            if ref.path and ref.path.is_file():
+            if ref.local:
+                if not (ref.path and ref.path.is_file()):
+                    raise FileNotFoundError(
+                        f"{ref.id} declares local={ref.local!r} but the file is not there."
+                    )
                 # No URL to hand Telegram. Upload the bytes we already have.
                 return self.api.upload_photo(
                     chat_id, ref.path.read_bytes(), filename=f"{ref.id}.jpg",
