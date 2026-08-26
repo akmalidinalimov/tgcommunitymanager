@@ -972,6 +972,23 @@ class Runtime:
                 log.exception("card render failed for %s; falling back to text", kind)
         return None, None
 
+    @staticmethod
+    def _album_item(asset):
+        """One entry for a media group: (filename, bytes, kind?).
+
+        A local asset is read from disk. A remote one is fetched — and images go
+        through fetch_image, which re-encodes oversized PNGs, while video goes
+        through fetch_bytes, because re-encoding an mp4 as JPEG hands Telegram a
+        corrupt file.
+        """
+        if asset.path and asset.path.is_file():
+            blob = asset.path.read_bytes()
+            return ((f"{asset.id}.mp4", blob, "video") if asset.is_video
+                    else (f"{asset.id}.jpg", blob))
+        if asset.is_video:
+            return (f"{asset.id}.mp4", fetch_bytes(asset.url), "video")
+        return (f"{asset.id}.jpg", fetch_image(asset.url))
+
     def _deliver(self, chat_id: int, visual, body: str, *,
                  parse_mode: str | None = None, reply_markup: dict | None = None) -> dict:
         """Send a post — or its preview — as the visual with the words under it."""
@@ -981,15 +998,16 @@ class Runtime:
             # URL-fetched photo at 5MB and a 2K render goes past it. Video goes
             # through fetch_bytes, because fetch_image re-encodes as JPEG and
             # would hand Telegram a corrupted file.
-            items = [
-                (f"{a.id}.mp4", fetch_bytes(a.url), "video") if a.is_video
-                else (f"{a.id}.jpg", fetch_image(a.url))
-                for a in ref
-            ]
+            items = [self._album_item(a) for a in ref]
             return self.api.send_media_group(
                 chat_id, items, caption=body or None, parse_mode=parse_mode,
             )
         if shape == "asset":
+            if ref.path and ref.path.is_file():
+                # No URL to hand Telegram. Upload the bytes we already have.
+                return self.api.upload_photo(
+                    chat_id, ref.path.read_bytes(), filename=f"{ref.id}.jpg",
+                    caption=body, parse_mode=parse_mode, reply_markup=reply_markup)
             sender = self.api.send_video if ref.is_video else self.api.send_photo
             try:
                 return sender(chat_id, ref.url, caption=body, parse_mode=parse_mode,

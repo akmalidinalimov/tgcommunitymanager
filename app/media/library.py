@@ -39,6 +39,21 @@ class Asset:
     duration: int | None = None
     expires: bool = True
     """True for a vendor CDN URL that will eventually 404."""
+    local: str = ""
+    """Repo-relative path, for an asset that lives in the image rather than on a
+    vendor CDN.
+
+    Strictly better than a URL for anything worth keeping: it cannot expire, it
+    cannot be rate-limited, and it is present on the VPS the moment the image is
+    built. Founder-supplied work goes here — we did not generate it and cannot
+    regenerate it, so a dead link would lose it for good."""
+
+    @property
+    def path(self) -> Path | None:
+        """Absolute path to the local file, if this asset has one."""
+        if not self.local:
+            return None
+        return Path(__file__).resolve().parent.parent.parent / self.local
 
     @property
     def is_video(self) -> bool:
@@ -62,6 +77,7 @@ def load(path: Path | None = None) -> list[Asset]:
             model=entry.get("model", ""),
             duration=entry.get("duration"),
             expires=bool(entry.get("expires", True)),
+            local=entry.get("local", ""),
         )
         for entry in (data.get("assets") or [])
     ]

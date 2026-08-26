@@ -48,5 +48,10 @@ def test_exhausted_kind_returns_none_rather_than_reusing():
 def test_the_shipped_library_parses():
     """Not asserting contents — only that the file is valid and loadable."""
     for asset in load():
-        assert asset.id and asset.url and asset.kind in ("video", "photo")
+        assert asset.id and asset.kind in ("video", "photo")
+        # A URL or a local file, but it must have one — an asset with neither
+        # resolves to nothing at 21:00 and the slot falls to the backup pool.
+        assert asset.url or asset.local, f"{asset.id} has no source"
+        if asset.local:
+            assert asset.path.is_file(), f"{asset.id} points at a missing file"
         assert asset.good_for, f"{asset.id} has no good_for; it can never be picked"

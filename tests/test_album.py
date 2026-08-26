@@ -252,7 +252,9 @@ class TestVideoAlbums:
 
         from app import runtime
 
-        source = inspect.getsource(runtime.Runtime._deliver)
+        # The fetch logic moved into _album_item when local assets were added.
+        # The guard follows the code; it is the behaviour that matters.
+        source = inspect.getsource(runtime.Runtime._album_item)
         assert "fetch_bytes" in source
         video_line = next(l for l in source.split("\n") if "mp4" in l and "fetch" in l)
         assert "fetch_bytes" in video_line and "fetch_image" not in video_line

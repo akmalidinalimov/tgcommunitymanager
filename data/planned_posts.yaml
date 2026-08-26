@@ -152,6 +152,67 @@ posts:
 
       Keyingi qadam ham shu yerdan chiqdi: haqiqiy minorani chiqarish uchun referens rasm bilan sinab koʻraman va natijasini shu yerda koʻrsataman.
 
+  "2026-08-26_21:00":
+    kind: technique
+    assets:
+      - char-ref-studio
+      - char-vineyard-seated
+      - char-vineyard-reaching
+      - char-vineyard-eating
+      - char-vineyard-pocket
+      - char-vineyard-chest
+      - char-vineyard-hand
+    note: >
+      Character consistency, from Akmalidin's own generations. Seven frames:
+      one neutral studio reference and six vineyard shots across five shot
+      sizes.
+
+      ORDER IS EDITORIAL AND THE CAPTION DEPENDS ON IT. Reference first so the
+      audience sees the source, then widest to tightest, ending on the two
+      frames with no face in them. Those two are the strongest evidence in the
+      set — identity carried entirely by wardrobe and hands — and the caption
+      names them as 6 and 7. Reorder the list and the caption points at the
+      wrong pictures.
+
+      Images only, no video, per founder direction 2026-08-26.
+
+      These are the first LOCAL assets in the library: no vendor URL, files
+      baked into the image. Better for anything worth keeping, and necessary
+      here because we did not generate them and could not regenerate them if a
+      CDN link died.
+
+      MODEL UNKNOWN and deliberately left blank. Generated on the founder's own
+      account and he did not say which model. A plausible wrong name is worse
+      than an admitted gap, and this project has been bitten twice by a
+      mislabelled model. Nothing in the post names one.
+    text: |
+      Har safar boshqa odam chiqyaptimi? Muammo promptda emas.
+
+      Birinchi rasm — asl referens, oddiy studiya surati. Qolgan oltitasi oʻsha odam: uzoqdan, yaqindan, yon tomondan.
+
+      6- va 7-rasmda yuz umuman koʻrinmaydi. Baribir oʻsha odam ekani bilinadi, chunki uni kiyim va qoʻl ushlab turibdi.
+
+      📌 Referens toza va oddiy boʻlsin. Studiya foni, tekis yorugʻlik, xotirjam yuz. Referensning oʻzi dramatik yoritilgan boʻlsa, model odamni emas, uslubni koʻchiradi.
+
+      📌 Yuz va kiyimni har bir promptda bir xil yozing. «Bej zigʻir koʻylak, oq futbolka, yengi shimarilgan» — har safar aynan shu. Yuz koʻrinmagan kadrda odamni kiyim ushlab turadi.
+
+      📌 Faqat kadrni oʻzgartiring, dunyoni emas. Yorugʻlik, joy va kiyim qotib turadi, kamera bilan harakat oʻzgaradi.
+
+      ✅ Yana bittasi: yuzi oʻziga xos odamni tanlang. Umumiy yuz har safar suzib ketadi.
+
+      Sizda qaysi kadrda odam oʻzgarib ketgan? 👇
+    seed_comment: |
+      Promptning ishlaydigan qismi — uch qatorlik qulf. Har bir kadrda aynan shu qoladi:
+
+      1. «based on the provided reference image» — referensga bogʻlash.
+      2. Yuz: «sharp facial anatomy, ultra-detailed eyes with natural catchlight, realistic skin microtexture».
+      3. Kiyim: «light beige linen overshirt over a clean white t-shirt, sleeves rolled up».
+
+      Faqat kamera qatori oʻzgaradi: low angle mid shot, close-up, detail shot.
+
+      Toʻliq promptni soʻrasangiz shu yerga tashlayman.
+
+
 # Finished copy with no slot. `load()` reads only `posts:`, so nothing here can
 # publish — move an entry up when a slot is chosen for it.
 drafts:
