@@ -127,6 +127,12 @@ def anchor(sent) -> dict:
     return sent[0] if isinstance(sent, list) else sent
 
 
+#: Runtime key holding the publishing pause. Deliberately in the store and not
+#: in the environment: pausing is an operational decision and must not need a
+#: deploy, and it has to survive a restart.
+PAUSED_KEY = "publishing_paused"
+
+
 def kind_for(slot: Slot) -> str:
     return WEEKLY_PLAN.get((slot.at.weekday(), slot.at.hour), "technique")
 
@@ -208,7 +214,7 @@ class Runtime:
     #: What the founders can ask the bot in the admin chat. Deliberately tiny:
     #: the batch review belongs in the Mini App, and this is the safety valve for
     #: when a card did not arrive.
-    COMMANDS = ("/pending", "/kutilmoqda", "/holat", "/status")
+    COMMANDS = ("/pending", "/kutilmoqda", "/holat", "/status", "/pauza", "/davom")
 
     def handle_admin_command(self, message: dict) -> None:
         raw = (message.get("text") or "").strip()
@@ -226,6 +232,26 @@ class Runtime:
                 return
             if self.apply_inline_edit(replied_to, raw):
                 return
+
+        if text == "/pauza":
+            self.set_paused(True, by=str(user_id))
+            self.api.send_message(
+                self.settings.admin_chat_id,
+                "⏸ <b>Chop etish toʻxtatildi.</b>\n\n"
+                "Kanalga hech narsa chiqmaydi. Izohlarga javob berish va "
+                "tasdiqlash kartalari ishlashda davom etadi.\n\n"
+                "Davom ettirish: /davom",
+                parse_mode="HTML")
+            return
+
+        if text == "/davom":
+            self.set_paused(False, by=str(user_id))
+            self.api.send_message(
+                self.settings.admin_chat_id,
+                "▶️ <b>Chop etish davom etadi.</b>\n\n"
+                "Toʻxtab turgan vaqtdagi slotlar chiqmaydi — faqat keyingilari.",
+                parse_mode="HTML")
+            return
 
         if text in ("/pending", "/kutilmoqda"):
             log.info("admin asked for the approval queue")
@@ -627,7 +653,29 @@ class Runtime:
         ):
             log.info("state: content %s (%s) -> %s", row["slot_key"], row["kind"], row["state"])
 
+    @property
+    def paused(self) -> bool:
+        return bool(self.store.get_runtime(PAUSED_KEY))
+
+    def set_paused(self, paused: bool, *, by: str = "") -> None:
+        self.store.set_runtime(PAUSED_KEY, f"{now_tashkent().isoformat()} {by}".strip()
+                               if paused else "")
+        log.warning("publishing %s%s", "PAUSED" if paused else "RESUMED",
+                    f" by {by}" if by else "")
+
     def publish_due(self) -> None:
+        if self.paused:
+            # Deliberately advances last_seen anyway. Without that, resuming
+            # would find every slot skipped during the pause "due" and dump a
+            # backlog into the channel at once — which is exactly the failure
+            # the missed-run recovery was built to prevent.
+            due, _ = due_slots(self.store.last_seen)
+            if due:
+                log.warning("publishing is paused; skipping %s",
+                            ", ".join(s.key for s in due))
+                self.store.last_seen = now_tashkent()
+            return
+
         last = self.store.last_seen
         publish, too_late = due_slots(last)
         if publish or too_late:

@@ -717,3 +717,75 @@ def test_a_refused_press_is_logged_too(rt, caplog):
         rt.handle_update(callback("2026-08-18_21:00", user_id=4242))
 
     assert "approval refused" in " ".join(r.message for r in caplog.records)
+
+
+# --- the publishing pause ------------------------------------------------------
+#
+# Asked for on 2026-08-30. The obvious ways to stop posting are both wrong:
+# killing the container also kills comment replies, and Telegram drops updates
+# older than 24h and never replays them, so a stopped bot permanently loses every
+# thread opened while it was down. --dry-run silences the replies too. The pause
+# gates publish_due and nothing else.
+
+def test_a_paused_runtime_publishes_nothing(rt, monkeypatch):
+    from app.spine.scheduler import Slot
+
+    slot = Slot(datetime(2026, 8, 31, 21, 0, tzinfo=TASHKENT))
+    monkeypatch.setattr("app.runtime.due_slots", lambda *a, **k: ([slot], []))
+    monkeypatch.setattr("app.runtime.Runtime.publish_slot",
+                        lambda *a, **k: pytest.fail("a paused runtime must not publish"))
+    rt.set_paused(True, by="test")
+    rt.publish_due()
+
+
+def test_pausing_still_advances_last_seen(rt, monkeypatch):
+    """Otherwise resuming dumps the whole backlog into the channel at once.
+
+    That is precisely the failure the missed-run recovery exists to prevent, so
+    the pause must not quietly recreate it.
+    """
+    from app.spine.scheduler import Slot
+
+    slot = Slot(datetime(2026, 8, 31, 21, 0, tzinfo=TASHKENT))
+    monkeypatch.setattr("app.runtime.due_slots", lambda *a, **k: ([slot], []))
+    rt.set_paused(True, by="test")
+    rt.publish_due()
+    assert rt.store.last_seen is not None
+
+
+def test_resuming_restores_publishing(rt, monkeypatch):
+    from app.spine.scheduler import Slot
+
+    published = []
+    slot = Slot(datetime(2026, 8, 31, 21, 0, tzinfo=TASHKENT))
+    monkeypatch.setattr("app.runtime.due_slots", lambda *a, **k: ([slot], []))
+    monkeypatch.setattr("app.runtime.Runtime.publish_slot",
+                        lambda self, s: published.append(s.key))
+
+    rt.set_paused(True, by="test")
+    rt.publish_due()
+    assert not published
+
+    rt.set_paused(False, by="test")
+    rt.publish_due()
+    assert published == [slot.key]
+
+
+def test_the_pause_survives_a_restart(tmp_path):
+    """It is a state, not a session flag. A bot that resumes publishing because
+    it restarted is not paused."""
+    from app.spine.store import Store
+
+    path = tmp_path / "pause.db"
+    with Store(path) as s:
+        s.set_runtime("publishing_paused", "2026-08-30T12:00:00+05:00 6542876935")
+    with Store(path) as s:
+        assert s.get_runtime("publishing_paused")
+
+
+def test_the_pause_is_reported_in_holat(rt):
+    """A pause nobody can see is a pause somebody forgets about."""
+    rt.set_paused(True, by="6542876935")
+    assert rt.paused
+    rt.set_paused(False, by="6542876935")
+    assert not rt.paused
