@@ -16,6 +16,7 @@ services:
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       REPLY_MODEL: ${REPLY_MODEL}
       OPENAI_MODEL: ${OPENAI_MODEL}
+      PUBLISHING_PAUSED: ${PUBLISHING_PAUSED}
     command: ["python", "-m", "app", "--db", "/app/state/bot.db"]
     volumes:
       # Mutable state ONLY. This must never be /app/data: a volume mounted over

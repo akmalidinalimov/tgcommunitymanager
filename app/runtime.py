@@ -655,7 +655,11 @@ class Runtime:
 
     @property
     def paused(self) -> bool:
-        return bool(self.store.get_runtime(PAUSED_KEY))
+        # Configuration can only force it ON. Removing the variable does not
+        # resume publishing — that takes a deliberate /davom — because a config
+        # default quietly restarting a channel is exactly the surprise this
+        # switch exists to prevent.
+        return self.settings.publishing_paused or bool(self.store.get_runtime(PAUSED_KEY))
 
     def set_paused(self, paused: bool, *, by: str = "") -> None:
         self.store.set_runtime(PAUSED_KEY, f"{now_tashkent().isoformat()} {by}".strip()

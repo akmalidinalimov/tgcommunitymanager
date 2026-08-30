@@ -92,6 +92,16 @@ class Settings:
     NOT the researcher. `app/agents/research.py` calls Anthropic's server-side
     web_search tool, which has no equivalent in the shape the other agents use,
     so price lookups stay on Anthropic whatever this says."""
+    publishing_paused: bool = False
+    """Force the publishing pause on, from configuration.
+
+    The pause is normally the founders' own switch, held in the store so it
+    survives a restart and needs no deploy. This is the other direction: a
+    deploy-time override for when someone who cannot reach the admin chat needs
+    publishing stopped. It only ever forces the pause ON — clearing it does not
+    resume, because a config default must never silently start publishing
+    again."""
+
     #: Where drafts, escalations and approvals are delivered.
     admin_chat_id: int | None = None
     #: Telegram user ids permitted to approve. Anyone else is ignored.
@@ -116,6 +126,8 @@ class Settings:
             channel_id=int(_required("TELEGRAM_CHANNEL_ID")),
             discussion_group_id=int(_required("TELEGRAM_DISCUSSION_GROUP_ID")),
             channel_username=os.environ.get("TELEGRAM_CHANNEL_USERNAME", "").lstrip("@"),
+            publishing_paused=os.environ.get("PUBLISHING_PAUSED", "").strip().lower()
+            in ("1", "true", "yes", "on"),
             anthropic_api_key=os.environ.get("ANTHROPIC_API_KEY") or None,
             openai_api_key=os.environ.get("OPENAI_API_KEY") or None,
             # Two names because the founders wrote OPENAI_MODEL in .env and a

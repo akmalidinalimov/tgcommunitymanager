@@ -37,7 +37,7 @@ REQUIRED = (
 #: unset variable there makes Docker warn and substitute nothing — and the
 #: preflight that catches a missing key can only catch it if it is missing
 #: rather than stale.
-OPTIONAL = ("OPENAI_API_KEY", "REPLY_MODEL", "OPENAI_MODEL")
+OPTIONAL = ("OPENAI_API_KEY", "REPLY_MODEL", "OPENAI_MODEL", "PUBLISHING_PAUSED")
 
 #: Hostinger caps the compose `content` field. freelanceai hit this at 8312.
 COMPOSE_CAP = 8192
@@ -105,6 +105,8 @@ def main() -> int:
     chosen = env.get("REPLY_MODEL") or env.get("OPENAI_MODEL") or "claude-opus-5"
     print(f"env vars   : {len(forwarded)} forwarded, values not shown")
     print(f"model      : {chosen}")
+    if env.get("PUBLISHING_PAUSED", "").lower() in ("1", "true", "yes", "on"):
+        print("PUBLISHING : PAUSED by configuration")
     if args.check:
         print("\n--check: nothing sent")
         return 0
